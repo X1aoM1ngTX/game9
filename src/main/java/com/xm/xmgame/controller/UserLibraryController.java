@@ -1,36 +1,75 @@
 package com.xm.xmgame.controller;
 
 import com.xm.xmgame.common.BaseResponse;
+import com.xm.xmgame.common.ErrorCode;
 import com.xm.xmgame.common.ResultUtils;
+import com.xm.xmgame.exception.BusinessException;
 import com.xm.xmgame.model.domain.Game;
+import com.xm.xmgame.model.domain.User;
 import com.xm.xmgame.service.UserLibraryService;
+import com.xm.xmgame.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/userLibrary")
+@RequestMapping("/userLibrary")
+@Slf4j
 public class UserLibraryController {
 
     @Autowired
     private UserLibraryService userLibraryService;
 
-    @PostMapping("/addUserGame")
-    public BaseResponse<Boolean> addUserGame(@RequestParam Long userId, @RequestParam Long gameId) {
-        boolean result = userLibraryService.addUserGame(userId, gameId);
+    @Autowired
+    private UserService userService;
+
+    /**
+     * 添加游戏到用户游戏库
+     *
+     * @param gameId  游戏id
+     * @param request HttpServletRequest
+     * @return 是否添加成功
+     */
+    @PostMapping("/addGameToLibrary")
+    public BaseResponse<Boolean> addUserGame(@RequestParam Long gameId, HttpServletRequest request) {
+        if (gameId == null || gameId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        boolean result = userLibraryService.addUserGame(loginUser.getUserId(), gameId);
         return ResultUtils.success(result);
     }
 
-    @DeleteMapping("/removeUserGame")
-    public BaseResponse<Boolean> removeUserGame(@RequestParam Long userId, @RequestParam Long gameId) {
-        boolean result = userLibraryService.removeUserGame(userId, gameId);
+    /**
+     * 从用户游戏库移除游戏
+     *
+     * @param gameId  游戏id
+     * @param request HttpServletRequest
+     * @return 是否移除成功
+     */
+    @PostMapping("/removeGameFromLibrary")
+    public BaseResponse<Boolean> removeUserGame(@RequestParam Long gameId, HttpServletRequest request) {
+        if (gameId == null || gameId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        boolean result = userLibraryService.removeUserGame(loginUser.getUserId(), gameId);
         return ResultUtils.success(result);
     }
 
-    @GetMapping("/listUserGame")
-    public BaseResponse<List<Game>> getUserGames(@RequestParam Long userId) {
-        List<Game> games = userLibraryService.getUserGames(userId);
+    /**
+     * 获取用户的游戏库列表
+     *
+     * @param request HttpServletRequest
+     * @return 游戏列表
+     */
+    @GetMapping("/listUserGames")
+    public BaseResponse<List<Game>> listUserGames(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        List<Game> games = userLibraryService.getUserGames(loginUser.getUserId());
         return ResultUtils.success(games);
     }
 }

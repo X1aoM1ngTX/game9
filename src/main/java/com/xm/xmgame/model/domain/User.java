@@ -15,7 +15,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 /**
  * 用户表
  *
- * @TableName user
+ * @表名 user
  */
 @TableName(value = "user")
 @Data

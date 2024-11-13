@@ -14,25 +14,28 @@ import java.util.List;
 public interface UserLibraryService extends IService<UserLibrary> {
 
     /**
+     * 添加游戏到用户游戏库
      *
-     * @param userId
-     * @param gameId
-     * @return
+     * @param userId 用户id
+     * @param gameId 游戏id
+     * @return 是否添加成功
      */
     boolean addUserGame(Long userId, Long gameId);
 
     /**
+     * 从用户游戏库移除游戏
      *
-     * @param userId
-     * @param gameId
-     * @return
+     * @param userId 用户id
+     * @param gameId 游戏id
+     * @return 是否移除成功
      */
     boolean removeUserGame(Long userId, Long gameId);
 
     /**
+     * 获取用户的游戏库列表
      *
-     * @param userId
-     * @return
+     * @param userId 用户id
+     * @return 游戏列表
      */
     List<Game> getUserGames(Long userId);
 }

@@ -14,9 +14,10 @@ import java.util.Date;
 
 /**
  * 游戏表
- * @TableName game
+ *
+ * @表名 game
  */
-@TableName(value ="game")
+@TableName(value = "game")
 @Data
 public class Game implements Serializable {
     /**

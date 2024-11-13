@@ -9,11 +9,11 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 /**
-* @author XMTX8yyds
-* @description 针对表【userLibrary(用户游戏库)】的数据库操作Mapper
-* @createDate 2024-11-13 15:11:22
-* @Entity generator.domain.UserLibrary
-*/
+ * @author XMTX8yyds
+ * @描述  针对表【userLibrary(用户游戏库)】的数据库操作Mapper
+ * @创建时间  2024-11-13 15:11:22
+ * @实体  model.domain.UserLibrary
+ */
 public interface UserLibraryMapper extends BaseMapper<UserLibrary> {
 
     @Delete("DELETE FROM UserLibrary WHERE userId = #{userId} AND gameId = #{gameId}")

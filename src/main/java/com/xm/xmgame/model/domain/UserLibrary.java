@@ -7,13 +7,15 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serial;
 import java.io.Serializable;
+
 import lombok.Data;
 
 /**
  * 用户游戏库
- * @TableName userLibrary
+ *
+ * @表名 userLibrary
  */
-@TableName(value ="userLibrary")
+@TableName(value = "userLibrary")
 @Data
 public class UserLibrary implements Serializable {
     /**
