@@ -37,10 +37,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private static final String SALT = "xm";
 
     /**
-     * 用户注册
+     * 用户注册。
      *
-     * @param registerRequest 用户注册请求
-     * @return 用户ID
+     * @param registerRequest 用户注册请求，包含用户名、邮箱和密码。
+     * @return 新注册用户的ID。
+     * @throws BusinessException 如果参数为空、用户名过短、密码过短、用户名已存在、邮箱已被注册或数据库错误，抛出业务异常。
      */
     @Override
     public Long userRegister(UserRegisterRequest registerRequest) {
@@ -88,11 +89,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 用户登录
+     * 用户登录。
      *
-     * @param loginRequest 用户登录请求
-     * @param request      HttpServlet请求
-     * @return
+     * @param loginRequest 用户登录请求，包含用户名和密码。
+     * @param request HttpServlet请求，用于获取Session和设置用户登录状态。
+     * @return 安全的用户对象，不包含敏感信息。
+     * @throws BusinessException 如果参数为空、用户不存在或密码错误，抛出业务异常。
      */
     @Override
     public User userLogin(UserLoginRequest loginRequest, HttpServletRequest request) {
@@ -126,9 +128,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return UserUtils.getSafetyUser(user);
     }
 
+
     /**
-     * @param request HttpServlet请求
-     * @return
+     * 获取当前登录的用户。
+     *
+     * @param request HttpServlet请求，用于获取Session中的用户登录状态。
+     * @return 当前登录的用户对象。
+     * @throws BusinessException 如果用户未登录或用户信息无效，抛出业务异常。
      */
     @Override
     public User getLoginUser(HttpServletRequest request) {
@@ -148,10 +154,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 用户退出
+     * 用户注销。
      *
-     * @param request HttpServlet请求
-     * @return 用户是否退出成功
+     * @param request HttpServlet请求，用于获取Session中的用户登录状态。
+     * @return 返回 true 表示注销成功。
+     * @throws BusinessException 如果用户未登录，抛出业务异常。
      */
     @Override
     public boolean userLogout(HttpServletRequest request) {

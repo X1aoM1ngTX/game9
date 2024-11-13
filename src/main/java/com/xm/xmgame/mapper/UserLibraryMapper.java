@@ -1,0 +1,18 @@
+package com.xm.xmgame.mapper;
+
+import com.xm.xmgame.model.domain.UserLibrary;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+/**
+* @author XMTX8yyds
+* @description 针对表【userlibrary(用户游戏库)】的数据库操作Mapper
+* @createDate 2024-11-13 15:11:22
+* @Entity generator.domain.Userlibrary
+*/
+public interface UserLibraryMapper extends BaseMapper<UserLibrary> {
+
+}
+
+
+
+

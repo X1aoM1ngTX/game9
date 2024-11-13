@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xm.xmgame.mapper.UserLibraryMapper">
+
+    <resultMap id="BaseResultMap" type="com.xm.xmgame.model.domain.UserLibrary">
+            <id property="userLibraryId" column="userLibraryId" jdbcType="BIGINT"/>
+            <result property="userId" column="userId" jdbcType="BIGINT"/>
+            <result property="gameId" column="gameId" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        userLibraryId,userId,gameId
+    </sql>
+</mapper>
