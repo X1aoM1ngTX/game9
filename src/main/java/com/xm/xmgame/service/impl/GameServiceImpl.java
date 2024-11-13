@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * @author XMTX8yyds
+ * @author xm
  * @description 针对表【game(游戏表)】的数据库操作Service实现
  * @createDate 2024-11-11 14:15:44
  */
@@ -31,6 +31,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     private GameMapper gameMapper;
 
     /**
+     * 创建游戏
      *
      * @param gameCreateRequest 创建游戏请求
      * @return Long 游戏ID
@@ -40,7 +41,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         if (gameCreateRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        
+
         String gameName = gameCreateRequest.getGameName();
         BigDecimal gamePrice = gameCreateRequest.getGamePrice();
         Integer gameStock = gameCreateRequest.getGameStock();
@@ -75,8 +76,9 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     }
 
     /**
+     * 查询所有游戏
      *
-     * @return
+     * @return 所有游戏
      */
     @Override
     public List<Game> getAllGames() {
@@ -86,9 +88,10 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     }
 
     /**
+     * 查询游戏
      *
-     * @param gameQueryRequest 查询条件
-     * @return
+     * @param gameQueryRequest 游戏查询请求
+     * @return 游戏查询结果
      */
     @Override
     public Page<Game> pageGames(GameQueryRequest gameQueryRequest) {
@@ -98,19 +101,20 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
 
         LambdaQueryWrapper<Game> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.like(StringUtils.isNotBlank(gameQueryRequest.getGameName()),
-                         Game::getGameName, gameQueryRequest.getGameName())
-                   .eq(gameQueryRequest.getShowAvailableOnly() != null && gameQueryRequest.getShowAvailableOnly(),
-                       Game::getGameIsRemoved, false)
-                   .orderByDesc(Game::getGameCreatedTime);
+                        Game::getGameName, gameQueryRequest.getGameName())
+                .eq(gameQueryRequest.getShowAvailableOnly() != null && gameQueryRequest.getShowAvailableOnly(),
+                        Game::getGameIsRemoved, false)
+                .orderByDesc(Game::getGameCreatedTime);
 
         return page(new Page<>(gameQueryRequest.getCurrent(), gameQueryRequest.getPageSize()),
-                   queryWrapper);
+                queryWrapper);
     }
 
     /**
+     * 更新游戏
      *
-     * @param gameUpdateRequest 更新游戏请求
-     * @return
+     * @param gameUpdateRequest 游戏更新请求
+     * @return boolean (是否更新成功)
      */
     @Override
     public boolean updateGame(GameUpdateRequest gameUpdateRequest) {
@@ -137,9 +141,10 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     }
 
     /**
+     * 设置游戏状态
      *
      * @param gameStatusRequest 游戏状态请求
-     * @return
+     * @return boolean (是否设置成功)
      */
     @Override
     public boolean setGameRemovedStatus(GameStatusRequest gameStatusRequest) {
@@ -157,9 +162,10 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     }
 
     /**
+     * 删除游戏(物理删除)
      *
      * @param gameId 游戏id
-     * @return
+     * @return 是否删除成功
      */
     @Override
     public boolean deleteGame(Long gameId) {
