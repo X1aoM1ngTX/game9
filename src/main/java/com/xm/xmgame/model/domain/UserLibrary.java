@@ -13,7 +13,7 @@ import lombok.Data;
  * 用户游戏库
  * @TableName userLibrary
  */
-@TableName(value ="userlibrary")
+@TableName(value ="userLibrary")
 @Data
 public class UserLibrary implements Serializable {
     /**
@@ -34,5 +34,5 @@ public class UserLibrary implements Serializable {
 
     @Serial
     @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 410294789136513L;
 }
