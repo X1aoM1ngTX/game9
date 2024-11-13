@@ -1,12 +1,14 @@
 package com.xm.xmgame.exception;
 
 import com.xm.xmgame.common.ErrorCode;
+import lombok.Getter;
 
 /**
  * 自定义业务异常
  *
  * @author xmcode
  */
+@Getter
 public class BusinessException extends RuntimeException {
     private final int code;
     private final String description;
@@ -29,11 +31,4 @@ public class BusinessException extends RuntimeException {
         this.description = description;
     }
 
-    public int getCode() {
-        return code;
-    }
-
-    public String getDescription() {
-        return description;
-    }
 }
