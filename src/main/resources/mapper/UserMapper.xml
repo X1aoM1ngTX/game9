@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xm.xmgame.mapper.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.xm.xmgame.model.domain.User">
+            <id property="userId" column="userId" jdbcType="BIGINT"/>
+            <result property="userName" column="userName" jdbcType="VARCHAR"/>
+            <result property="userEmail" column="userEmail" jdbcType="VARCHAR"/>
+            <result property="userPhone" column="userPhone" jdbcType="VARCHAR"/>
+            <result property="userPassword" column="userPassword" jdbcType="VARCHAR"/>
+            <result property="userCreatedTime" column="userCreatedTime" jdbcType="TIMESTAMP"/>
+            <result property="userIsDelete" column="userIsDelete" jdbcType="TINYINT"/>
+            <result property="userIsAdmin" column="userIsAdmin" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        userId,userName,userEmail,
+        userPhone,userPassword,userCreatedTime,
+        userIsDelete,userIsAdmin
+    </sql>
+</mapper>

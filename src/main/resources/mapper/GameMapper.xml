@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xm.xmgame.mapper.GameMapper">
+
+    <resultMap id="BaseResultMap" type="com.xm.xmgame.model.domain.Game">
+            <id property="gameId" column="gameId" jdbcType="BIGINT"/>
+            <result property="gameName" column="gameName" jdbcType="VARCHAR"/>
+            <result property="gameDescription" column="gameDescription" jdbcType="VARCHAR"/>
+            <result property="gamePrice" column="gamePrice" jdbcType="DECIMAL"/>
+            <result property="gameStock" column="gameStock" jdbcType="INTEGER"/>
+            <result property="gameCreatedTime" column="gameCreatedTime" jdbcType="TIMESTAMP"/>
+            <result property="gameReleaseDate" column="gameReleaseDate" jdbcType="DATE"/>
+            <result property="gameDev" column="gameDev" jdbcType="VARCHAR"/>
+            <result property="gamePub" column="gamePub" jdbcType="VARCHAR"/>
+            <result property="gameIsRemoved" column="gameIsRemoved" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        gameId,gameName,gameDescription,
+        gamePrice,gameStock,gameCreatedTime,
+        gameReleaseDate,gameDev,gamePub,
+        gameIsRemoved
+    </sql>
+</mapper>
