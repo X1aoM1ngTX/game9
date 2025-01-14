@@ -78,4 +78,9 @@ public class GameUpdateRequest implements Serializable {
      * 折扣值
      */
     private BigDecimal gameDiscount;
+
+    /**
+     * 游戏封面
+     */
+    private String gameCover;
 }

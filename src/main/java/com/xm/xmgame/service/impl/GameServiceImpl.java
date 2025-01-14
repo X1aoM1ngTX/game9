@@ -161,7 +161,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
             game.setGameSaleEndTime(null);
             game.setGameDiscountedPrices(null);
         }
-
+        game.setGameCover(gameUpdateRequest.getGameCover());
         return updateById(game);
     }
 
