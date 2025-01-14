@@ -24,6 +24,7 @@ public class UserUtils {
         safetyUser.setUserName(originUser.getUserName());
         safetyUser.setUserEmail(originUser.getUserEmail());
         safetyUser.setUserPhone(originUser.getUserPhone());
+        safetyUser.setUserCreatedTime(originUser.getUserCreatedTime());
         safetyUser.setUserIsAdmin(originUser.getUserIsAdmin());
         return safetyUser;
     }

@@ -37,7 +37,7 @@ public class Game implements Serializable {
     private String gameDescription;
 
     /**
-     * 游戏价格
+     * 游戏原始价格
      */
     private BigDecimal gamePrice;
 
@@ -70,6 +70,36 @@ public class Game implements Serializable {
      * 游戏是否下架
      */
     private Boolean gameIsRemoved;
+
+    /**
+     * 游戏打折价格
+     */
+    private BigDecimal gameDiscountedPrices;
+
+    /**
+     * 游戏是否正在打折
+     */
+    private Integer gameOnSale;
+
+    /**
+     * 游戏折扣开始时间
+     */
+    private Date gameSaleStartTime;
+
+    /**
+     * 游戏折扣结束时间
+     */
+        private Date gameSaleEndTime;
+
+    /**
+     * 游戏折扣
+     */
+    private BigDecimal gameDiscount;
+
+    /**
+     * 游戏封面
+     */
+    private String gameCover;
 
     @Serial
     @TableField(exist = false)

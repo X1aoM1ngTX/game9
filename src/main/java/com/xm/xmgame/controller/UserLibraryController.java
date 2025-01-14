@@ -17,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/userLibrary")
+@CrossOrigin(origins = {"http://localhost:3000"},allowCredentials = "true")
 @Slf4j
 public class UserLibraryController {
 

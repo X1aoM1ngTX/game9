@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 /**
@@ -127,15 +128,39 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
 
-        // 更新游戏信息
+        // 更新基本信息
         game.setGameName(gameUpdateRequest.getGameName());
         game.setGameDescription(gameUpdateRequest.getGameDescription());
-        game.setGamePrice(gameUpdateRequest.getGamePrice());
+        if (gameUpdateRequest.getGamePrice() != null) {
+            try {
+                game.setGamePrice(new BigDecimal(gameUpdateRequest.getGamePrice()));
+            } catch (NumberFormatException e) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "价格格式不正确");
+            }
+        }
         game.setGameStock(gameUpdateRequest.getGameStock());
         game.setGamePub(gameUpdateRequest.getGamePub());
         game.setGameDev(gameUpdateRequest.getGameDev());
         game.setGameReleaseDate(gameUpdateRequest.getGameReleaseDate());
-        game.setGameIsRemoved(gameUpdateRequest.isGameIsRemoved());
+        game.setGameOnSale(gameUpdateRequest.getGameOnSale() ? 1 : 0);
+        if (gameUpdateRequest.getGameOnSale()) {
+            game.setGameDiscount(gameUpdateRequest.getGameDiscount());
+            game.setGameSaleStartTime(gameUpdateRequest.getGameSaleStartTime());
+            game.setGameSaleEndTime(gameUpdateRequest.getGameSaleEndTime());
+            // 计算折扣价格
+            if (game.getGamePrice() != null && gameUpdateRequest.getGameDiscount() != null) {
+                BigDecimal discountedPrice = game.getGamePrice()
+                    .multiply(BigDecimal.ONE.subtract(gameUpdateRequest.getGameDiscount()))
+                    .setScale(2, RoundingMode.HALF_UP);
+                game.setGameDiscountedPrices(discountedPrice);
+            }
+        } else {
+            // 关闭折扣时，清空所有折扣相关信息
+            game.setGameDiscount(BigDecimal.ZERO);
+            game.setGameSaleStartTime(null);
+            game.setGameSaleEndTime(null);
+            game.setGameDiscountedPrices(null);
+        }
 
         return updateById(game);
     }
@@ -174,6 +199,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         }
         return removeById(gameId);
     }
+
 }
 
 

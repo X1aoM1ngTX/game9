@@ -63,4 +63,5 @@ public interface GameService extends IService<Game> {
      * @return boolean
      */
     boolean deleteGame(Long gameId);
+
 }

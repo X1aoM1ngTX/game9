@@ -5,22 +5,30 @@
 <mapper namespace="com.xm.xmgame.mapper.GameMapper">
 
     <resultMap id="BaseResultMap" type="com.xm.xmgame.model.domain.Game">
-            <id property="gameId" column="gameId" jdbcType="BIGINT"/>
-            <result property="gameName" column="gameName" jdbcType="VARCHAR"/>
-            <result property="gameDescription" column="gameDescription" jdbcType="VARCHAR"/>
-            <result property="gamePrice" column="gamePrice" jdbcType="DECIMAL"/>
-            <result property="gameStock" column="gameStock" jdbcType="INTEGER"/>
-            <result property="gameCreatedTime" column="gameCreatedTime" jdbcType="TIMESTAMP"/>
-            <result property="gameReleaseDate" column="gameReleaseDate" jdbcType="DATE"/>
-            <result property="gameDev" column="gameDev" jdbcType="VARCHAR"/>
-            <result property="gamePub" column="gamePub" jdbcType="VARCHAR"/>
-            <result property="gameIsRemoved" column="gameIsRemoved" jdbcType="TINYINT"/>
+        <id property="gameId" column="gameId" jdbcType="BIGINT"/>
+        <result property="gameName" column="gameName" jdbcType="VARCHAR"/>
+        <result property="gameDescription" column="gameDescription" jdbcType="VARCHAR"/>
+        <result property="gamePrice" column="gamePrice" jdbcType="DECIMAL"/>
+        <result property="gameStock" column="gameStock" jdbcType="INTEGER"/>
+        <result property="gameCreatedTime" column="gameCreatedTime" jdbcType="TIMESTAMP"/>
+        <result property="gameReleaseDate" column="gameReleaseDate" jdbcType="DATE"/>
+        <result property="gameDev" column="gameDev" jdbcType="VARCHAR"/>
+        <result property="gamePub" column="gamePub" jdbcType="VARCHAR"/>
+        <result property="gameIsRemoved" column="gameIsRemoved" jdbcType="TINYINT"/>
+        <result property="gameDiscountedPrices" column="gameDiscountedPrices" jdbcType="DECIMAL"/>
+        <result property="gameOnSale" column="gameOnSale" jdbcType="TINYINT"/>
+        <result property="gameSaleStartTime" column="gameSaleStartTime" jdbcType="TIMESTAMP"/>
+        <result property="gameSaleEndTime" column="gameSaleEndTime" jdbcType="TIMESTAMP"/>
+        <result property="gameDiscount" column="gameDiscount" jdbcType="DECIMAL"/>
+        <result property="gameCover" column="gameCover" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         gameId,gameName,gameDescription,
         gamePrice,gameStock,gameCreatedTime,
         gameReleaseDate,gameDev,gamePub,
-        gameIsRemoved
+        gameIsRemoved,gameDiscountedPrices,gameOnSale,
+        gameSaleStartTime,gameSaleEndTime,gameDiscount,
+        gameCover
     </sql>
 </mapper>

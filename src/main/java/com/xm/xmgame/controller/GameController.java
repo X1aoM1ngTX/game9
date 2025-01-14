@@ -23,6 +23,7 @@ import static com.xm.xmgame.constant.UserConstant.USER_LOGIN_STATE;
 
 @RestController
 @RequestMapping("/game")
+@CrossOrigin(origins = {"http://localhost:3000"},allowCredentials = "true")
 public class GameController {
 
     @Resource

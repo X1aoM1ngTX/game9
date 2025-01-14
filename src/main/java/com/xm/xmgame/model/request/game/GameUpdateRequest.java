@@ -6,24 +6,76 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 
+/**
+ * 游戏更新请求
+ *
+ * @author xm
+ */
 @Data
 public class GameUpdateRequest implements Serializable {
-
-    private Long gameId;
-    private String gameName;
-    private String gameDescription;
-    private BigDecimal gamePrice;
-    private Integer gameStock;
-    private String gamePub;
-    private LocalDate gameReleaseDate;
-    private String gameDev;
-    private Boolean gameIsRemoved;
-
+    
     @Serial
-    private static final long serialVersionUID = -6813351925946917L;
+    private static final long serialVersionUID = 1L;
 
-    public boolean isGameIsRemoved() {
-        return gameIsRemoved;
-    }
+    /**
+     * 游戏ID
+     */
+    private Long gameId;
+
+    /**
+     * 游戏名
+     */
+    private String gameName;
+
+    /**
+     * 游戏描述
+     */
+    private String gameDescription;
+
+    /**
+     * 游戏价格
+     */
+    private String gamePrice;
+
+    /**
+     * 游戏库存
+     */
+    private Integer gameStock;
+
+    /**
+     * 游戏发行时间
+     */
+    private LocalDate gameReleaseDate;
+
+    /**
+     * 游戏开发商
+     */
+    private String gameDev;
+
+    /**
+     * 游戏发行商
+     */
+    private String gamePub;
+
+    /**
+     * 是否开启折扣
+     */
+    private Boolean gameOnSale;
+
+    /**
+     * 折扣开始时间
+     */
+    private Date gameSaleStartTime;
+
+    /**
+     * 折扣结束时间
+     */
+    private Date gameSaleEndTime;
+
+    /**
+     * 折扣值
+     */
+    private BigDecimal gameDiscount;
 }
