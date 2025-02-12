@@ -27,7 +27,7 @@ public class GameDiscountJob {
     /**
      * 每秒检查一次折扣是否过期
      */
-    @Scheduled(cron = "0 */5 * * * *")
+    @Scheduled(cron = "0 */1 * * * *")
     public void checkDiscountExpiration() {
         log.info("开始检查游戏折扣过期情况");
 

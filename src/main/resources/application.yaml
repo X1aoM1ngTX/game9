@@ -8,10 +8,30 @@ spring:
     password: 123456
   session:
     timeout: 1478400 # 默认14天
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  web:
+    resources:
+      add-mappings: false
+  mail:
+    host: smtp.qq.com
+    username: noneedtofan@qq.com
+    password: "ztatcjfydfgceadh"
+    port: 465
+    default-encoding: UTF-8
+    protocol: smtps
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 server:
   port: 8080
   servlet:
     context-path: /api
+
 mybatis-plus:
   global-config:
     db-config:

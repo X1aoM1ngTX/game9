@@ -10,6 +10,7 @@ import com.xm.xmgame.model.request.game.GameCreateRequest;
 import com.xm.xmgame.model.request.game.GameQueryRequest;
 import com.xm.xmgame.model.request.game.GameStatusRequest;
 import com.xm.xmgame.model.request.game.GameUpdateRequest;
+import com.xm.xmgame.model.vo.GameDetailVO;
 import com.xm.xmgame.service.GameService;
 import com.xm.xmgame.mapper.GameMapper;
 import jakarta.annotation.Resource;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,7 +42,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     @Override
     public Long createGame(GameCreateRequest gameCreateRequest) {
         if (gameCreateRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
         }
 
         String gameName = gameCreateRequest.getGameName();
@@ -97,7 +99,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     @Override
     public Page<Game> pageGames(GameQueryRequest gameQueryRequest) {
         if (gameQueryRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
         }
 
         LambdaQueryWrapper<Game> queryWrapper = new LambdaQueryWrapper<>();
@@ -112,6 +114,53 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     }
 
     /**
+     * 更新游戏状态
+     *
+     * @param gameId 游戏id
+     * @return boolean (是否更新成功)
+     */
+    @Override
+    public GameDetailVO getGameDetail(Long gameId) {
+        if (gameId == null || gameId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数错误");
+        }
+
+        // 获取游戏基本信息
+        Game game = getById(gameId);
+        if (game == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "游戏不存在");
+        }
+
+        // 转换为VO对象
+        GameDetailVO gameDetailVO = new GameDetailVO();
+        gameDetailVO.setGameId(game.getGameId());
+        gameDetailVO.setGameName(game.getGameName());
+        gameDetailVO.setGameDescription(game.getGameDescription());
+        gameDetailVO.setGamePrice(game.getGamePrice());
+        gameDetailVO.setGameStock(game.getGameStock());
+        gameDetailVO.setGameReleaseDate(game.getGameReleaseDate());
+        gameDetailVO.setGameDev(game.getGameDev());
+        gameDetailVO.setGamePub(game.getGamePub());
+        gameDetailVO.setGameCover(game.getGameCover());
+        gameDetailVO.setGameIsRemoved(game.getGameIsRemoved());
+
+        // 处理折扣信息
+        if (game.getGameOnSale() == 1 && game.getGameSaleEndTime() != null
+                && game.getGameSaleEndTime().after(new Date())) {
+            gameDetailVO.setGameOnSale(1);
+            gameDetailVO.setGameDiscount(game.getGameDiscount());
+            gameDetailVO.setGameSaleEndTime(game.getGameSaleEndTime());
+            gameDetailVO.setGameDiscountedPrices(game.getGameDiscountedPrices());
+        } else {
+            gameDetailVO.setGameOnSale(0);
+            gameDetailVO.setGameDiscountedPrices(game.getGamePrice());
+        }
+
+        return gameDetailVO;
+    }
+
+
+    /**
      * 更新游戏
      *
      * @param gameUpdateRequest 游戏更新请求
@@ -120,12 +169,12 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     @Override
     public boolean updateGame(GameUpdateRequest gameUpdateRequest) {
         if (gameUpdateRequest == null || gameUpdateRequest.getGameId() == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
 
         Game game = getById(gameUpdateRequest.getGameId());
         if (game == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "游戏不存在");
         }
 
         // 更新基本信息
@@ -133,10 +182,28 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         game.setGameDescription(gameUpdateRequest.getGameDescription());
         if (gameUpdateRequest.getGamePrice() != null) {
             try {
-                game.setGamePrice(new BigDecimal(gameUpdateRequest.getGamePrice()));
+                game.setGamePrice(new BigDecimal(String.valueOf(gameUpdateRequest.getGamePrice())));
             } catch (NumberFormatException e) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "价格格式不正确");
             }
+        }
+        if (gameUpdateRequest.getGamePrice() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "价格不能为空");
+        }
+        if (new BigDecimal(gameUpdateRequest.getGamePrice()).compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "价格不能为负数");
+        }
+        // 检查免费游戏不能打折
+        boolean GamePriceIsFree = false;
+        boolean GameOnSale = false;
+        if (game.getGamePrice().compareTo(BigDecimal.ZERO) < 0) {
+            GamePriceIsFree = true;
+        }
+        if (game.getGameOnSale() == 1) {
+            GameOnSale = true;
+        }
+        if (GamePriceIsFree && GameOnSale) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "免费游戏不能打折");
         }
         game.setGameStock(gameUpdateRequest.getGameStock());
         game.setGamePub(gameUpdateRequest.getGamePub());
@@ -150,8 +217,8 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
             // 计算折扣价格
             if (game.getGamePrice() != null && gameUpdateRequest.getGameDiscount() != null) {
                 BigDecimal discountedPrice = game.getGamePrice()
-                    .multiply(BigDecimal.ONE.subtract(gameUpdateRequest.getGameDiscount()))
-                    .setScale(2, RoundingMode.HALF_UP);
+                        .multiply(BigDecimal.ONE.subtract(gameUpdateRequest.getGameDiscount()))
+                        .setScale(2, RoundingMode.HALF_UP);
                 game.setGameDiscountedPrices(discountedPrice);
             }
         } else {
@@ -174,12 +241,12 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     @Override
     public boolean setGameRemovedStatus(GameStatusRequest gameStatusRequest) {
         if (gameStatusRequest == null || gameStatusRequest.getGameId() == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
 
         Game game = getById(gameStatusRequest.getGameId());
         if (game == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "游戏不存在");
         }
 
         game.setGameIsRemoved(gameStatusRequest.isGameIsRemoved());

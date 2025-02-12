@@ -7,6 +7,7 @@ import com.xm.xmgame.model.request.game.GameCreateRequest;
 import com.xm.xmgame.model.request.game.GameQueryRequest;
 import com.xm.xmgame.model.request.game.GameStatusRequest;
 import com.xm.xmgame.model.request.game.GameUpdateRequest;
+import com.xm.xmgame.model.vo.GameDetailVO;
 
 import java.util.List;
 
@@ -39,6 +40,14 @@ public interface GameService extends IService<Game> {
      * @return 分页游戏列表
      */
     Page<Game> pageGames(GameQueryRequest gameQueryRequest);
+
+    /**
+     * 获取游戏详情
+     *
+     * @param gameId 游戏id
+     * @return 游戏详情
+     */
+    GameDetailVO getGameDetail(Long gameId);
 
     /**
      * 更新游戏

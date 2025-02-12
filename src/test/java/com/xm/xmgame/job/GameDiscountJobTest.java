@@ -3,9 +3,13 @@ package com.xm.xmgame.job;
 import com.xm.xmgame.model.domain.Game;
 import com.xm.xmgame.service.GameService;
 import jakarta.annotation.Resource;
+import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -112,5 +116,30 @@ class GameDiscountJobTest {
 
         // 5. 清理测试数据
         gameService.removeById(game.getGameId());
+    }
+
+    @Autowired
+    JavaMailSender javaMailSender;
+
+    @Test
+    public void test() throws Exception {
+
+        // 创建一个邮件消息
+        MimeMessage message = javaMailSender.createMimeMessage();
+
+        // 创建 MimeMessageHelper
+        MimeMessageHelper helper = new MimeMessageHelper(message, false);
+
+        // 发件人邮箱和名称
+        helper.setFrom("noneedtofan@qq.com", "springdoc");
+        // 收件人邮箱
+        helper.setTo("1062829664@qq.com");
+        // 邮件标题
+        helper.setSubject("Hello World.");
+        // 邮件正文，第二个参数表示是否是HTML正文
+        helper.setText("Hello <strong> World</strong>！", true);
+
+        // 发送
+        javaMailSender.send(message);
     }
 } 

@@ -1,9 +1,5 @@
-package com.xm.xmgame.model.domain;
+package com.xm.xmgame.model.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serial;
@@ -13,17 +9,17 @@ import java.time.LocalDate;
 import java.util.Date;
 
 /**
- * 游戏表
- *
- * @表名 game
+ * 游戏详情视图对象
  */
-@TableName(value = "game")
 @Data
-public class Game implements Serializable {
+public class GameDetailVO implements Serializable {
+    
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     /**
      * 游戏ID
      */
-    @TableId(type = IdType.AUTO)
     private Long gameId;
 
     /**
@@ -42,14 +38,14 @@ public class Game implements Serializable {
     private BigDecimal gamePrice;
 
     /**
+     * 游戏打折价格
+     */
+    private BigDecimal gameDiscountedPrices;
+
+    /**
      * 游戏库存
      */
     private Integer gameStock;
-
-    /**
-     * 游戏创建时间
-     */
-    private Date gameCreatedTime;
 
     /**
      * 游戏发行时间
@@ -72,24 +68,9 @@ public class Game implements Serializable {
     private Boolean gameIsRemoved;
 
     /**
-     * 游戏打折价格
-     */
-    private BigDecimal gameDiscountedPrices;
-
-    /**
      * 游戏是否正在打折
      */
     private Integer gameOnSale;
-
-    /**
-     * 游戏折扣开始时间
-     */
-    private Date gameSaleStartTime;
-
-    /**
-     * 游戏折扣结束时间
-     */
-        private Date gameSaleEndTime;
 
     /**
      * 游戏折扣
@@ -97,11 +78,12 @@ public class Game implements Serializable {
     private BigDecimal gameDiscount;
 
     /**
+     * 游戏折扣结束时间
+     */
+    private Date gameSaleEndTime;
+
+    /**
      * 游戏封面
      */
     private String gameCover;
-
-    @Serial
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
-}
+} 
