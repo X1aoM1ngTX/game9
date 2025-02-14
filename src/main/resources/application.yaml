@@ -27,6 +27,10 @@ spring:
       host: localhost
       port: 6379
 
+logging: 
+  charset: 
+    console: UTF-8
+
 server:
   port: 8080
   servlet:

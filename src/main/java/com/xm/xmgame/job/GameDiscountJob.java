@@ -27,7 +27,7 @@ public class GameDiscountJob {
     /**
      * 每秒检查一次折扣是否过期
      */
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void checkDiscountExpiration() {
         log.info("开始检查游戏折扣过期情况");
 
@@ -70,12 +70,13 @@ public class GameDiscountJob {
         if (updatedCount > 0) {
             // 验证更新结果
             String verifySql = """
-                        SELECT COUNT(*) 
-                        FROM game 
-                        WHERE gameOnSale = 1 
+                        SELECT COUNT(*)
+                        FROM game
+                        WHERE gameOnSale = 1
                         AND gameSaleEndTime < NOW()
                     """;
 
+            @SuppressWarnings("null")
             int remainingCount = jdbcTemplate.queryForObject(verifySql, Integer.class);
             log.info("更新后仍有 {} 个过期未处理的游戏", remainingCount);
 
