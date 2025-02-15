@@ -1,0 +1,485 @@
+package com.xm.gamehub.service.impl;
+
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xm.gamehub.common.ErrorCode;
+import com.xm.gamehub.exception.BusinessException;
+import com.xm.gamehub.mapper.UserMapper;
+import com.xm.gamehub.model.domain.User;
+import com.xm.gamehub.model.entity.email.VerifyCodeEmail;
+import com.xm.gamehub.model.request.user.*;
+import com.xm.gamehub.service.UserService;
+import com.xm.gamehub.utils.UserUtils;
+import com.xm.gamehub.utils.UploadUtil;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+import static com.xm.gamehub.constant.UserConstant.ADMIN_ROLE;
+import static com.xm.gamehub.constant.UserConstant.USER_LOGIN_STATE;
+
+/**
+ * @author X1aoM1ngTX
+ * @描述 针对表【user(用户表)】的数据库操作Service实现
+ * @创建时间 2024-10-10 13:26:55
+ */
+@Service
+@Slf4j
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
+    @Resource
+    private UserMapper userMapper;
+
+    @Resource
+    JavaMailSender javaMailSender;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private UploadUtil uploadUtil;
+
+    @Value("${spring.mail.username}")
+    private String emailFrom;
+
+    private static String EMAIL_FROM;
+
+    private static final String SALT = "xm";
+
+    private static final String VERIFY_CODE_PREFIX = "verify:code:";
+    private static final long VERIFY_CODE_EXPIRE = 5; // 验证码有效期（分钟）
+
+    @PostConstruct
+    public void init() {
+        EMAIL_FROM = emailFrom;
+    }
+
+    /**
+     * 用户注册。
+     *
+     * @param registerRequest 用户注册请求，包含用户名、邮箱和密码。
+     * @return 新注册用户的ID。
+     * @throws BusinessException 如果参数为空、用户名过短、密码过短、用户名已存在、邮箱已被注册或数据库错误，抛出业务异常。
+     */
+    @Override
+    public Long userRegister(UserRegisterRequest registerRequest) {
+        String userName = registerRequest.getUserName();
+        String userEmail = registerRequest.getUserEmail();
+        String userPhone = registerRequest.getUserPhone();
+        String userPassword = registerRequest.getUserPassword();
+
+        // 1. 校验
+        if (StringUtils.isAnyBlank(userName, userEmail, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+        if (userName.length() < 4) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名过短");
+        }
+        if (userPassword.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码过短");
+        }
+        if (userPhone.length() < 11) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "手机号过短");
+        }
+        if (StringUtils.isAnyBlank(userEmail)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不能为空");
+        }
+
+        // 2. 账户不能重复
+        User existUser = userMapper.selectByUserName(userName);
+        if (existUser != null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名已存在");
+        }
+
+        // 3. 邮箱不能重复
+        existUser = userMapper.selectByEmail(userEmail);
+        if (existUser != null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱已被注册");
+        }
+
+        // 4. 加密密码
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+
+        // 5. 插入数据
+        User user = new User();
+        user.setUserName(userName);
+        user.setUserEmail(userEmail);
+        user.setUserPhone(userPhone);
+        user.setUserPassword(encryptPassword);
+        boolean saveResult = save(user);
+        if (!saveResult) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
+        }
+
+        return user.getUserId();
+    }
+
+    /**
+     * 用户登录。
+     *
+     * @param loginRequest 用户登录请求，包含用户名和密码。
+     * @param request      HttpServlet请求，用于获取Session和设置用户登录状态。
+     * @return 安全的用户对象，不包含敏感信息。
+     * @throws BusinessException 如果参数为空、用户不存在或密码错误，抛出业务异常。
+     */
+    @Override
+    public User userLogin(UserLoginRequest loginRequest, HttpServletRequest request) {
+        String userName = loginRequest.getUserName();
+        String userPassword = loginRequest.getUserPassword();
+
+        // 1. 校验
+        if (StringUtils.isAnyBlank(userName, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+
+        // 2. 加密
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+
+        // 3. 查询用户是否存在
+        User user = userMapper.selectByUserName(userName);
+        if (user == null) {
+            log.info("user login failed, userName cannot match userPassword");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
+        }
+
+        // 4. 校验密码
+        if (!user.getUserPassword().equals(encryptPassword)) {
+            log.info("user login failed, userName cannot match userPassword");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码错误");
+        }
+
+        // 5. 记录用户的登录态
+        request.getSession().setAttribute(USER_LOGIN_STATE, user);
+
+        return UserUtils.getSafetyUser(user);
+    }
+
+
+    /**
+     * 获取当前登录的用户。
+     *
+     * @param request HttpServlet请求，用于获取Session中的用户登录状态。
+     * @return 当前登录的用户对象。
+     * @throws BusinessException 如果用户未登录或用户信息无效，抛出业务异常。
+     */
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+        // 先判断是否已登录
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User currentUser = (User) userObj;
+        if (currentUser == null || currentUser.getUserId() == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        // 从数据库查询（追求性能的话可以注释，直接走缓存）
+        long userId = currentUser.getUserId();
+        currentUser = getById(userId);
+        if (currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        return currentUser;
+    }
+
+    /**
+     * 用户注销。
+     *
+     * @param logoutRequest HttpServlet请求，用于获取Session中的用户登录状态。
+     * @return 返回 true 表示注销成功。
+     * @throws BusinessException 如果用户未登录，抛出业务异常。
+     */
+    @Override
+    public boolean userLogout(HttpServletRequest logoutRequest) {
+        if (logoutRequest.getSession().getAttribute(USER_LOGIN_STATE) == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        // 移除登录态
+        logoutRequest.getSession().removeAttribute(USER_LOGIN_STATE);
+        return true;
+    }
+
+    /**
+     * 更新用户信息。
+     *
+     * @param updateRequest 用户更新请求，包含用户名、昵称、邮箱和手机号码。
+     * @param userId        用户ID。
+     * @return 返回 true 表示更新成功。
+     * @throws BusinessException 如果请求参数为空、用户不存在、当前用户无权限修改该用户信息或数据库操作失败，抛出业务异常。
+     */
+    @Override
+    public boolean userModify(UserModifyRequest updateRequest, Long userId) {
+        if (StringUtils.isAnyBlank(updateRequest.getUserName(), updateRequest.getUserNickname())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名和昵称不能为空");
+        }
+        
+        User user = getById(userId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
+        }
+        
+        // 检查用户名是否被其他用户使用
+        User existUser = userMapper.selectOne(
+            Wrappers.<User>lambdaQuery()
+                .eq(User::getUserName, updateRequest.getUserName())
+                .ne(User::getUserId, userId)
+        );
+        if (existUser != null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名已被使用");
+        }
+        
+        user.setUserName(updateRequest.getUserName());
+        user.setUserNickname(updateRequest.getUserNickname());
+        user.setUserEmail(updateRequest.getUserEmail());
+        user.setUserPhone(updateRequest.getUserPhone());
+        user.setUserProfile(updateRequest.getUserProfile());
+        
+        return updateById(user);
+    }
+
+    /**
+     * 更新管理员用户信息。
+     *
+     * @param updateRequest 管理员用户更新请求，包含用户名、昵称、邮箱、手机号码和用户权限。
+     * @param userId        用户ID。
+     * @return 返回 true 表示更新成功。
+     * @throws BusinessException 如果用户不存在、用户名已存在或数据库操作失败，抛出业务异常。
+     */
+    @Override
+    public boolean adminUserUpdate(AdminUserUpdateRequest updateRequest, Long userId) {
+        if (StringUtils.isAnyBlank(updateRequest.getUserName(), updateRequest.getUserNickname())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名和昵称不能为空");
+        }
+        
+        User user = getById(userId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
+        }
+        
+        // 检查用户名是否被其他用户使用
+        User existUser = userMapper.selectOne(
+            Wrappers.<User>lambdaQuery()
+                .eq(User::getUserName, updateRequest.getUserName())
+                .ne(User::getUserId, userId)
+        );
+        if (existUser != null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名已被使用");
+        }
+        
+        user.setUserName(updateRequest.getUserName());
+        user.setUserNickname(updateRequest.getUserNickname());
+        user.setUserEmail(updateRequest.getUserEmail());
+        user.setUserPhone(updateRequest.getUserPhone());
+        user.setUserIsAdmin(updateRequest.getUserIsAdmin());
+        
+        return updateById(user);
+    }
+
+    @Override
+    public void sendEmail(String toEmail) {
+        try {
+            // 生成6位随机验证码
+            String verifyCode = String.format("%06d", new Random().nextInt(1000000));
+            
+            // 将验证码保存到Redis
+            String key = VERIFY_CODE_PREFIX + toEmail;
+            // 不主动删除旧的验证码，让它自然过期
+            stringRedisTemplate.opsForValue().set(key, verifyCode, VERIFY_CODE_EXPIRE, TimeUnit.MINUTES);
+            
+            // 创建邮件消息
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            // 使用 VerifyCodeEmail 中的配置
+            helper.setFrom(emailFrom, VerifyCodeEmail.organization);
+            helper.setTo(toEmail);
+            helper.setSubject(VerifyCodeEmail.title);
+            
+            // 使用 VerifyCodeEmail 中的模板
+            String content = String.format(
+                VerifyCodeEmail.content,
+                VerifyCodeEmail.title,
+                verifyCode
+            );
+            helper.setText(content, true);
+
+            // 发送邮件
+            javaMailSender.send(message);
+            
+            log.info("验证码邮件发送成功: {}, 验证码: {}", toEmail, verifyCode);
+        } catch (Exception e) {
+            log.error("发送验证码邮件失败: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "验证码发送失败，请稍后重试");
+        }
+    }
+
+    @Override
+    public boolean verifyCode(VerifyCodeRequest verifyRequest) {
+        if (verifyRequest == null || StringUtils.isAnyBlank(verifyRequest.getEmail(), verifyRequest.getCode())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不完整");
+        }
+
+        // 从Redis获取验证码
+        String key = VERIFY_CODE_PREFIX + verifyRequest.getEmail();
+        String savedCode = stringRedisTemplate.opsForValue().get(key);
+        
+        log.info("验证码校验 - 邮箱: {}, 输入验证码: {}, 存储验证码: {}", 
+            verifyRequest.getEmail(), verifyRequest.getCode(), savedCode);
+        
+        if (savedCode == null) {
+            log.warn("验证码已过期 - 邮箱: {}", verifyRequest.getEmail());
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码已过期，请重新获取");
+        }
+
+        // 验证码匹配（不区分大小写）
+        if (savedCode.equalsIgnoreCase(verifyRequest.getCode())) {
+            // 验证成功后不删除验证码，而是刷新过期时间
+            stringRedisTemplate.expire(key, VERIFY_CODE_EXPIRE, TimeUnit.MINUTES);
+            log.info("验证码验证成功 - 邮箱: {}", verifyRequest.getEmail());
+            return true;
+        }
+        
+        log.warn("验证码错误 - 邮箱: {}, 输入: {}, 正确: {}", 
+            verifyRequest.getEmail(), verifyRequest.getCode(), savedCode);
+        throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
+    }
+
+    @Override
+    public boolean resetPassword(ResetPasswordRequest resetRequest) {
+        if (resetRequest == null || 
+            StringUtils.isAnyBlank(
+                resetRequest.getEmail(), 
+                resetRequest.getVerifyCode(), 
+                resetRequest.getNewPassword()
+            )) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不完整");
+        }
+
+        // 1. 先验证密码格式
+        if (resetRequest.getNewPassword().length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码长度不能小于8位");
+        }
+
+        // 2. 从Redis获取验证码
+        String key = VERIFY_CODE_PREFIX + resetRequest.getEmail();
+        String savedCode = stringRedisTemplate.opsForValue().get(key);
+        
+        // 3. 记录日志
+        log.info("重置密码 - 邮箱: {}, 验证码: {}, Redis中的验证码: {}", 
+            resetRequest.getEmail(), resetRequest.getVerifyCode(), savedCode);
+
+        // 4. 验证码校验
+        if (savedCode == null) {
+            log.warn("重置密码失败 - 验证码已过期，邮箱: {}", resetRequest.getEmail());
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码已过期，请重新获取");
+        }
+
+        if (!savedCode.equalsIgnoreCase(resetRequest.getVerifyCode())) {
+            log.warn("重置密码失败 - 验证码错误，邮箱: {}, 输入: {}, 正确: {}", 
+                resetRequest.getEmail(), resetRequest.getVerifyCode(), savedCode);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
+        }
+
+        try {
+            // 5. 查找用户
+            User user = userMapper.selectByEmail(resetRequest.getEmail());
+            if (user == null) {
+                throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
+            }
+
+            // 6. 更新密码
+            String encryptPassword = DigestUtils.md5DigestAsHex((SALT + resetRequest.getNewPassword()).getBytes());
+            user.setUserPassword(encryptPassword);
+            
+            // 7. 更新密码，不删除验证码，让它自然过期
+            boolean updateResult = updateById(user);
+            if (updateResult) {
+                log.info("重置密码成功 - 邮箱: {}", resetRequest.getEmail());
+            }
+            
+            return updateResult;
+        } catch (Exception e) {
+            log.error("重置密码失败: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "重置密码失败，请稍后重试");
+        }
+    }
+
+    /**
+     * 判断是否为管理员
+     *
+     * @param request HttpServlet请求
+     * @return ture / false
+     */
+    @Override
+    public boolean isAdmin(HttpServletRequest request) {
+        // 仅管理员可查询
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObj;
+        return user != null && user.getUserIsAdmin() == ADMIN_ROLE;
+    }
+
+    /**
+     * 更新用户头像
+     *
+     * @param userId 用户ID
+     * @param file 头像文件
+     * @return 新的头像URL
+     */
+    @Override
+    public String updateUserAvatar(Long userId, MultipartFile file) {
+        // 1. 参数校验
+        if (userId == null || userId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID不合法");
+        }
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像文件不能为空");
+        }
+        
+        // 2. 校验文件大小（限制为2MB）
+        if (file.getSize() > 2 * 1024 * 1024) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像文件大小不能超过2MB");
+        }
+        
+        // 3. 校验文件类型
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件类型必须是图片");
+        }
+        
+        try {
+            // 4. 上传文件到阿里云OSS
+            String avatarUrl = uploadUtil.uploadAliyunOss(file);
+            
+            // 5. 更新用户头像URL
+            User user = getById(userId);
+            if (user == null) {
+                throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
+            }
+            
+            user.setUserAvatar(avatarUrl);
+            boolean updated = updateById(user);
+            if (!updated) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新用户头像失败");
+            }
+            
+            return avatarUrl;
+        } catch (IOException e) {
+            log.error("上传头像失败", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "上传头像失败");
+        }
+    }
+}
+
+

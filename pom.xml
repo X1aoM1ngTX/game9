@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.xm</groupId>
-    <artifactId>xmgame</artifactId>
+    <artifactId>gamehub</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>xmgame</name>
-    <description>xmgame</description>
+    <name>gamehub</name>
+    <description>gamehub</description>
     <url/>
     <licenses>
         <license/>

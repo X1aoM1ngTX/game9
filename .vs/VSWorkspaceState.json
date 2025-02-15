@@ -6,9 +6,9 @@
     "\\src\\main\\java",
     "\\src\\main\\java\\com",
     "\\src\\main\\java\\com\\xm",
-    "\\src\\main\\java\\com\\xm\\xmgame",
-    "\\src\\main\\java\\com\\xm\\xmgame\\controller"
+    "\\src\\main\\java\\com\\xm\\gamehub",
+    "\\src\\main\\java\\com\\xm\\gamehub\\controller"
   ],
-  "SelectedNode": "\\src\\main\\java\\com\\xm\\xmgame\\XmGameApplication.java",
+  "SelectedNode": "\\src\\main\\java\\com\\xm\\gamehub\\GameHubApplication.java",
   "PreviewInSolutionExplorer": false
 }

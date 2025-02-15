@@ -1,6 +1,6 @@
 spring:
   application:
-    name: xmgame
+    name: gamehub
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/xmgame
@@ -68,4 +68,4 @@ springdoc:
     enabled: true
   api-docs:
     path: /v3/api-docs
-  packages-to-scan: com.xm.xmgame.controller
+  packages-to-scan: com.xm.gamehub.controller
