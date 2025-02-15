@@ -56,9 +56,9 @@ mybatis-plus:
 
 aliyun:
   oss:
-    domain: ${ALIBABA_CLOUD_DOMAIN}
-    endpoint: ${ALIBABA_CLOUD_ENDPOINT}
-    bucketName: ${ALIBABA_CLOUD_BUCKET_NAME}
+    domain: https://xmgame-bucket.oss-cn-guangzhou.aliyuncs.com/
+    endpoint: oss-cn-guangzhou.aliyuncs.com
+    bucketName: xmgame-bucket
 
 springdoc:
   swagger-ui:
