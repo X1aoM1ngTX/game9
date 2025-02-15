@@ -15,19 +15,17 @@ import java.util.UUID;
 public class UploadUtil {
     // 阿里云OSS相关配置
     @Value("${aliyun.oss.domain}")
-    private String domain;
+    private String domain = System.getenv("ALIBABA_CLOUD_DOMAIN");
 
     @Value("${aliyun.oss.endpoint}")
-    private String endpoint;
+    private String endpoint = System.getenv("ALIBABA_CLOUD_ENDPOINT");
 
-    @Value("${aliyun.oss.accessKeyId}")
-    private String accessKeyId;
+    private final String accessKeyId = System.getenv("ALIBABA_CLOUD_ACCESS_KEY_ID");;
 
-    @Value("${aliyun.oss.accessKeySecret}")
-    private String accessKeySecret;
+    private final String accessKeySecret = System.getenv("ALIBABA_CLOUD_ACCESS_KEY_SECRET");
 
     @Value("${aliyun.oss.bucketName}")
-    private String bucketName;
+    private String bucketName = System.getenv("ALIBABA_CLOUD_BUCKET_NAME");
 
     private static String ALIYUN_OSS_DOMAIN;
     private static String ALIYUN_OSS_ENDPOINT;

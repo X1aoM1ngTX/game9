@@ -56,11 +56,11 @@ mybatis-plus:
 
 aliyun:
   oss:
-    domain: https://xmgame-bucket.oss-cn-guangzhou.aliyuncs.com/
-    endpoint: oss-cn-guangzhou.aliyuncs.com
+    domain: ${ALIYUN_OSS_DOMAIN}
+    endpoint: ${ALIYUN_OSS_ENDPOINT}
     accessKeyId: ${ALIYUN_ACCESS_KEY_ID}
     accessKeySecret: ${ALIYUN_ACCESS_KEY_SECRET}
-    bucketName: xmgame-bucket
+    bucketName: ${ALIYUN_OSS_BUCKET_NAME}
 
 springdoc:
   swagger-ui:
