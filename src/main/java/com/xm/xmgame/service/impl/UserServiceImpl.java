@@ -6,15 +6,19 @@ import com.xm.xmgame.common.ErrorCode;
 import com.xm.xmgame.exception.BusinessException;
 import com.xm.xmgame.mapper.UserMapper;
 import com.xm.xmgame.model.domain.User;
+import com.xm.xmgame.model.entity.email.VerifyCodeEmail;
 import com.xm.xmgame.model.request.user.*;
 import com.xm.xmgame.service.UserService;
-import com.xm.xmgame.common.UserUtils;
+import com.xm.xmgame.utils.UserUtils;
+
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -29,7 +33,7 @@ import static com.xm.xmgame.constant.UserConstant.ADMIN_ROLE;
 import static com.xm.xmgame.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
- * @author xm
+ * @author X1aoM1ngTX
  * @描述 针对表【user(用户表)】的数据库操作Service实现
  * @创建时间 2024-10-10 13:26:55
  */
@@ -46,13 +50,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
-    /**
-     * 盐值，混淆密码
-     */
+    @Value("${spring.mail.username}")
+    private String emailFrom;
+
+    private static String EMAIL_FROM;
+
     private static final String SALT = "xm";
 
     private static final String VERIFY_CODE_PREFIX = "verify:code:";
     private static final long VERIFY_CODE_EXPIRE = 5; // 验证码有效期（分钟）
+
+    @PostConstruct
+    public void init() {
+        EMAIL_FROM = emailFrom;
+    }
 
     /**
      * 用户注册。
@@ -65,6 +76,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public Long userRegister(UserRegisterRequest registerRequest) {
         String userName = registerRequest.getUserName();
         String userEmail = registerRequest.getUserEmail();
+        String userPhone = registerRequest.getUserPhone();
         String userPassword = registerRequest.getUserPassword();
 
         // 1. 校验
@@ -76,6 +88,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         if (userPassword.length() < 8) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码过短");
+        }
+        if (userPhone.length() < 11) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "手机号过短");
+        }
+        if (StringUtils.isAnyBlank(userEmail)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不能为空");
         }
 
         // 2. 账户不能重复
@@ -97,6 +115,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = new User();
         user.setUserName(userName);
         user.setUserEmail(userEmail);
+        user.setUserPhone(userPhone);
         user.setUserPassword(encryptPassword);
         boolean saveResult = save(user);
         if (!saveResult) {
@@ -197,8 +216,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @throws BusinessException 如果请求参数为空、用户不存在、当前用户无权限修改该用户信息或数据库操作失败，抛出业务异常。
      */
     @Override
-    public boolean userUpdate(UserUpdateRequest updateRequest, Long userId) {
-        if (updateRequest == null) {
+    public boolean userModify(UserModifyRequest modifyRequest, Long userId) {
+        if (modifyRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
         }
 
@@ -209,19 +228,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
 
             // 更新用户名
-            if (StringUtils.isNotBlank(updateRequest.getUserName())) {
-                user.setUserName(updateRequest.getUserName());
+            if (StringUtils.isNotBlank(modifyRequest.getUserName())) {
+                user.setUserName(modifyRequest.getUserName());
             }
 
             // 更新邮箱地址
-            if (StringUtils.isNotBlank(updateRequest.getUserEmail())) {
-                user.setUserEmail(updateRequest.getUserEmail());
+            if (StringUtils.isNotBlank(modifyRequest.getUserEmail())) {
+                user.setUserEmail(modifyRequest.getUserEmail());
             }
 
             // 更新手机号码
-            if (StringUtils.isNotBlank(updateRequest.getUserPhone())) {
-                user.setUserPhone(updateRequest.getUserPhone());
+            if (StringUtils.isNotBlank(modifyRequest.getUserPhone())) {
+                user.setUserPhone(modifyRequest.getUserPhone());
             }
+
+            // 更新用户简介
+            if (StringUtils.isNotBlank(modifyRequest.getUserProfile())) {
+                user.setUserProfile(modifyRequest.getUserProfile());
+            }
+            
             return updateById(user);
         } catch (Exception e) {
             // 记录日志并抛出自定义异常
@@ -275,7 +300,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public void sendEmail(EmailSendToUserRequest sendRequest) throws MessagingException, UnsupportedEncodingException {
-        if (sendRequest == null || StringUtils.isBlank(sendRequest.getEmail())) {
+        if (sendRequest == null || StringUtils.isBlank(sendRequest.getToEmail())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不能为空");
         }
 
@@ -283,29 +308,35 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String verifyCode = String.format("%06d", new Random().nextInt(1000000));
         
         // 存入Redis，设置过期时间
-        String key = VERIFY_CODE_PREFIX + sendRequest.getEmail();
-        stringRedisTemplate.opsForValue().set(key, verifyCode, VERIFY_CODE_EXPIRE, TimeUnit.MINUTES);
+        String key = VERIFY_CODE_PREFIX + sendRequest.getToEmail();
+        try {
+            // 先删除旧的验证码
+            stringRedisTemplate.delete(key);
+            // 存入新验证码
+            stringRedisTemplate.opsForValue().set(key, verifyCode, VERIFY_CODE_EXPIRE, TimeUnit.MINUTES);
+            
+            // 打印日志，方便调试
+            log.info("验证码已存储到Redis，key={}, code={}, expireTime={}分钟", key, verifyCode, VERIFY_CODE_EXPIRE);
+            
+            // 创建邮件内容
+            String content = String.format(VerifyCodeEmail.content,
+                VerifyCodeEmail.title,
+                verifyCode
+            );
 
-        // 创建邮件内容
-        String content = String.format(
-            "<div style='text-align:center'>" +
-            "<h2>%s</h2>" +
-            "<p>您的验证码是：<strong style='color:#1890ff;font-size:20px'>%s</strong></p>" +
-            "<p>验证码有效期为5分钟，请尽快使用</p>" +
-            "</div>",
-            sendRequest.getTitle(),
-            verifyCode
-        );
-        sendRequest.setContent(content);
-
-        // 发送邮件
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        helper.setFrom("noneedtofan@qq.com", sendRequest.getOrganization());
-        helper.setTo(sendRequest.getEmail());
-        helper.setSubject(sendRequest.getTitle());
-        helper.setText(content, true);
-        javaMailSender.send(message);
+            // 发送邮件
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(EMAIL_FROM, VerifyCodeEmail.organization);
+            helper.setTo(sendRequest.getToEmail());
+            helper.setSubject(VerifyCodeEmail.title);
+            helper.setText(content, true);
+            javaMailSender.send(message);
+            
+        } catch (Exception e) {
+            log.error("验证码发送失败：", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "验证码发送失败，请稍后重试");
+        }
     }
 
     @Override
@@ -318,6 +349,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String key = VERIFY_CODE_PREFIX + verifyRequest.getEmail();
         String savedCode = stringRedisTemplate.opsForValue().get(key);
         
+        // 打印日志，方便调试
+        log.info("验证码校验：key={}, savedCode={}, inputCode={}", 
+            key, savedCode, verifyRequest.getCode());
+        
         if (savedCode == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码已过期");
         }
@@ -327,8 +362,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (isMatch) {
             // 验证成功后删除验证码
             stringRedisTemplate.delete(key);
+            return true;
+        } else {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
         }
-        return isMatch;
     }
 
     @Override

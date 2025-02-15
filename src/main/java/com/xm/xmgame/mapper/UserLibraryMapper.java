@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 /**
- * @author XMTX8yyds
+ * @author X1aoM1ngTX
  * @描述  针对表【userLibrary(用户游戏库)】的数据库操作Mapper
  * @创建时间  2024-11-13 15:11:22
  * @实体  model.domain.UserLibrary

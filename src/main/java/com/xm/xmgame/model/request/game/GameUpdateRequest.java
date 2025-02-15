@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * 游戏更新请求
  *
- * @author xm
+ * @author X1aoM1ngTX
  */
 @Data
 public class GameUpdateRequest implements Serializable {

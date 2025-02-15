@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * 管理员用户信息修改请求体
  *
- * @author xm
+ * @author X1aoM1ngTX
  */
 @Data
 public class AdminUserUpdateRequest implements Serializable {

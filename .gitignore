@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# 开发环境配置
+src/main/resources/application-dev.yaml
+
+# 环境配置
+.env
+.env.local

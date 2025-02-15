@@ -13,11 +13,14 @@
             <result property="userCreatedTime" column="userCreatedTime" jdbcType="TIMESTAMP"/>
             <result property="userIsDelete" column="userIsDelete" jdbcType="TINYINT"/>
             <result property="userIsAdmin" column="userIsAdmin" jdbcType="TINYINT"/>
+            <result property="userProfile" column="userProfile" jdbcType="VARCHAR"/>
+            <result property="userAvatar" column="userAvatar" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         userId,userName,userEmail,
         userPhone,userPassword,userCreatedTime,
-        userIsDelete,userIsAdmin
+        userIsDelete,userIsAdmin,userProfile,
+        userAvatar
     </sql>
 </mapper>

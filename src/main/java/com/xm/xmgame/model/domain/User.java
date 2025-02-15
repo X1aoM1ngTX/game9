@@ -62,6 +62,16 @@ public class User implements Serializable {
      */
     private Integer userIsAdmin;
 
+    /**
+     * 用户简介
+     */
+    private String userProfile;
+
+    /**
+     * 用户头像URL
+     */
+    private String userAvatar;
+
     @TableField(exist = false)
     @Serial
     private static final long serialVersionUID = 1L;

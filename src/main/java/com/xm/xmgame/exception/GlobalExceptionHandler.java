@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 /**
  * 全局异常处理器
  *
- * @author xmcode
+ * @author X1aoM1ngTX
  * @date 2024-11-05 22:43:21
  */
 

@@ -17,8 +17,8 @@ spring:
       add-mappings: false
   mail:
     host: smtp.qq.com
-    username: noneedtofan@qq.com
-    password: "ztatcjfydfgceadh"
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     port: 465
     default-encoding: UTF-8
     protocol: smtps
@@ -26,9 +26,18 @@ spring:
     redis:
       host: localhost
       port: 6379
+      database: 0  # 添加数据库编号
+      timeout: 10000  # 连接超时时间
+      lettuce:
+        pool:
+          max-active: 8  # 连接池最大连接数
+          max-wait: -1ms  # 连接池最大阻塞等待时间
+          max-idle: 8  # 连接池中的最大空闲连接
+          min-idle: 0  # 连接池中的最小空闲连接
 
 logging: 
   charset: 
+    file: UTF-8
     console: UTF-8
 
 server:
@@ -44,3 +53,19 @@ mybatis-plus:
       logic-not-delete-value: 0 # 逻辑未删除值
   configuration:
     map-underscore-to-camel-case: false
+
+aliyun:
+  oss:
+    domain: https://xmgame-bucket.oss-cn-guangzhou.aliyuncs.com/
+    endpoint: oss-cn-guangzhou.aliyuncs.com
+    accessKeyId: ${ALIYUN_ACCESS_KEY_ID}
+    accessKeySecret: ${ALIYUN_ACCESS_KEY_SECRET}
+    bucketName: xmgame-bucket
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  api-docs:
+    path: /v3/api-docs
+  packages-to-scan: com.xm.xmgame.controller

@@ -2,17 +2,50 @@ package com.xm.xmgame.utils;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
+import jakarta.annotation.PostConstruct;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.UUID;
 
+@Component
 public class UploadUtil {
+    // 阿里云OSS相关配置
+    @Value("${aliyun.oss.domain}")
+    private String domain;
 
-    public static final String ALIYUN_OSS_DOMAIN = "https://xmgame-bucket.oss-cn-guangzhou.aliyuncs.com/";
+    @Value("${aliyun.oss.endpoint}")
+    private String endpoint;
 
-    public static String uploadAliyunOss(MultipartFile file) throws IOException {
+    @Value("${aliyun.oss.accessKeyId}")
+    private String accessKeyId;
+
+    @Value("${aliyun.oss.accessKeySecret}")
+    private String accessKeySecret;
+
+    @Value("${aliyun.oss.bucketName}")
+    private String bucketName;
+
+    private static String ALIYUN_OSS_DOMAIN;
+    private static String ALIYUN_OSS_ENDPOINT;
+    private static String ALIYUN_OSS_ACCESS_KEY_ID;
+    private static String ALIYUN_OSS_ACCESS_KEY_SECRET;
+    private static String ALIYUN_OSS_BUCKET_NAME;
+
+    @PostConstruct
+    public void init() {
+        // 将注入的配置值赋给静态变量
+        ALIYUN_OSS_DOMAIN = domain;
+        ALIYUN_OSS_ENDPOINT = endpoint;
+        ALIYUN_OSS_ACCESS_KEY_ID = accessKeyId;
+        ALIYUN_OSS_ACCESS_KEY_SECRET = accessKeySecret;
+        ALIYUN_OSS_BUCKET_NAME = bucketName;
+    }
+
+    public String uploadAliyunOss(MultipartFile file) throws IOException {
         // 获取文件名
         String originalFileName = file.getOriginalFilename();
         // 获取文件后缀
@@ -20,13 +53,11 @@ public class UploadUtil {
         // 生成新文件名
         String newFileName = UUID.randomUUID().toString().replace("-", "_") + ext;
 
-        // 阿里云OSS相关配置
-        String ALIYUN_OSS_ENDPOINT = "http://oss-cn-guangzhou.aliyuncs.com";
         // 创建OSSClient实例
         OSS ossClient = new OSSClientBuilder().build(ALIYUN_OSS_ENDPOINT, ALIYUN_OSS_ACCESS_KEY_ID, ALIYUN_OSS_ACCESS_KEY_SECRET);
         // 上传文件
         ossClient.putObject(
-                "xmgame-bucket",
+                ALIYUN_OSS_BUCKET_NAME,
                 newFileName,
                 file.getInputStream());
         ossClient.shutdown();

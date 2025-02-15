@@ -4,7 +4,7 @@ package com.xm.xmgame.constant;
 /**
  * 用户常量
  *
- * @author xmcode
+ * @author X1aoM1ngTX
  */
 public interface UserConstant {
 

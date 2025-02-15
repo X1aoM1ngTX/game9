@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * 游戏状态请求体
  *
- * @author xm
+ * @author X1aoM1ngTX
  */
 @Data
 public class GameStatusRequest implements Serializable {

@@ -1,6 +1,7 @@
 package com.xm.xmgame.model.request.game;
 
 import lombok.Data;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -9,13 +10,22 @@ import java.math.BigDecimal;
 /**
  * 游戏创建请求体
  *
- * @author xm
+ * @author X1aoM1ngTX
  */
+@Schema(description = "游戏创建请求")
 @Data
 public class GameCreateRequest implements Serializable {
 
+    @Schema(description = "游戏名称")
     private String gameName;
+
+    @Schema(description = "游戏描述")
+    private String gameDescription;
+
+    @Schema(description = "游戏价格")
     private BigDecimal gamePrice;
+
+    @Schema(description = "游戏库存")
     private Integer gameStock;
 
     @Serial

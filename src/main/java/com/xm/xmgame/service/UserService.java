@@ -11,7 +11,7 @@ import java.io.UnsupportedEncodingException;
 /**
  * 用户服务
  *
- * @author XMTX8yyds
+ * @author X1aoM1ngTX
  * @描述 针对表【user(用户表)】的数据库操作Service
  * @创建时间 2024-10-10 13:26:55
  */
@@ -40,7 +40,7 @@ public interface UserService extends IService<User> {
     /**
      * 用户信息修改
      */
-    boolean userUpdate(UserUpdateRequest updateRequest, Long userId);
+    boolean userModify(UserModifyRequest updateRequest, Long userId);
 
     /**
      * 管理员用户信息修改

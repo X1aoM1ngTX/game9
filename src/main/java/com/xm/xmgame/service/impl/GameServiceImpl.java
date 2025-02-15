@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author xm
+ * @author X1aoM1ngTX
  * @description 针对表【game(游戏表)】的数据库操作Service实现
  * @createDate 2024-11-11 14:15:44
  */

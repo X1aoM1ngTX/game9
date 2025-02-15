@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * 游戏查询请求
  *
- * @author xm
+ * @author X1aoM1ngTX
  */
 @Data
 public class GameQueryRequest implements Serializable {

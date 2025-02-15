@@ -12,7 +12,7 @@ import com.xm.xmgame.model.vo.GameDetailVO;
 import java.util.List;
 
 /**
- * @author XMTX8yyds
+ * @author X1aoM1ngTX
  * @description 针对表【game(游戏表)】的数据库操作Service
  * @createDate 2024-11-11 14:15:44
  */
