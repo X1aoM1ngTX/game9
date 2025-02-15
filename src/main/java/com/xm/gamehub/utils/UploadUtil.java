@@ -15,7 +15,7 @@ import java.util.UUID;
 public class UploadUtil {
     // 阿里云OSS相关配置
     @Value("${aliyun.oss.domain}")
-    private String domain;
+    private String domain = System.getenv("ALIBABA_CLOUD_DOMAIN");
 
     @Value("${aliyun.oss.endpoint}")
     private String endpoint = System.getenv("ALIBABA_CLOUD_ENDPOINT");

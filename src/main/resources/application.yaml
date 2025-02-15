@@ -56,11 +56,9 @@ mybatis-plus:
 
 aliyun:
   oss:
-    domain: ${ALIYUN_OSS_DOMAIN}
-    endpoint: ${ALIYUN_OSS_ENDPOINT}
-    accessKeyId: ${ALIYUN_ACCESS_KEY_ID}
-    accessKeySecret: ${ALIYUN_ACCESS_KEY_SECRET}
-    bucketName: ${ALIYUN_OSS_BUCKET_NAME}
+    domain: ${ALIBABA_CLOUD_DOMAIN}
+    endpoint: ${ALIBABA_CLOUD_ENDPOINT}
+    bucketName: ${ALIBABA_CLOUD_BUCKET_NAME}
 
 springdoc:
   swagger-ui:
