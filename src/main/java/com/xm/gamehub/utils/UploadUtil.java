@@ -15,17 +15,16 @@ import java.util.UUID;
 public class UploadUtil {
     // 阿里云OSS相关配置
     @Value("${aliyun.oss.domain}")
-    private String domain = System.getenv("ALIBABA_CLOUD_DOMAIN");
+    private String domain;
 
     @Value("${aliyun.oss.endpoint}")
-    private String endpoint = System.getenv("ALIBABA_CLOUD_ENDPOINT");
+    private String endpoint;
 
-    private final String accessKeyId = System.getenv("ALIBABA_CLOUD_ACCESS_KEY_ID");
-
-    private final String accessKeySecret = System.getenv("ALIBABA_CLOUD_ACCESS_KEY_SECRET");
+    private String accessKeyId;
+    private String accessKeySecret;
 
     @Value("${aliyun.oss.bucketName}")
-    private String bucketName = System.getenv("ALIBABA_CLOUD_BUCKET_NAME");
+    private String bucketName;
 
     private static String ALIYUN_OSS_DOMAIN;
     private static String ALIYUN_OSS_ENDPOINT;
@@ -35,6 +34,10 @@ public class UploadUtil {
 
     @PostConstruct
     public void init() {
+        // 从环境变量中获取密钥
+        accessKeyId = System.getenv("ALIBABA_CLOUD_ACCESS_KEY_ID");
+        accessKeySecret = System.getenv("ALIBABA_CLOUD_ACCESS_KEY_SECRET");
+
         // 将注入的配置值赋给静态变量
         ALIYUN_OSS_DOMAIN = domain;
         ALIYUN_OSS_ENDPOINT = endpoint;
