@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Tag(name = "用户接口", description = "用户相关的所有接口")
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:3000"},allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 @Slf4j
 public class UserController {
 

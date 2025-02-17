@@ -40,7 +40,7 @@ public class UserLibraryServiceImpl extends ServiceImpl<UserLibraryMapper, UserL
     @Override
     public boolean addUserGame(Long userId, Long gameId) {
         if (userId == null || userId <= 0 || gameId == null || gameId <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
         
         // 检查游戏是否存在
@@ -80,7 +80,7 @@ public class UserLibraryServiceImpl extends ServiceImpl<UserLibraryMapper, UserL
     @Override
     public boolean removeUserGame(Long userId, Long gameId) {
         if (userId == null || userId <= 0 || gameId == null || gameId <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
         
         // 检查是否拥有该游戏
