@@ -3,44 +3,12 @@ POST http://localhost:8080/api/user/login
 Content-Type: application/json
 
 {
-  "userName": "admin",
-  "userPassword": "12345678"
+    "userName": "admin",
+    "userPassword": "12345678"
 }
 
-### 查看游戏详情（检查初始库存）
-GET http://localhost:8080/api/game/39
+### 查询所有游戏
+GET http://localhost:8080/api/game/getAllGames
 
-### 并发购买测试 1
-POST http://localhost:8080/api/game/purchase
-Content-Type: application/json
-
-{
-    "gameId": 39
-}
-
-### 并发购买测试 2 (快速发送，模拟并发)
-POST http://localhost:8080/api/game/purchase
-Content-Type: application/json
-
-{
-    "gameId": 39
-}
-
-### 并发购买测试 3 (快速发送，模拟并发)
-POST http://localhost:8080/api/game/purchase
-Content-Type: application/json
-
-{
-    "gameId": 39
-}
-
-### 查看游戏详情（检查最终库存）
-GET http://localhost:8080/api/game/39
-
-### 从用户游戏库移除游戏
-POST http://localhost:8080/api/userLibrary/removeGameFromLibrary
-Content-Type: application/json
-
-{
-    "gameId": 39
-}
+### 查询游戏详情
+GET http://localhost:8080/api/game/38

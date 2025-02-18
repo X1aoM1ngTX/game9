@@ -51,7 +51,7 @@ public interface UserService extends IService<User> {
     /**
      * 发送邮件
      */
-    void sendEmail(String toEmail) throws MessagingException, UnsupportedEncodingException;
+    void sendEmailCode(String toEmail) throws MessagingException, UnsupportedEncodingException;
 
     /**
      * 验证验证码
@@ -70,9 +70,7 @@ public interface UserService extends IService<User> {
 
     /**
      * 更新用户头像
-     * @param userId 用户ID
-     * @param file 头像文件
-     * @return 新的头像URL
      */
     String updateUserAvatar(Long userId, MultipartFile file);
+
 }

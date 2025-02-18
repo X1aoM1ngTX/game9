@@ -121,10 +121,10 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     }
 
     /**
-     * 更新游戏状态
+     * 获取游戏详情
      *
      * @param gameId 游戏id
-     * @return boolean (是否更新成功)
+     * @return 游戏详情
      */
     @Override
     public GameDetailVO getGameDetail(Long gameId) {
@@ -152,16 +152,10 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         gameDetailVO.setGameIsRemoved(game.getGameIsRemoved());
 
         // 处理折扣信息
-        if (game.getGameOnSale() == 1 && game.getGameSaleEndTime() != null
-                && game.getGameSaleEndTime().after(new Date())) {
-            gameDetailVO.setGameOnSale(1);
-            gameDetailVO.setGameDiscount(game.getGameDiscount());
-            gameDetailVO.setGameSaleEndTime(game.getGameSaleEndTime());
-            gameDetailVO.setGameDiscountedPrices(game.getGameDiscountedPrices());
-        } else {
-            gameDetailVO.setGameOnSale(0);
-            gameDetailVO.setGameDiscountedPrices(game.getGamePrice());
-        }
+        gameDetailVO.setGameOnSale(game.getGameOnSale());
+        gameDetailVO.setGameDiscount(game.getGameDiscount());
+        gameDetailVO.setGameSaleEndTime(game.getGameSaleEndTime());
+        gameDetailVO.setGameDiscountedPrices(game.getGameDiscountedPrices());
 
         return gameDetailVO;
     }
@@ -274,6 +268,13 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         return removeById(gameId);
     }
 
+    /**
+     * 购买游戏
+     *
+     * @param userId 用户id
+     * @param gameId 游戏id
+     * @return 是否购买成功
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean purchaseGame(Long userId, Long gameId) {

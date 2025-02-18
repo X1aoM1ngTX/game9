@@ -14,12 +14,15 @@ import com.xm.gamehub.utils.UploadUtil;
 import com.xm.gamehub.utils.CaptchaUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -27,7 +30,6 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static com.xm.gamehub.constant.UserConstant.ADMIN_ROLE;
@@ -46,7 +48,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserMapper userMapper;
 
     @Resource
-    JavaMailSender javaMailSender;
+    private JavaMailSender javaMailSender;
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -63,16 +65,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private static final String VERIFY_CODE_PREFIX = "verify:code:";
 
-    /**
-     * 初始化邮箱地址。
-     */
+    // Redis 中验证码的 key 前缀
+    private static final String EMAIL_CODE_KEY = "user:email:code:";
+
+    //初始化邮箱地址
     @PostConstruct
     public void init() {
         EMAIL_FROM = emailFrom;
     }
 
+    // 检查 Redis 连接
+    private void checkRedisConnection() {
+        if (stringRedisTemplate == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis配置错误");
+        }
+
+        RedisConnectionFactory connectionFactory = stringRedisTemplate.getConnectionFactory();
+        if (connectionFactory == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis配置错误");
+        }
+
+        try {
+            connectionFactory.getConnection().close();
+        } catch (Exception e) {
+            log.error("Redis连接失败: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis服务未启动，请联系管理员");
+        }
+    }
+
     /**
-     * 用户注册。
+     * 用户注册
      *
      * @param registerRequest 用户注册请求，包含用户名、邮箱和密码。
      * @return 新注册用户的ID。
@@ -80,52 +102,71 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Long userRegister(UserRegisterRequest registerRequest) {
-        String userName = registerRequest.getUserName();
-        String userEmail = registerRequest.getUserEmail();
-        String userPhone = registerRequest.getUserPhone();
-        String userPassword = registerRequest.getUserPassword();
-
-        // 1. 校验
-        if (StringUtils.isAnyBlank(userName, userEmail, userPassword)) {
+        // 1. 校验数据
+        if (registerRequest == null || StringUtils.isAnyBlank(
+                registerRequest.getUserName(),
+                registerRequest.getUserEmail(),
+                registerRequest.getUserPassword(),
+                registerRequest.getUserCheckPassword())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-        if (userName.length() < 4) {
+        if (registerRequest.getUserName().length() < 4) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名过短");
         }
-        if (userPassword.length() < 8) {
+        if (registerRequest.getUserPassword().length() < 8) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码过短");
         }
-        if (userPhone.length() < 11) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "手机号过短");
-        }
-        if (StringUtils.isAnyBlank(userEmail)) {
+        if (StringUtils.isAnyBlank(registerRequest.getUserEmail())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不能为空");
         }
 
-        // 2. 账户不能重复
-        User existUser = userMapper.selectByUserName(userName);
+        // 2. 两次密码不一致
+        if (!registerRequest.getUserPassword().equals(registerRequest.getUserCheckPassword())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次密码不一致");
+        }
+
+        // 3. 校验邮箱格式
+        if (!registerRequest.getUserEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式不正确");
+        }
+
+        // 4. 校验验证码
+        String cacheCode = stringRedisTemplate.opsForValue().get(VERIFY_CODE_PREFIX + registerRequest.getUserEmail());
+        if (cacheCode == null || !cacheCode.equals(registerRequest.getVerifyCode())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误或已过期");
+        }
+
+        // 5. 账户不能重复
+        User existUser = userMapper.selectByUserName(registerRequest.getUserName());
         if (existUser != null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名已存在");
         }
 
-        // 3. 邮箱不能重复
-        existUser = userMapper.selectByEmail(userEmail);
+        // 6. 邮箱不能重复
+        existUser = userMapper.selectByEmail(registerRequest.getUserEmail());
         if (existUser != null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱已被注册");
+            
         }
 
-        // 4. 加密密码
-        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+        // 7. 加密密码
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + registerRequest.getUserPassword()).getBytes());
 
-        // 5. 插入数据
+        // 8. 插入数据
         User user = new User();
-        user.setUserName(userName);
-        user.setUserEmail(userEmail);
-        user.setUserPhone(userPhone);
+        user.setUserName(registerRequest.getUserName());
+        user.setUserEmail(registerRequest.getUserEmail());
         user.setUserPassword(encryptPassword);
         boolean saveResult = save(user);
         if (!saveResult) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "注册失败，数据库错误");
+        }
+        log.info("用户注册成功: {}", user.getUserId());
+
+        // 9. 删除验证码
+        if (saveResult) {
+            stringRedisTemplate.delete(VERIFY_CODE_PREFIX + registerRequest.getUserEmail());
+            log.info("验证码删除成功: {}", registerRequest.getUserEmail());
         }
 
         return user.getUserId();
@@ -296,25 +337,32 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * @throws BusinessException 如果发送失败，抛出业务异常。
      */
     @Override
-    public void sendEmail(String toEmail) {
+    public void sendEmailCode(String toEmail) {
+        // 1. 校验邮箱格式
+        if (!toEmail.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式不正确");
+        }
+
+        // 2. 检查Redis连接
+        checkRedisConnection();
+
         try {
-            // 生成6位随机验证码
+            // 3. 生成6位随机验证码
             String verifyCode = CaptchaUtils.generate_6_AZ09();
-            
-            // 将验证码保存到Redis
             String key = VERIFY_CODE_PREFIX + toEmail;
             stringRedisTemplate.opsForValue().set(key, verifyCode, 5, TimeUnit.MINUTES);
-            
-            // 创建邮件消息
+            log.info("为邮箱 {} 生成验证码: {}", toEmail, verifyCode);
+
+            // 4. 创建邮件消息
             MimeMessage message = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            // 使用 VerifyCodeEmail 中的配置
+            // 5. 使用 VerifyCodeEmail 中的配置
             helper.setFrom(emailFrom, VerifyCodeEmail.organization);
             helper.setTo(toEmail);
             helper.setSubject(VerifyCodeEmail.title);
             
-            // 使用 VerifyCodeEmail 中的模板
+            // 6. 使用 VerifyCodeEmail 中的模板
             String content = String.format(
                 VerifyCodeEmail.content,
                 VerifyCodeEmail.title,
@@ -322,10 +370,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             );
             helper.setText(content, true);
 
-            // 发送邮件
+            // 7. 发送邮件
+            log.info("开始发送验证码邮件到: {}", toEmail);
             javaMailSender.send(message);
-            
-            log.info("验证码邮件发送成功: {}, 验证码: {}", toEmail, verifyCode);
+            log.info("验证码邮件发送成功: {}", toEmail);
+
+        } catch (MailException | MessagingException e) {
+            log.error("邮件发送失败: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "邮件服务异常，请稍后重试");
         } catch (Exception e) {
             log.error("发送验证码邮件失败: {}", e.getMessage(), e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "验证码发送失败，请稍后重试");

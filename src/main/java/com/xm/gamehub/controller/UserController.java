@@ -49,13 +49,9 @@ public class UserController {
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest registerRequest) {
         if (registerRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-        String userName = registerRequest.getUserName();
-        String userPassword = registerRequest.getUserPassword();
-        String userEmail = registerRequest.getUserEmail();
-        String userPhone = registerRequest.getUserPhone();
-        if (StringUtils.isAnyBlank(userName, userEmail, userPassword, userPhone)) {
+        if (StringUtils.isAnyBlank(registerRequest.getUserName(), registerRequest.getUserEmail(), registerRequest.getUserPassword())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         long result = userService.userRegister(registerRequest);
@@ -75,9 +71,7 @@ public class UserController {
         if (loginRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-        String userName = loginRequest.getUserName();
-        String userPassword = loginRequest.getUserPassword();
-        if (StringUtils.isAnyBlank(userName, userPassword)) {
+        if (StringUtils.isAnyBlank(loginRequest.getUserName(), loginRequest.getUserPassword())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         User user = userService.userLogin(loginRequest, request);
@@ -94,7 +88,7 @@ public class UserController {
     @PostMapping("/logout")
     public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
         if (request == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         boolean result = userService.userLogout(request);
         return ResultUtils.success(result);
@@ -107,8 +101,8 @@ public class UserController {
      * @return 是否发送成功
      */
     @Operation(summary = "发送验证码邮件", description = "发送验证码到指定邮箱")
-    @PostMapping("/sendEmail")
-    public BaseResponse<String> sendEmail(@RequestBody EmailSendToUserRequest request) {
+    @PostMapping("/sendEmailCode")
+    public BaseResponse<String> sendEmailCode(@RequestBody EmailSendToUserRequest request) {
         try {
             if (request == null || StringUtils.isBlank(request.getToEmail())) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不能为空");
@@ -117,7 +111,7 @@ public class UserController {
             if (!request.getToEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式不正确");
             }
-            userService.sendEmail(request.getToEmail());
+            userService.sendEmailCode(request.getToEmail());
             return ResultUtils.success("验证码发送成功");
         } catch (BusinessException e) {
             throw e;
@@ -130,14 +124,14 @@ public class UserController {
     /**
      * 验证验证码
      *
-     * @param verifyRequest 验证
+     * @param verifyRequest 验证请求
      * @return 是否成功
      */
     @Operation(summary = "验证验证码", description = "验证验证码")
     @PostMapping("/verifyCode")
     public BaseResponse<Boolean> verifyCode(@RequestBody VerifyCodeRequest verifyRequest) {
         if (verifyRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         boolean result = userService.verifyCode(verifyRequest);
         return ResultUtils.success(result);
@@ -153,7 +147,7 @@ public class UserController {
     @PostMapping("/resetPassword")
     public BaseResponse<Boolean> resetPassword(@RequestBody ResetPasswordRequest resetRequest) {
         if (resetRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         boolean result = userService.resetPassword(resetRequest);
         return ResultUtils.success(result);

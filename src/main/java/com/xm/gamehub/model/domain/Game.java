@@ -89,7 +89,7 @@ public class Game implements Serializable {
     /**
      * 游戏折扣结束时间
      */
-        private Date gameSaleEndTime;
+    private Date gameSaleEndTime;
 
     /**
      * 游戏折扣
