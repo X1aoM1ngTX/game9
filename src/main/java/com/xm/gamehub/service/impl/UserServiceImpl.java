@@ -11,7 +11,7 @@ import com.xm.gamehub.model.request.user.*;
 import com.xm.gamehub.service.UserService;
 import com.xm.gamehub.utils.UserUtils;
 import com.xm.gamehub.utils.UploadUtil;
-
+import com.xm.gamehub.utils.CaptchaUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.mail.internet.MimeMessage;
@@ -62,8 +62,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private static final String SALT = "xm";
 
     private static final String VERIFY_CODE_PREFIX = "verify:code:";
-    private static final long VERIFY_CODE_EXPIRE = 5; // 验证码有效期（分钟）
 
+    /**
+     * 初始化邮箱地址。
+     */
     @PostConstruct
     public void init() {
         EMAIL_FROM = emailFrom;
@@ -287,16 +289,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return updateById(user);
     }
 
+    /**
+     * 发送邮箱验证码。
+     *
+     * @param toEmail 目标邮箱地址。
+     * @throws BusinessException 如果发送失败，抛出业务异常。
+     */
     @Override
     public void sendEmail(String toEmail) {
         try {
             // 生成6位随机验证码
-            String verifyCode = String.format("%06d", new Random().nextInt(1000000));
+            String verifyCode = CaptchaUtils.generate_6_AZ09();
             
             // 将验证码保存到Redis
             String key = VERIFY_CODE_PREFIX + toEmail;
-            // 不主动删除旧的验证码，让它自然过期
-            stringRedisTemplate.opsForValue().set(key, verifyCode, VERIFY_CODE_EXPIRE, TimeUnit.MINUTES);
+            stringRedisTemplate.opsForValue().set(key, verifyCode, 5, TimeUnit.MINUTES);
             
             // 创建邮件消息
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -325,6 +332,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
     }
 
+    /**
+     * 验证邮箱验证码。
+     *
+     * @param verifyRequest 验证请求，包含邮箱和验证码。
+     * @return 返回 true 表示验证成功。
+     * @throws BusinessException 如果参数不完整、验证码已过期或验证码错误，抛出业务异常。
+     */
     @Override
     public boolean verifyCode(VerifyCodeRequest verifyRequest) {
         if (verifyRequest == null || StringUtils.isAnyBlank(verifyRequest.getEmail(), verifyRequest.getCode())) {
@@ -346,7 +360,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 验证码匹配（不区分大小写）
         if (savedCode.equalsIgnoreCase(verifyRequest.getCode())) {
             // 验证成功后不删除验证码，而是刷新过期时间
-            stringRedisTemplate.expire(key, VERIFY_CODE_EXPIRE, TimeUnit.MINUTES);
+            stringRedisTemplate.expire(key, 5, TimeUnit.MINUTES);
             log.info("验证码验证成功 - 邮箱: {}", verifyRequest.getEmail());
             return true;
         }
@@ -356,8 +370,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
     }
 
+    /**
+     * 重置密码。
+     *
+     * @param resetRequest 重置请求，包含邮箱、验证码和新密码。
+     * @return 返回 true 表示重置成功。
+     * @throws BusinessException 如果参数不完整、密码格式不正确或验证码错误，抛出业务异常。
+     */
     @Override
     public boolean resetPassword(ResetPasswordRequest resetRequest) {
+        // 参数校验
         if (resetRequest == null || 
             StringUtils.isAnyBlank(
                 resetRequest.getEmail(), 
@@ -367,25 +389,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不完整");
         }
 
-        // 1. 先验证密码格式
+        // 验证密码格式
         if (resetRequest.getNewPassword().length() < 8) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码长度不能小于8位");
         }
 
-        // 2. 从Redis获取验证码
+        // 从Redis获取验证码
         String key = VERIFY_CODE_PREFIX + resetRequest.getEmail();
         String savedCode = stringRedisTemplate.opsForValue().get(key);
         
-        // 3. 记录日志
+        // 记录日志
         log.info("重置密码 - 邮箱: {}, 验证码: {}, Redis中的验证码: {}", 
             resetRequest.getEmail(), resetRequest.getVerifyCode(), savedCode);
 
-        // 4. 验证码校验
+        // 验证码校验
         if (savedCode == null) {
             log.warn("重置密码失败 - 验证码已过期，邮箱: {}", resetRequest.getEmail());
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码已过期，请重新获取");
         }
-
         if (!savedCode.equalsIgnoreCase(resetRequest.getVerifyCode())) {
             log.warn("重置密码失败 - 验证码错误，邮箱: {}, 输入: {}, 正确: {}", 
                 resetRequest.getEmail(), resetRequest.getVerifyCode(), savedCode);
@@ -393,17 +414,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         try {
-            // 5. 查找用户
+            // 查找用户
             User user = userMapper.selectByEmail(resetRequest.getEmail());
             if (user == null) {
                 throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
             }
 
-            // 6. 更新密码
+            // 更新密码
             String encryptPassword = DigestUtils.md5DigestAsHex((SALT + resetRequest.getNewPassword()).getBytes());
             user.setUserPassword(encryptPassword);
             
-            // 7. 更新密码，不删除验证码，让它自然过期
             boolean updateResult = updateById(user);
             if (updateResult) {
                 log.info("重置密码成功 - 邮箱: {}", resetRequest.getEmail());

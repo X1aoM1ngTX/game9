@@ -11,8 +11,10 @@ import com.xm.gamehub.model.request.game.GameCreateRequest;
 import com.xm.gamehub.model.request.game.GameQueryRequest;
 import com.xm.gamehub.model.request.game.GameStatusRequest;
 import com.xm.gamehub.model.request.game.GameUpdateRequest;
+import com.xm.gamehub.model.request.game.GamePurchaseRequest;
 import com.xm.gamehub.model.vo.GameDetailVO;
 import com.xm.gamehub.service.GameService;
+import com.xm.gamehub.service.UserService;
 import com.xm.gamehub.utils.UploadUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,10 +38,14 @@ import static com.xm.gamehub.constant.UserConstant.USER_LOGIN_STATE;
 @RestController
 @RequestMapping("/game")
 @CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
+@Slf4j
 public class GameController {
 
     @Resource
     private GameService gameService;
+
+    @Resource
+    private UserService userService;
 
     /**
      * 创建游戏
@@ -154,7 +161,7 @@ public class GameController {
         if (!isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH, "无权限");
         }
-        
+
         if (file.isEmpty()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件为空");
         }
@@ -184,6 +191,33 @@ public class GameController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         boolean result = gameService.deleteGame(gameId);
+        return ResultUtils.success(result);
+    }
+
+    /**
+     * 购买游戏
+     *
+     * @param purchaseRequest 购买请求
+     * @param request         HttpServletRequest
+     * @return 是否购买成功
+     */
+    @Operation(summary = "购买游戏", description = "用户购买游戏")
+    @PostMapping("/purchase")
+    public BaseResponse<Boolean> purchaseGame(@RequestBody GamePurchaseRequest purchaseRequest,
+                                              HttpServletRequest request) {
+        // 1. 参数校验
+        if (purchaseRequest == null || purchaseRequest.getGameId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
+        }
+
+        // 2. 获取当前登录用户
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
+        }
+
+        // 3. 执行购买
+        boolean result = gameService.purchaseGame(loginUser.getUserId(), purchaseRequest.getGameId());
         return ResultUtils.success(result);
     }
 

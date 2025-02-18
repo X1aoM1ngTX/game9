@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 
 /**
  * 用户接口
+ *
+ * @author X1aoM1ngTX
  */
 @Tag(name = "用户接口", description = "用户相关的所有接口")
 @RestController
@@ -39,6 +41,9 @@ public class UserController {
 
     /**
      * 用户注册
+     *
+     * @param registerRequest 注册请求
+     * @return 用户ID
      */
     @Operation(summary = "用户注册", description = "注册新的用户")
     @PostMapping("/register")
@@ -59,6 +64,10 @@ public class UserController {
 
     /**
      * 用户登录
+     *
+     * @param loginRequest 登录请求
+     * @param request      HttpServletRequest
+     * @return 用户
      */
     @Operation(summary = "用户登录", description = "用户登录")
     @PostMapping("/login")
@@ -77,6 +86,9 @@ public class UserController {
 
     /**
      * 用户注销
+     *
+     * @param request HttpServletRequest
+     * @return 是否注销成功
      */
     @Operation(summary = "用户退出登录", description = "用户退出登录")
     @PostMapping("/logout")
@@ -149,6 +161,9 @@ public class UserController {
 
     /**
      * 获取当前用户
+     *
+     * @param request HttpServletRequest
+     * @return 当前用户
      */
     @Operation(summary = "获取当前用户", description = "获取当前用户")
     @GetMapping("/current")
@@ -162,6 +177,10 @@ public class UserController {
 
     /**
      * 查询用户
+     *
+     * @param username 用户名
+     * @param request  HttpServletRequest
+     * @return 用户列表
      */
     @Operation(summary = "查询用户", description = "查询用户")
     @GetMapping("/search")
@@ -172,8 +191,8 @@ public class UserController {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         if (StringUtils.isNotBlank(username)) {
             queryWrapper.like("userName", username)
-                       .or()
-                       .like("userNickname", username);
+                    .or()
+                    .like("userNickname", username);
         }
         List<User> userList = userService.list(queryWrapper);
         List<User> safetyUserList = userList.stream()
@@ -186,7 +205,7 @@ public class UserController {
      * 修改用户信息
      *
      * @param modifyRequest 用户更新请求
-     * @param request HttpServlet请求
+     * @param request       HttpServlet请求
      * @return 是否更新成功
      */
     @Operation(summary = "修改用户自己的信息", description = "修改用户信息")
@@ -205,6 +224,9 @@ public class UserController {
 
     /**
      * 管理员用户信息修改
+     *
+     * @param updateRequest 管理员用户更新请求
+     * @return 是否更新成功
      */
     @Operation(summary = "管理员用户信息修改", description = "管理员用户信息修改")
     @PostMapping("/adminUpdate")
@@ -224,6 +246,10 @@ public class UserController {
 
     /**
      * 删除用户
+     *
+     * @param id      用户ID
+     * @param request HttpServletRequest
+     * @return 是否删除成功
      */
     @Operation(summary = "删除用户", description = "删除用户")
     @PostMapping("/delete")
@@ -240,8 +266,8 @@ public class UserController {
 
     /**
      * 更新用户头像
-     * 
-     * @param file 头像文件
+     *
+     * @param file    头像文件
      * @param request HttpServletRequest
      * @return 新的头像URL
      */
@@ -251,13 +277,13 @@ public class UserController {
         if (file == null || file.isEmpty()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件不能为空");
         }
-        
+
         // 获取当前登录用户
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
-        
+
         // 更新头像
         String avatarUrl = userService.updateUserAvatar(loginUser.getUserId(), file);
         return ResultUtils.success(avatarUrl);

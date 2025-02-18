@@ -6,7 +6,6 @@ import com.xm.gamehub.common.ErrorCode;
 import com.xm.gamehub.exception.BusinessException;
 import com.xm.gamehub.model.domain.Game;
 import com.xm.gamehub.model.domain.UserLibrary;
-import com.xm.gamehub.service.GameService;
 import com.xm.gamehub.service.UserLibraryService;
 import com.xm.gamehub.mapper.UserLibraryMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +26,6 @@ public class UserLibraryServiceImpl extends ServiceImpl<UserLibraryMapper, UserL
     @Autowired
     private UserLibraryMapper userLibraryMapper;
 
-    @Autowired
-    private GameService gameService;
-
     /**
      * 添加游戏到用户游戏库
      *
@@ -43,23 +39,8 @@ public class UserLibraryServiceImpl extends ServiceImpl<UserLibraryMapper, UserL
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
         
-        // 检查游戏是否存在
-        Game game = gameService.getById(gameId);
-        if (game == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "游戏不存在");
-        }
-        
-        // 检查游戏是否已下架
-        if (game.getGameIsRemoved()) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "游戏已下架");
-        }
-        
         // 检查是否已拥有该游戏
-        Long count = lambdaQuery()
-                .eq(UserLibrary::getUserId, userId)
-                .eq(UserLibrary::getGameId, gameId)
-                .count();
-        if (count > 0) {
+        if (hasGame(userId, gameId)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "已拥有该游戏");
         }
 
@@ -84,11 +65,7 @@ public class UserLibraryServiceImpl extends ServiceImpl<UserLibraryMapper, UserL
         }
         
         // 检查是否拥有该游戏
-        Long count = lambdaQuery()
-                .eq(UserLibrary::getUserId, userId)
-                .eq(UserLibrary::getGameId, gameId)
-                .count();
-        if (count == 0) {
+        if (!hasGame(userId, gameId)) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "未拥有该游戏");
         }
 
@@ -109,6 +86,25 @@ public class UserLibraryServiceImpl extends ServiceImpl<UserLibraryMapper, UserL
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         return userLibraryMapper.selectGamesByUserId(userId);
+    }
+
+    /**
+     * 检查用户是否拥有某游戏
+     * 
+     * @param userId 用户ID
+     * @param gameId 游戏ID
+     * @return 是否拥有
+     */
+    @Override
+    public boolean hasGame(Long userId, Long gameId) {
+        if (userId == null || userId <= 0 || gameId == null || gameId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
+        }
+        
+        return lambdaQuery()
+                .eq(UserLibrary::getUserId, userId)
+                .eq(UserLibrary::getGameId, gameId)
+                .count() > 0;
     }
 }
 

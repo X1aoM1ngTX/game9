@@ -73,4 +73,13 @@ public interface GameService extends IService<Game> {
      */
     boolean deleteGame(Long gameId);
 
+    /**
+     * 购买游戏
+     * 
+     * @param userId 用户ID
+     * @param gameId 游戏ID
+     * @return 是否购买成功
+     */
+    boolean purchaseGame(Long userId, Long gameId);
+
 }

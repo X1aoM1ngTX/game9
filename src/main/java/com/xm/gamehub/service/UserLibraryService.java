@@ -38,4 +38,13 @@ public interface UserLibraryService extends IService<UserLibrary> {
      * @return 游戏列表
      */
     List<Game> getUserGames(Long userId);
+
+    /**
+     * 检查用户是否拥有某游戏
+     * 
+     * @param userId 用户ID
+     * @param gameId 游戏ID
+     * @return 是否拥有
+     */
+    boolean hasGame(Long userId, Long gameId);
 }
