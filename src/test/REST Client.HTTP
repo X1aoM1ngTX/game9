@@ -12,3 +12,11 @@ GET http://localhost:8080/api/game/getAllGames
 
 ### 查询游戏详情
 GET http://localhost:8080/api/game/38
+
+### 删除用户
+POST http://localhost:8080/api/user/delete
+Content-Type: application/json
+
+{
+    "userId": 11
+}

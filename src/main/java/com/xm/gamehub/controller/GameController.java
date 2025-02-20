@@ -51,16 +51,17 @@ public class GameController {
      * 创建游戏
      *
      * @param gameCreateRequest 游戏创建请求
+     * @param request           HttpServletRequest
      * @return 游戏ID
      */
     @Operation(summary = "创建游戏", description = "创建新的游戏")
     @PostMapping("/createGame")
     public BaseResponse<Long> createGame(@RequestBody GameCreateRequest gameCreateRequest, HttpServletRequest request) {
         if (!isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH);
+            throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
         if (gameCreateRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
         long result = gameService.createGame(gameCreateRequest);
         return ResultUtils.success(result);
@@ -88,7 +89,7 @@ public class GameController {
     @PostMapping("/list/page")
     public BaseResponse<Page<Game>> listGames(@RequestBody GameQueryRequest gameQueryRequest) {
         if (gameQueryRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
         Page<Game> gamePage = gameService.pageGames(gameQueryRequest);
         return ResultUtils.success(gamePage);
@@ -120,10 +121,10 @@ public class GameController {
     @PutMapping("/updateGame")
     public BaseResponse<Boolean> updateGame(@RequestBody GameUpdateRequest gameUpdateRequest, HttpServletRequest request) {
         if (!isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH);
+            throw new BusinessException(ErrorCode.NO_AUTH, "无权限");
         }
         if (gameUpdateRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
         boolean result = gameService.updateGame(gameUpdateRequest);
         return ResultUtils.success(result);
@@ -141,7 +142,7 @@ public class GameController {
     public BaseResponse<Boolean> setGameStatus(@RequestBody GameStatusRequest gameStatusRequest,
                                                HttpServletRequest request) {
         if (!isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH);
+            throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
         boolean result = gameService.setGameRemovedStatus(gameStatusRequest);
         return ResultUtils.success(result);
@@ -185,10 +186,10 @@ public class GameController {
     public BaseResponse<Boolean> deleteGame(@RequestBody Long gameId, HttpServletRequest request) {
         // 仅管理员可删除
         if (!isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH);
+            throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
         if (gameId == null || gameId <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
         boolean result = gameService.deleteGame(gameId);
         return ResultUtils.success(result);

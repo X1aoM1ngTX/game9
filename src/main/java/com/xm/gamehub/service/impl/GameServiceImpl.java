@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -150,8 +149,6 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         gameDetailVO.setGamePub(game.getGamePub());
         gameDetailVO.setGameCover(game.getGameCover());
         gameDetailVO.setGameIsRemoved(game.getGameIsRemoved());
-
-        // 处理折扣信息
         gameDetailVO.setGameOnSale(game.getGameOnSale());
         gameDetailVO.setGameDiscount(game.getGameDiscount());
         gameDetailVO.setGameSaleEndTime(game.getGameSaleEndTime());
@@ -263,7 +260,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     @Override
     public boolean deleteGame(Long gameId) {
         if (gameId == null || gameId <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
         return removeById(gameId);
     }

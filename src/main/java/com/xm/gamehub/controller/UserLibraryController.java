@@ -41,7 +41,7 @@ public class UserLibraryController {
     @PostMapping("/addGameToLibrary")
     public BaseResponse<Boolean> addUserGame(@RequestBody UserGameRequest addGameRequest, HttpServletRequest request) {
         if (addGameRequest == null || addGameRequest.getGameId() == null || addGameRequest.getGameId() <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
         User loginUser = userService.getLoginUser(request);
         boolean result = userLibraryService.addUserGame(loginUser.getUserId(), addGameRequest.getGameId());

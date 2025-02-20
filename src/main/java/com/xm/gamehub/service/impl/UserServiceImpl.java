@@ -65,9 +65,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private static final String VERIFY_CODE_PREFIX = "verify:code:";
 
-    // Redis 中验证码的 key 前缀
-    private static final String EMAIL_CODE_KEY = "user:email:code:";
-
     //初始化邮箱地址
     @PostConstruct
     public void init() {
@@ -140,13 +137,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User existUser = userMapper.selectByUserName(registerRequest.getUserName());
         if (existUser != null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名已存在");
-        }
-
-        // 6. 邮箱不能重复
-        existUser = userMapper.selectByEmail(registerRequest.getUserEmail());
-        if (existUser != null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱已被注册");
-            
         }
 
         // 7. 加密密码
@@ -226,13 +216,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) userObj;
         if (currentUser == null || currentUser.getUserId() == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN);
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
         // 从数据库查询（追求性能的话可以注释，直接走缓存）
         long userId = currentUser.getUserId();
         currentUser = getById(userId);
         if (currentUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN);
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
         return currentUser;
     }
@@ -247,7 +237,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public boolean userLogout(HttpServletRequest logoutRequest) {
         if (logoutRequest.getSession().getAttribute(USER_LOGIN_STATE) == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN);
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
         // 移除登录态
         logoutRequest.getSession().removeAttribute(USER_LOGIN_STATE);

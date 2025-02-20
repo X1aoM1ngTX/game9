@@ -83,7 +83,7 @@ public class UserLibraryServiceImpl extends ServiceImpl<UserLibraryMapper, UserL
     @Override
     public List<Game> getUserGames(Long userId) {
         if (userId == null || userId <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
         return userLibraryMapper.selectGamesByUserId(userId);
     }

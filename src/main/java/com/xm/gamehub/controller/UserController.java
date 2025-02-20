@@ -164,7 +164,7 @@ public class UserController {
     public BaseResponse<User> getCurrentUser(HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN);
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
         return ResultUtils.success(UserUtils.getSafetyUser(loginUser));
     }
@@ -241,20 +241,20 @@ public class UserController {
     /**
      * 删除用户
      *
-     * @param id      用户ID
-     * @param request HttpServletRequest
+     * @param deleteRequest 用户删除请求
+     * @param request       HttpServletRequest
      * @return 是否删除成功
      */
     @Operation(summary = "删除用户", description = "删除用户")
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteUser(@RequestBody long id, HttpServletRequest request) {
+    public BaseResponse<Boolean> deleteUser(@RequestBody UserDeleteRequest deleteRequest, HttpServletRequest request) {
         if (!userService.isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH);
+            throw new BusinessException(ErrorCode.NO_AUTH, "无权限");
         }
-        if (id <= 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        if (deleteRequest == null || deleteRequest.getUserId() == null || deleteRequest.getUserId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-        boolean result = userService.removeById(id);
+        boolean result = userService.removeById(deleteRequest.getUserId());
         return ResultUtils.success(result);
     }
 
