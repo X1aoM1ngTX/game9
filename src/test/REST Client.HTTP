@@ -20,3 +20,11 @@ Content-Type: application/json
 {
     "userId": 11
 }
+
+### 发送验证码邮件
+POST http://localhost:8080/api/user/sendEmailCode
+Content-Type: application/json
+
+{
+    "toEmail": "1062829664@qq.com"
+}

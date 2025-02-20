@@ -9,6 +9,7 @@ import com.xm.gamehub.model.domain.User;
 import com.xm.gamehub.model.request.user.*;
 import com.xm.gamehub.service.UserService;
 import com.xm.gamehub.utils.UserUtils;
+import com.xm.gamehub.utils.UploadUtil;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -278,8 +280,23 @@ public class UserController {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
 
-        // 更新头像
-        String avatarUrl = userService.updateUserAvatar(loginUser.getUserId(), file);
-        return ResultUtils.success(avatarUrl);
+        try {
+            // 使用单例模式获取 UploadUtil 实例
+            String avatarUrl = UploadUtil.getInstance().uploadAliyunOss(file);
+            
+            // 更新用户头像
+            User user = new User();
+            user.setUserId(loginUser.getUserId());
+            user.setUserAvatar(avatarUrl);
+            boolean updated = userService.updateById(user);
+            if (!updated) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新用户头像失败");
+            }
+            
+            return ResultUtils.success(avatarUrl);
+        } catch (IOException e) {
+            log.error("上传头像失败", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "上传头像失败");
+        }
     }
 }
