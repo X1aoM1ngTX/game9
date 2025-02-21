@@ -12,6 +12,7 @@ import com.xm.gamehub.model.request.game.GameQueryRequest;
 import com.xm.gamehub.model.request.game.GameStatusRequest;
 import com.xm.gamehub.model.request.game.GameUpdateRequest;
 import com.xm.gamehub.model.request.game.GamePurchaseRequest;
+import com.xm.gamehub.model.request.game.GameDeleteRequest;
 import com.xm.gamehub.model.vo.GameDetailVO;
 import com.xm.gamehub.service.GameService;
 import com.xm.gamehub.service.UserService;
@@ -121,7 +122,7 @@ public class GameController {
     @PutMapping("/updateGame")
     public BaseResponse<Boolean> updateGame(@RequestBody GameUpdateRequest gameUpdateRequest, HttpServletRequest request) {
         if (!isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH, "无权限");
+            throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
         if (gameUpdateRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
@@ -160,7 +161,7 @@ public class GameController {
     public BaseResponse<String> upload(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
         // 检查管理员权限
         if (!isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH, "无权限");
+            throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
 
         if (file.isEmpty()) {
@@ -177,22 +178,22 @@ public class GameController {
 
     /**
      * 删除游戏(物理删除)
-     *
-     * @param gameId  游戏id
-     * @param request HttpServlet请求
+     * 
+     * @param deleteRequest 删除请求
+     * @param request       HttpServlet请求
      * @return 是否删除成功
      */
     @Operation(summary = "删除游戏（物理删除）", description = "删除游戏")
     @PostMapping("/deleteGame")
-    public BaseResponse<Boolean> deleteGame(@RequestBody Long gameId, HttpServletRequest request) {
+    public BaseResponse<Boolean> deleteGame(@RequestBody GameDeleteRequest deleteRequest, HttpServletRequest request) {
         // 仅管理员可删除
         if (!isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
-        if (gameId == null || gameId <= 0) {
+        if (deleteRequest == null || deleteRequest.getGameId() == null || deleteRequest.getGameId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
-        boolean result = gameService.deleteGame(gameId);
+        boolean result = gameService.deleteGame(deleteRequest.getGameId());
         return ResultUtils.success(result);
     }
 

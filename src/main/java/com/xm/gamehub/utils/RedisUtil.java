@@ -6,6 +6,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -118,12 +119,26 @@ public class RedisUtil {
 
     /**
      * 检查Redis连接
+     * 
+     * @throws BusinessException 如果Redis连接失败
      */
     public void checkConnection() {
+        if (stringRedisTemplate == null) {
+            log.error("Redis配置错误: StringRedisTemplate未注入");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis配置错误");
+        }
+
+        RedisConnectionFactory connectionFactory = stringRedisTemplate.getConnectionFactory();
+        if (connectionFactory == null) {
+            log.error("Redis配置错误: RedisConnectionFactory未配置");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis配置错误");
+        }
+
         try {
-            stringRedisTemplate.getConnectionFactory().getConnection().ping();
+            connectionFactory.getConnection().ping();
+            log.debug("Redis连接检查成功");
         } catch (Exception e) {
-            log.error("Redis连接失败: {}", e.getMessage());
+            log.error("Redis连接失败，请确保Redis服务已启动: {}", e.getMessage());
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis服务未启动");
         }
     }

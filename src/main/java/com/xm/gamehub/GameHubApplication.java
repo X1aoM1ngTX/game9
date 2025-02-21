@@ -5,11 +5,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.annotation.Resource;
+import com.xm.gamehub.utils.RedisUtil;
 
 @SpringBootApplication
 @MapperScan("com.xm.gamehub.mapper")
@@ -27,29 +27,9 @@ public class GameHubApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        checkRedisConnection();
+        log.info("启动中...");
+        log.info("检查Redis连接");
+        RedisUtil.getInstance().checkConnection();
     }
 
-    private void checkRedisConnection() {
-        if (stringRedisTemplate == null) {
-            log.error("Redis配置错误: StringRedisTemplate未注入");
-            System.exit(1);
-            return;
-        }
-
-        RedisConnectionFactory connectionFactory = stringRedisTemplate.getConnectionFactory();
-        if (connectionFactory == null) {
-            log.error("Redis配置错误: RedisConnectionFactory未配置");
-            System.exit(1);
-            return;
-        }
-
-        try {
-            connectionFactory.getConnection().close();
-            log.info("Redis连接成功");
-        } catch (Exception e) {
-            log.error("Redis连接失败，请确保Redis服务已启动: {}", e.getMessage());
-            System.exit(1);
-        }
-    }
 }

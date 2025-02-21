@@ -113,11 +113,6 @@ public class EmailUtil {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis配置错误");
         }
 
-        try {
-            stringRedisTemplate.getConnectionFactory().getConnection().close();
-        } catch (Exception e) {
-            log.error("Redis连接失败: {}", e.getMessage(), e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis服务未启动");
-        }
+        RedisUtil.getInstance().checkConnection();
     }
 } 

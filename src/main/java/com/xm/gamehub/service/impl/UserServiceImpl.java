@@ -7,6 +7,7 @@ import com.xm.gamehub.exception.BusinessException;
 import com.xm.gamehub.mapper.UserMapper;
 import com.xm.gamehub.model.domain.User;
 import com.xm.gamehub.model.request.user.*;
+import com.xm.gamehub.model.request.admin.BatchImportUsersRequest;
 import com.xm.gamehub.service.UserService;
 import com.xm.gamehub.utils.UserUtils;
 import com.xm.gamehub.utils.UploadUtil;
@@ -18,8 +19,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -27,6 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.xm.gamehub.constant.UserConstant.ADMIN_ROLE;
 import static com.xm.gamehub.constant.UserConstant.USER_LOGIN_STATE;
@@ -110,6 +111,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!registerRequest.getUserEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式不正确");
         }
+
+        // 检查 Redis 连接
+        checkRedisConnection();
 
         // 4. 校验验证码
         String cacheCode = RedisUtil.getInstance().get(VERIFY_CODE_PREFIX + registerRequest.getUserEmail());
@@ -312,6 +316,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public void sendEmailCode(String toEmail) {
+        // 检查 Redis 连接
+        checkRedisConnection();
+        
         // 使用单例模式获取 EmailUtil 实例并发送验证码
         EmailUtil.getInstance().sendVerificationCode(toEmail);
     }
@@ -328,6 +335,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (verifyRequest == null || StringUtils.isAnyBlank(verifyRequest.getEmail(), verifyRequest.getCode())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不完整");
         }
+
+        // 检查 Redis 连接
+        checkRedisConnection();
 
         // 从Redis获取验证码
         String key = VERIFY_CODE_PREFIX + verifyRequest.getEmail();
@@ -372,6 +382,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             )) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不完整");
         }
+
+        // 检查 Redis 连接
+        checkRedisConnection();
 
         // 验证密码格式
         if (resetRequest.getNewPassword().length() < 8) {
@@ -485,6 +498,56 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.error("上传头像失败", e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "上传头像失败");
         }
+    }
+
+    /**
+     * 批量导入用户
+     *
+     * @param users 用户列表
+     * @return 导入的用户数量
+     * @throws BusinessException 如果用户列表为空或用户信息不完整，抛出业务异常。
+     */
+    @Override
+    public int batchImportUsers(List<BatchImportUsersRequest.UserImportInfo> users) {
+        if (users == null || users.isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户列表为空");
+        }
+
+        List<User> userList = new ArrayList<>();
+        for (BatchImportUsersRequest.UserImportInfo userInfo : users) {
+            // 参数校验
+            if (StringUtils.isAnyBlank(
+                    userInfo.getUserName(),
+                    userInfo.getUserEmail(),
+                    userInfo.getUserPassword())) {
+                log.warn("用户信息不完整: {}", userInfo);
+                continue;
+            }
+            
+            // 检查用户名是否已存在
+            if (userMapper.selectByUserName(userInfo.getUserName()) != null) {
+                log.warn("用户名已存在: {}", userInfo.getUserName());
+                continue;
+            }
+            
+            // 创建用户对象
+            User user = new User();
+            user.setUserName(userInfo.getUserName());
+            user.setUserEmail(userInfo.getUserEmail());
+            user.setUserPassword(DigestUtils.md5DigestAsHex((SALT + userInfo.getUserPassword()).getBytes()));
+            user.setUserPhone(userInfo.getUserPhone());
+            user.setUserIsAdmin(userInfo.getUserIsAdmin());
+            
+            userList.add(user);
+        }
+        
+        if (userList.isEmpty()) {
+            return 0;
+        }
+        
+        // 批量插入
+        saveBatch(userList);
+        return userList.size();
     }
 }
 

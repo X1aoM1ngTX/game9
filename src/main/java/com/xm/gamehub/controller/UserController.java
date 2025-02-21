@@ -6,11 +6,14 @@ import com.xm.gamehub.common.ErrorCode;
 import com.xm.gamehub.common.ResultUtils;
 import com.xm.gamehub.exception.BusinessException;
 import com.xm.gamehub.model.domain.User;
+import com.xm.gamehub.model.request.admin.*;
 import com.xm.gamehub.model.request.user.*;
+import com.xm.gamehub.service.GameService;
 import com.xm.gamehub.service.UserService;
-import com.xm.gamehub.utils.UserUtils;
 import com.xm.gamehub.utils.UploadUtil;
-
+import com.xm.gamehub.utils.UserUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -40,6 +41,9 @@ public class UserController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private GameService gameService;
 
     /**
      * 用户注册
@@ -182,7 +186,7 @@ public class UserController {
     @GetMapping("/search")
     public BaseResponse<List<User>> searchUsers(String username, HttpServletRequest request) {
         if (!userService.isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH, "无权限");
+            throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         if (StringUtils.isNotBlank(username)) {
@@ -234,7 +238,7 @@ public class UserController {
         @SuppressWarnings("null")
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         if (!userService.isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH, "无权限");
+            throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
         boolean result = userService.adminUserUpdate(updateRequest, updateRequest.getUserId());
         return ResultUtils.success(result);
@@ -251,7 +255,7 @@ public class UserController {
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteUser(@RequestBody UserDeleteRequest deleteRequest, HttpServletRequest request) {
         if (!userService.isAdmin(request)) {
-            throw new BusinessException(ErrorCode.NO_AUTH, "无权限");
+            throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
         if (deleteRequest == null || deleteRequest.getUserId() == null || deleteRequest.getUserId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
@@ -283,7 +287,7 @@ public class UserController {
         try {
             // 使用单例模式获取 UploadUtil 实例
             String avatarUrl = UploadUtil.getInstance().uploadAliyunOss(file);
-            
+
             // 更新用户头像
             User user = new User();
             user.setUserId(loginUser.getUserId());
@@ -292,11 +296,51 @@ public class UserController {
             if (!updated) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新用户头像失败");
             }
-            
+
             return ResultUtils.success(avatarUrl);
         } catch (IOException e) {
             log.error("上传头像失败", e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "上传头像失败");
         }
+    }
+
+    /**
+     * 批量导入用户
+     *
+     * @param importRequest 导入请求
+     * @param httpRequest   请求
+     * @return 导入结果
+     */
+    @Operation(summary = "批量导入用户", description = "批量导入用户")
+    @PostMapping("/batchImportUsers")
+    public BaseResponse<Integer> batchImportUsers(@RequestBody BatchImportUsersRequest importRequest,
+                                                  HttpServletRequest httpRequest) {
+        // 仅管理员可操作
+        if (!userService.isAdmin(httpRequest)) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
+        }
+
+        int count = userService.batchImportUsers(importRequest.getUsers());
+        return ResultUtils.success(count);
+    }
+
+    /**
+     * 批量导入游戏
+     *
+     * @param importRequest 导入请求
+     * @param httpRequest   请求
+     * @return 导入结果
+     */
+    @Operation(summary = "批量导入游戏", description = "批量导入游戏")
+    @PostMapping("/batchImportGames")
+    public BaseResponse<Integer> batchImportGames(@RequestBody BatchImportGamesRequest importRequest,
+                                                  HttpServletRequest httpRequest) {
+        // 仅管理员可操作
+        if (!userService.isAdmin(httpRequest)) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
+        }
+
+        int count = gameService.batchImportGames(importRequest.getGames());
+        return ResultUtils.success(count);
     }
 }

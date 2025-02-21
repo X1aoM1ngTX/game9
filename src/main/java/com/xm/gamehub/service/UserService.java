@@ -3,11 +3,13 @@ package com.xm.gamehub.service;
 import com.xm.gamehub.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xm.gamehub.model.request.user.*;
+import com.xm.gamehub.model.request.admin.BatchImportUsersRequest;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 /**
  * 用户服务
@@ -72,5 +74,10 @@ public interface UserService extends IService<User> {
      * 更新用户头像
      */
     String updateUserAvatar(Long userId, MultipartFile file);
+
+    /**
+     * 批量导入用户
+     */
+    int batchImportUsers(List<BatchImportUsersRequest.UserImportInfo> users);
 
 }

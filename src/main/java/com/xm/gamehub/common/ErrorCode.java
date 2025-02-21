@@ -13,7 +13,7 @@ public enum ErrorCode {
     PARAMS_ERROR(40000, "请求参数错误", "请求参数错误"),
     NULL_ERROR(40001, "请求参数为空", "请求参数为空"),
     NOT_LOGIN(40100, "未登录", "未登录"),
-    NO_AUTH(40101, "无权限", "无权限"),
+    NO_AUTH(40101, "用户无权限", "用户无权限"),
     SYSTEM_ERROR(50000, "系统内部异常", "系统内部异常"),
     NOT_FOUND_ERROR(50001, "未发现", "未发现"),
     GAME_EXIST(50002, "游戏已存在", "游戏已存在");

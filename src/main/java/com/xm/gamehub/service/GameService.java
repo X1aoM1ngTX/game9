@@ -8,6 +8,7 @@ import com.xm.gamehub.model.request.game.GameQueryRequest;
 import com.xm.gamehub.model.request.game.GameStatusRequest;
 import com.xm.gamehub.model.request.game.GameUpdateRequest;
 import com.xm.gamehub.model.vo.GameDetailVO;
+import com.xm.gamehub.model.request.admin.BatchImportGamesRequest;
 
 import java.util.List;
 
@@ -81,5 +82,10 @@ public interface GameService extends IService<Game> {
      * @return 是否购买成功
      */
     boolean purchaseGame(Long userId, Long gameId);
+
+    /**
+     * 批量导入游戏
+     */
+    int batchImportGames(List<BatchImportGamesRequest.GameImportInfo> games);
 
 }

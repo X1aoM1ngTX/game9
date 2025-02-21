@@ -19,10 +19,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import com.xm.gamehub.model.request.admin.BatchImportGamesRequest;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * @author X1aoM1ngTX
@@ -321,6 +323,49 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
                 .update();
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "购买失败，请重试");
         }
+    }
+
+    @Override
+    public int batchImportGames(List<BatchImportGamesRequest.GameImportInfo> games) {
+        if (games == null || games.isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "游戏列表为空");
+        }
+
+        List<Game> gameList = new ArrayList<>();
+        for (BatchImportGamesRequest.GameImportInfo gameInfo : games) {
+            // 参数校验
+            if (StringUtils.isAnyBlank(
+                    gameInfo.getGameName(),
+                    gameInfo.getGameDescription()) ||
+                gameInfo.getGamePrice() == null ||
+                gameInfo.getGameStock() == null) {
+                log.warn("游戏信息不完整: {}", gameInfo);
+                continue;
+            }
+            
+            // 检查游戏名是否已存在
+            if (lambdaQuery().eq(Game::getGameName, gameInfo.getGameName()).exists()) {
+                log.warn("游戏名已存在: {}", gameInfo.getGameName());
+                continue;
+            }
+            
+            // 创建游戏对象
+            Game game = new Game();
+            game.setGameName(gameInfo.getGameName());
+            game.setGameDescription(gameInfo.getGameDescription());
+            game.setGamePrice(gameInfo.getGamePrice());
+            game.setGameStock(gameInfo.getGameStock());
+            
+            gameList.add(game);
+        }
+        
+        if (gameList.isEmpty()) {
+            return 0;
+        }
+        
+        // 批量插入
+        saveBatch(gameList);
+        return gameList.size();
     }
 
 }
