@@ -3,10 +3,14 @@ package com.xm.gamehub.service;
 import com.xm.gamehub.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xm.gamehub.model.request.user.*;
+import com.xm.gamehub.model.request.admin.AdminUserUpdateRequest;
 import com.xm.gamehub.model.request.admin.BatchImportUsersRequest;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDate;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -18,6 +22,8 @@ import java.util.List;
  * @描述 针对表【user(用户表)】的数据库操作Service
  * @创建时间 2024-10-10 13:26:55
  */
+@Service
+@Transactional
 public interface UserService extends IService<User> {
 
     /**
@@ -80,4 +86,23 @@ public interface UserService extends IService<User> {
      */
     int batchImportUsers(List<BatchImportUsersRequest.UserImportInfo> users);
 
+    /**
+     * 用户签到
+     */
+    void userSignIn(Long userId);
+
+    /**
+     * 查询某天是否签到
+     */
+    boolean checkSignIn(Long userId, LocalDate date);
+
+    /**
+     * 获取用户签到历史（返回已签到的日期列表）
+     */
+    List<LocalDate> getSignInHistory(Long userId, int year);
+
+    /**
+     * 获取用户一年内的签到次数
+     */
+    long countSignInDays(Long userId, int year);
 }

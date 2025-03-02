@@ -17,7 +17,7 @@ import java.util.UUID;
 public class UploadUtil {
     private volatile static UploadUtil instance;
     private volatile static OSS ossClient;
-    
+
     // 阿里云OSS相关配置
     private static String domain;
     private static String endpoint;

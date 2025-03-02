@@ -4,13 +4,23 @@ import com.xm.gamehub.common.ErrorCode;
 import lombok.Getter;
 
 /**
- * 自定义业务异常
+ * 自定义业务异常类
  *
  * @author X1aoM1ngTX
  */
 @Getter
 public class BusinessException extends RuntimeException {
+
+    private static final long serialVersionUID = -7034897190745766939L;
+
+    /**
+     * 错误码
+     */
     private final int code;
+
+    /**
+     * 错误描述
+     */
     private final String description;
 
     public BusinessException(String message, int code, String description) {
@@ -31,4 +41,11 @@ public class BusinessException extends RuntimeException {
         this.description = description;
     }
 
+    /**
+     * 获取完整的错误信息
+     */
+    public String getDetailMessage() {
+        return String.format("错误码: %d, 错误信息: %s, 描述: %s",
+                code, getMessage(), description);
+    }
 }

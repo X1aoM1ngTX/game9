@@ -7,6 +7,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RedisUtil {
     private volatile static RedisUtil instance;
-    
+
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
@@ -118,9 +119,67 @@ public class RedisUtil {
     }
 
     /**
+     * 设置位图中的值
+     *
+     * @param key    键
+     * @param offset 偏移量
+     * @param value  值
+     */
+    public void setBit(String key, int offset, boolean value) {
+        try {
+            stringRedisTemplate.opsForValue().setBit(key, offset, value);
+            log.info("Redis设置位图中的值成功: key={}, offset={}, value={}", key, offset, value);
+        } catch (Exception e) {
+            log.error("Redis设置位图中的值失败: key={}, offset={}, value={}, error={}", key, offset, value, e.getMessage());
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis操作失败");
+        }
+    }
+
+    /**
+     * 获取位图中的值
+     *
+     * @param key    键
+     * @param offset 偏移量
+     * @return Boolean 是否签到
+     */
+    public Boolean getBit(String key, int offset) {
+        try {
+            Boolean result = stringRedisTemplate.opsForValue().getBit(key, offset);
+            if (result == null) {
+                log.warn("Redis获取位图中的值为null: key={}, offset={}", key, offset);
+                return false;
+            }
+            return result;
+        } catch (Exception e) {
+            log.error("Redis获取位图中的值失败: key={}, offset={}, error={}", key, offset, e.getMessage());
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis操作失败");
+        }
+    }
+
+    /**
+     * 获取位图中1的个数
+     *
+     * @param key 键
+     * @return 位图中1的个数
+     */
+    public long bitCount(String key) {
+        try {
+            Long result = stringRedisTemplate
+                    .execute((RedisCallback<Long>) connection -> connection.stringCommands().bitCount(key.getBytes()));
+            return result != null ? result : 0L;
+        } catch (Exception e) {
+            log.error("Redis bitCount 操作失败，key={}, error={}", key, e.getMessage());
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis操作失败");
+        }
+    }
+
+    /**
      * 检查Redis连接
      * 
-     * @throws BusinessException 如果Redis连接失败
+     * @throws BusinessException    如果Redis连接失败，抛出异常
+     * @throws NullPointerException 如果StringRedisTemplate未注入，抛出异常
+     * @throws NullPointerException 如果RedisConnectionFactory未配置，抛出异常
+     * @throws Exception            如果Redis连接失败，抛出异常
      */
     public void checkConnection() {
         if (stringRedisTemplate == null) {
@@ -142,4 +201,5 @@ public class RedisUtil {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis服务未启动");
         }
     }
-} 
+
+}

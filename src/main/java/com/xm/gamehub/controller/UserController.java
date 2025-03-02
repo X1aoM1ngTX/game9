@@ -24,6 +24,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
 @Tag(name = "用户接口", description = "用户相关的所有接口")
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
+@CrossOrigin(origins = { "http://localhost:3000" }, allowCredentials = "true")
 @Slf4j
 public class UserController {
 
@@ -57,7 +58,8 @@ public class UserController {
         if (registerRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-        if (StringUtils.isAnyBlank(registerRequest.getUserName(), registerRequest.getUserEmail(), registerRequest.getUserPassword())) {
+        if (StringUtils.isAnyBlank(registerRequest.getUserName(), registerRequest.getUserEmail(),
+                registerRequest.getUserPassword())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         long result = userService.userRegister(registerRequest);
@@ -236,7 +238,8 @@ public class UserController {
         }
         // 检查管理员权限
         @SuppressWarnings("null")
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                .getRequest();
         if (!userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
@@ -314,7 +317,7 @@ public class UserController {
     @Operation(summary = "批量导入用户", description = "批量导入用户")
     @PostMapping("/batchImportUsers")
     public BaseResponse<Integer> batchImportUsers(@RequestBody BatchImportUsersRequest importRequest,
-                                                  HttpServletRequest httpRequest) {
+            HttpServletRequest httpRequest) {
         // 仅管理员可操作
         if (!userService.isAdmin(httpRequest)) {
             throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
@@ -334,13 +337,91 @@ public class UserController {
     @Operation(summary = "批量导入游戏", description = "批量导入游戏")
     @PostMapping("/batchImportGames")
     public BaseResponse<Integer> batchImportGames(@RequestBody BatchImportGamesRequest importRequest,
-                                                  HttpServletRequest httpRequest) {
+            HttpServletRequest httpRequest) {
         // 仅管理员可操作
         if (!userService.isAdmin(httpRequest)) {
             throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
 
         int count = gameService.batchImportGames(importRequest.getGames());
+        return ResultUtils.success(count);
+    }
+
+    /**
+     * 用户签到
+     * 
+     * @param request HttpServletRequest
+     * @return 是否签到成功
+     */
+    @Operation(summary = "用户签到", description = "用户每日签到")
+    @PostMapping("/signIn")
+    public BaseResponse<Void> signIn(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
+        }
+
+        userService.userSignIn(loginUser.getUserId());
+        return ResultUtils.success(null);
+    }
+
+    /**
+     * 检查今日是否已签到
+     * 
+     * @param request HttpServletRequest
+     * @return 是否签到成功
+     */
+    @Operation(summary = "检查今日是否已签到", description = "检查用户今日是否已完成签到")
+    @GetMapping("/sign/check")
+    public BaseResponse<Boolean> checkTodaySignIn(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
+        }
+
+        boolean signed = userService.checkSignIn(loginUser.getUserId(), LocalDate.now());
+        return ResultUtils.success(signed);
+    }
+
+    /**
+     * 获取签到历史
+     * 
+     * @param year    年份
+     * @param request HttpServletRequest
+     * @return 签到历史
+     */
+    @Operation(summary = "获取签到历史", description = "获取用户指定年份的签到记录")
+    @GetMapping("/sign/history")
+    public BaseResponse<List<LocalDate>> getSignInHistory(
+            @RequestParam(defaultValue = "#{T(java.time.Year).now().getValue()}") Integer year,
+            HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
+        }
+
+        List<LocalDate> history = userService.getSignInHistory(loginUser.getUserId(), year);
+        return ResultUtils.success(history);
+    }
+
+    /**
+     * 获取签到统计
+     * 
+     * @param year    年份
+     * @param request HttpServletRequest
+     * @return 签到统计
+     */
+    @Operation(summary = "获取签到统计", description = "获取用户指定年份的签到总天数")
+    @GetMapping("/sign/count")
+    public BaseResponse<Long> getSignInCount(
+            @RequestParam(defaultValue = "#{T(java.time.Year).now().getValue()}") Integer year,
+            HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
+        }
+
+        long count = userService.countSignInDays(loginUser.getUserId(), year);
         return ResultUtils.success(count);
     }
 }

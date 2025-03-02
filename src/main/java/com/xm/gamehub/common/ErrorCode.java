@@ -16,7 +16,8 @@ public enum ErrorCode {
     NO_AUTH(40101, "用户无权限", "用户无权限"),
     SYSTEM_ERROR(50000, "系统内部异常", "系统内部异常"),
     NOT_FOUND_ERROR(50001, "未发现", "未发现"),
-    GAME_EXIST(50002, "游戏已存在", "游戏已存在");
+    GAME_EXIST(50002, "游戏已存在", "游戏已存在"),
+    OPERATION_ERROR(50003, "操作失败", "操作失败");
 
     private final int error_code;
     private final String message;

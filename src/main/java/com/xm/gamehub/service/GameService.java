@@ -1,14 +1,16 @@
 package com.xm.gamehub.service;
 
-import com.xm.gamehub.model.domain.Game;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.xm.gamehub.model.domain.Game;
+import com.xm.gamehub.model.request.admin.BatchImportGamesRequest;
 import com.xm.gamehub.model.request.game.GameCreateRequest;
 import com.xm.gamehub.model.request.game.GameQueryRequest;
 import com.xm.gamehub.model.request.game.GameStatusRequest;
 import com.xm.gamehub.model.request.game.GameUpdateRequest;
 import com.xm.gamehub.model.vo.GameDetailVO;
-import com.xm.gamehub.model.request.admin.BatchImportGamesRequest;
 
 import java.util.List;
 
@@ -17,6 +19,8 @@ import java.util.List;
  * @description 针对表【game(游戏表)】的数据库操作Service
  * @createDate 2024-11-11 14:15:44
  */
+@Service
+@Transactional
 public interface GameService extends IService<Game> {
 
     /**

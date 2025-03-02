@@ -1,4 +1,4 @@
-package com.xm.gamehub.model.request.user;
+package com.xm.gamehub.model.request.admin;
 
 import lombok.Data;
 

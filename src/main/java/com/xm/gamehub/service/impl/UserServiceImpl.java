@@ -7,6 +7,7 @@ import com.xm.gamehub.exception.BusinessException;
 import com.xm.gamehub.mapper.UserMapper;
 import com.xm.gamehub.model.domain.User;
 import com.xm.gamehub.model.request.user.*;
+import com.xm.gamehub.model.request.admin.AdminUserUpdateRequest;
 import com.xm.gamehub.model.request.admin.BatchImportUsersRequest;
 import com.xm.gamehub.service.UserService;
 import com.xm.gamehub.utils.UserUtils;
@@ -25,9 +26,12 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.Year;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.ZoneId;
 
 import static com.xm.gamehub.constant.UserConstant.ADMIN_ROLE;
 import static com.xm.gamehub.constant.UserConstant.USER_LOGIN_STATE;
@@ -59,7 +63,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private static final String VERIFY_CODE_PREFIX = "verify:code:";
 
-    //初始化邮箱地址
+    // 初始化邮箱地址
     @PostConstruct
     public void init() {
         EMAIL_FROM = emailFrom;
@@ -190,7 +194,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return UserUtils.getSafetyUser(user);
     }
 
-
     /**
      * 获取当前登录的用户。
      *
@@ -245,28 +248,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (StringUtils.isAnyBlank(updateRequest.getUserName(), updateRequest.getUserNickname())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名和昵称不能为空");
         }
-        
+
         User user = getById(userId);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
         }
-        
+
         // 检查用户名是否被其他用户使用
         User existUser = userMapper.selectOne(
-            Wrappers.<User>lambdaQuery()
-                .eq(User::getUserName, updateRequest.getUserName())
-                .ne(User::getUserId, userId)
-        );
+                Wrappers.<User>lambdaQuery()
+                        .eq(User::getUserName, updateRequest.getUserName())
+                        .ne(User::getUserId, userId));
         if (existUser != null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名已被使用");
         }
-        
+
         user.setUserName(updateRequest.getUserName());
         user.setUserNickname(updateRequest.getUserNickname());
         user.setUserEmail(updateRequest.getUserEmail());
         user.setUserPhone(updateRequest.getUserPhone());
         user.setUserProfile(updateRequest.getUserProfile());
-        
+
         return updateById(user);
     }
 
@@ -283,28 +285,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (StringUtils.isAnyBlank(updateRequest.getUserName(), updateRequest.getUserNickname())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名和昵称不能为空");
         }
-        
+
         User user = getById(userId);
         if (user == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
         }
-        
+
         // 检查用户名是否被其他用户使用
         User existUser = userMapper.selectOne(
-            Wrappers.<User>lambdaQuery()
-                .eq(User::getUserName, updateRequest.getUserName())
-                .ne(User::getUserId, userId)
-        );
+                Wrappers.<User>lambdaQuery()
+                        .eq(User::getUserName, updateRequest.getUserName())
+                        .ne(User::getUserId, userId));
         if (existUser != null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名已被使用");
         }
-        
+
         user.setUserName(updateRequest.getUserName());
         user.setUserNickname(updateRequest.getUserNickname());
         user.setUserEmail(updateRequest.getUserEmail());
         user.setUserPhone(updateRequest.getUserPhone());
         user.setUserIsAdmin(updateRequest.getUserIsAdmin());
-        
+
         return updateById(user);
     }
 
@@ -318,7 +319,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void sendEmailCode(String toEmail) {
         // 检查 Redis 连接
         checkRedisConnection();
-        
+
         // 使用单例模式获取 EmailUtil 实例并发送验证码
         EmailUtil.getInstance().sendVerificationCode(toEmail);
     }
@@ -342,10 +343,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 从Redis获取验证码
         String key = VERIFY_CODE_PREFIX + verifyRequest.getEmail();
         String savedCode = RedisUtil.getInstance().get(key);
-        
-        log.info("验证码校验 - 邮箱: {}, 输入验证码: {}, 存储验证码: {}", 
-            verifyRequest.getEmail(), verifyRequest.getCode(), savedCode);
-        
+
+        log.info("验证码校验 - 邮箱: {}, 输入验证码: {}, 存储验证码: {}",
+                verifyRequest.getEmail(), verifyRequest.getCode(), savedCode);
+
         if (savedCode == null) {
             log.warn("验证码已过期 - 邮箱: {}", verifyRequest.getEmail());
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码已过期，请重新获取");
@@ -358,9 +359,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("验证码验证成功 - 邮箱: {}", verifyRequest.getEmail());
             return true;
         }
-        
-        log.warn("验证码错误 - 邮箱: {}, 输入: {}, 正确: {}", 
-            verifyRequest.getEmail(), verifyRequest.getCode(), savedCode);
+
+        log.warn("验证码错误 - 邮箱: {}, 输入: {}, 正确: {}",
+                verifyRequest.getEmail(), verifyRequest.getCode(), savedCode);
         throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
     }
 
@@ -374,12 +375,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public boolean resetPassword(ResetPasswordRequest resetRequest) {
         // 参数校验
-        if (resetRequest == null || 
-            StringUtils.isAnyBlank(
-                resetRequest.getEmail(), 
-                resetRequest.getVerifyCode(), 
-                resetRequest.getNewPassword()
-            )) {
+        if (resetRequest == null ||
+                StringUtils.isAnyBlank(
+                        resetRequest.getEmail(),
+                        resetRequest.getVerifyCode(),
+                        resetRequest.getNewPassword())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不完整");
         }
 
@@ -394,9 +394,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 从Redis获取验证码
         String key = VERIFY_CODE_PREFIX + resetRequest.getEmail();
         String savedCode = RedisUtil.getInstance().get(key);
-        
-        log.info("重置密码 - 邮箱: {}, 验证码: {}, Redis中的验证码: {}", 
-            resetRequest.getEmail(), resetRequest.getVerifyCode(), savedCode);
+
+        log.info("重置密码 - 邮箱: {}, 验证码: {}, Redis中的验证码: {}",
+                resetRequest.getEmail(), resetRequest.getVerifyCode(), savedCode);
 
         // 验证码校验
         if (savedCode == null) {
@@ -405,15 +405,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         if (!savedCode.equalsIgnoreCase(resetRequest.getVerifyCode())) {
-            log.warn("重置密码失败 - 验证码错误，邮箱: {}, 输入: {}, 正确: {}", resetRequest.getEmail(), resetRequest.getVerifyCode(), savedCode);
+            log.warn("重置密码失败 - 验证码错误，邮箱: {}, 输入: {}, 正确: {}", resetRequest.getEmail(), resetRequest.getVerifyCode(),
+                    savedCode);
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
         }
 
         // 更新密码
         User user = lambdaQuery()
-            .eq(User::getUserEmail, resetRequest.getEmail())
-            .one();
-            
+                .eq(User::getUserEmail, resetRequest.getEmail())
+                .one();
+
         if (user == null) {
             log.warn("重置密码失败 - 用户不存在，邮箱: {}", resetRequest.getEmail());
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
@@ -421,8 +422,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 加密新密码
         String encryptedPassword = DigestUtils.md5DigestAsHex(
-            (SALT + resetRequest.getNewPassword()).getBytes()
-        );
+                (SALT + resetRequest.getNewPassword()).getBytes());
         user.setUserPassword(encryptedPassword);
 
         // 更新成功后删除验证码
@@ -453,7 +453,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      * 更新用户头像
      *
      * @param userId 用户ID
-     * @param file 头像文件
+     * @param file   头像文件
      * @return 新的头像URL
      */
     @Override
@@ -465,34 +465,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (file == null || file.isEmpty()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像文件不能为空");
         }
-        
+
         // 2. 校验文件大小（限制为2MB）
         if (file.getSize() > 2 * 1024 * 1024) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像文件大小不能超过2MB");
         }
-        
+
         // 3. 校验文件类型
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件类型必须是图片");
         }
-        
+
         try {
             // 4. 上传文件到阿里云OSS
             String avatarUrl = uploadUtil.uploadAliyunOss(file);
-            
+
             // 5. 更新用户头像URL
             User user = getById(userId);
             if (user == null) {
                 throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
             }
-            
+
             user.setUserAvatar(avatarUrl);
             boolean updated = updateById(user);
             if (!updated) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新用户头像失败");
             }
-            
+
             return avatarUrl;
         } catch (IOException e) {
             log.error("上传头像失败", e);
@@ -523,13 +523,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 log.warn("用户信息不完整: {}", userInfo);
                 continue;
             }
-            
+
             // 检查用户名是否已存在
             if (userMapper.selectByUserName(userInfo.getUserName()) != null) {
                 log.warn("用户名已存在: {}", userInfo.getUserName());
                 continue;
             }
-            
+
             // 创建用户对象
             User user = new User();
             user.setUserName(userInfo.getUserName());
@@ -537,18 +537,143 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setUserPassword(DigestUtils.md5DigestAsHex((SALT + userInfo.getUserPassword()).getBytes()));
             user.setUserPhone(userInfo.getUserPhone());
             user.setUserIsAdmin(userInfo.getUserIsAdmin());
-            
+
             userList.add(user);
         }
-        
+
         if (userList.isEmpty()) {
             return 0;
         }
-        
+
         // 批量插入
         saveBatch(userList);
         return userList.size();
     }
+
+    /**
+     * 用户签到
+     *
+     * @param userId 用户ID
+     */
+    @Override
+    public void userSignIn(Long userId) {
+        if (userId == null || userId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID不合法");
+        }
+
+        // 获取当前日期
+        LocalDate today = LocalDate.now();
+        String key = String.format("sign:%d:%d", userId, today.getYear());
+        int dayOfYear = today.getDayOfYear() - 1; // 从0开始计数
+
+        try {
+            // 判断是否已经签到
+            Boolean signed = RedisUtil.getInstance().getBit(key, dayOfYear);
+            if (Boolean.TRUE.equals(signed)) {
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "今天已经签到过了");
+            }
+
+            // 设置签到标记
+            RedisUtil.getInstance().setBit(key, dayOfYear, true);
+
+            // 设置过期时间为下一年的1月1日
+            LocalDate firstDayOfNextYear = today.plusYears(1).withDayOfYear(1);
+            long expireSeconds = firstDayOfNextYear.atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
+                    - System.currentTimeMillis() / 1000;
+            RedisUtil.getInstance().expire(key, expireSeconds, TimeUnit.SECONDS);
+
+            log.info("用户签到成功 - userId: {}, date: {}", userId, today);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("用户签到失败 - userId: {}, error: {}", userId, e.getMessage());
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "签到失败，请稍后重试");
+        }
+    }
+
+    /**
+     * 检查用户是否签到
+     *
+     * @param userId 用户ID
+     * @param date   日期
+     * @return 是否签到
+     */
+    @Override
+    public boolean checkSignIn(Long userId, LocalDate date) {
+        if (userId == null || userId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID不合法");
+        }
+        if (date == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "日期不能为空");
+        }
+
+        String key = String.format("sign:%d:%d", userId, date.getYear());
+        int dayOfYear = date.getDayOfYear() - 1;
+
+        try {
+            Boolean signed = RedisUtil.getInstance().getBit(key, dayOfYear);
+            return Boolean.TRUE.equals(signed);
+        } catch (Exception e) {
+            log.error("检查签到状态失败 - userId: {}, date: {}, error: {}", userId, date, e.getMessage());
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "检查签到状态失败");
+        }
+    }
+
+    /**
+     * 获取用户签到历史
+     *
+     * @param userId 用户ID
+     * @param year   年份
+     * @return 签到日期列表
+     */
+    @Override
+    public List<LocalDate> getSignInHistory(Long userId, int year) {
+        if (userId == null || userId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID不合法");
+        }
+        if (year <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "年份不正确");
+        }
+
+        String key = String.format("sign:%d:%d", userId, year);
+        List<LocalDate> signInDates = new ArrayList<>();
+
+        try {
+            int daysInYear = Year.of(year).length();
+            for (int i = 0; i < daysInYear; i++) {
+                if (Boolean.TRUE.equals(RedisUtil.getInstance().getBit(key, i))) {
+                    signInDates.add(LocalDate.ofYearDay(year, i + 1));
+                }
+            }
+            return signInDates;
+        } catch (Exception e) {
+            log.error("获取签到历史失败 - userId: {}, year: {}, error: {}", userId, year, e.getMessage());
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "获取签到历史失败");
+        }
+    }
+
+    /**
+     * 获取用户一年内的签到次数
+     *
+     * @param userId 用户ID
+     * @param year   年份
+     * @return 签到次数
+     */
+    @Override
+    public long countSignInDays(Long userId, int year) {
+        if (userId == null || userId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID不合法");
+        }
+        if (year <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "年份不正确");
+        }
+
+        try {
+            String key = String.format("sign:%d:%d", userId, year);
+            return RedisUtil.getInstance().bitCount(key);
+        } catch (Exception e) {
+            log.error("统计签到次数失败 - userId: {}, year: {}, error: {}", userId, year, e.getMessage());
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "统计签到次数失败");
+        }
+    }
 }
-
-
