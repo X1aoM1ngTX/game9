@@ -3,11 +3,11 @@ package com.xm.gamehub.utils;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -38,23 +38,6 @@ public class UploadUtil {
         // 私有构造函数
     }
 
-    @PostConstruct
-    public void init() {
-        // 从环境变量中获取密钥
-        accessKeyId = System.getenv("ALIBABA_CLOUD_ACCESS_KEY_ID");
-        accessKeySecret = System.getenv("ALIBABA_CLOUD_ACCESS_KEY_SECRET");
-
-        // 将注入的配置值赋给静态变量
-        domain = domainTemp;
-        endpoint = endpointTemp;
-        bucketName = bucketNameTemp;
-
-        // 初始化单例实例
-        instance = this;
-
-        log.info("UploadUtil 初始化完成，Endpoint: {}", endpoint);
-    }
-
     public static UploadUtil getInstance() {
         if (instance == null) {
             synchronized (UploadUtil.class) {
@@ -75,6 +58,31 @@ public class UploadUtil {
             }
         }
         return ossClient;
+    }
+
+    // 在应用关闭时关闭OSS客户端
+    public static void shutdown() {
+        if (ossClient != null) {
+            ossClient.shutdown();
+            ossClient = null;
+        }
+    }
+
+    @PostConstruct
+    public void init() {
+        // 从环境变量中获取密钥
+        accessKeyId = System.getenv("ALIBABA_CLOUD_ACCESS_KEY_ID");
+        accessKeySecret = System.getenv("ALIBABA_CLOUD_ACCESS_KEY_SECRET");
+
+        // 将注入的配置值赋给静态变量
+        domain = domainTemp;
+        endpoint = endpointTemp;
+        bucketName = bucketNameTemp;
+
+        // 初始化单例实例
+        instance = this;
+
+        log.info("UploadUtil 初始化完成，Endpoint: {}", endpoint);
     }
 
     public String uploadAliyunOss(MultipartFile file) throws IOException {
@@ -99,14 +107,6 @@ public class UploadUtil {
         } catch (IOException e) {
             log.error("文件上传失败", e);
             throw e;
-        }
-    }
-
-    // 在应用关闭时关闭OSS客户端
-    public static void shutdown() {
-        if (ossClient != null) {
-            ossClient.shutdown();
-            ossClient = null;
         }
     }
 }

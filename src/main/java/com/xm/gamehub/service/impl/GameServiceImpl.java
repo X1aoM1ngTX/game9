@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xm.gamehub.common.ErrorCode;
 import com.xm.gamehub.exception.BusinessException;
+import com.xm.gamehub.mapper.GameMapper;
 import com.xm.gamehub.model.domain.Game;
+import com.xm.gamehub.model.request.admin.BatchImportGamesRequest;
 import com.xm.gamehub.model.request.game.GameCreateRequest;
 import com.xm.gamehub.model.request.game.GameQueryRequest;
 import com.xm.gamehub.model.request.game.GameStatusRequest;
@@ -13,18 +15,16 @@ import com.xm.gamehub.model.request.game.GameUpdateRequest;
 import com.xm.gamehub.model.vo.GameDetailVO;
 import com.xm.gamehub.service.GameService;
 import com.xm.gamehub.service.UserLibraryService;
-import com.xm.gamehub.mapper.GameMapper;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import lombok.extern.slf4j.Slf4j;
-import com.xm.gamehub.model.request.admin.BatchImportGamesRequest;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author X1aoM1ngTX
@@ -281,7 +281,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         if (userId == null || userId <= 0 || gameId == null || gameId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
-        
+
         // 2. 检查游戏是否存在且未下架
         Game game = getById(gameId);
         if (game == null) {
@@ -290,37 +290,37 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         if (game.getGameIsRemoved()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "游戏已下架");
         }
-        
+
         // 3. 检查库存
         if (game.getGameStock() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "游戏库存不足");
         }
-        
+
         // 4. 检查用户是否已拥有该游戏
         if (userLibraryService.hasGame(userId, gameId)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "已拥有该游戏");
         }
-        
+
         // 5. 减少库存（使用乐观锁确保并发安全）
         boolean updateStock = update()
-            .setSql("gameStock = gameStock - 1")
-            .eq("gameId", gameId)
-            .gt("gameStock", 0)
-            .update();
-            
+                .setSql("gameStock = gameStock - 1")
+                .eq("gameId", gameId)
+                .gt("gameStock", 0)
+                .update();
+
         if (!updateStock) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "购买失败，请重试");
         }
-        
+
         // 6. 添加到用户游戏库
         try {
             return userLibraryService.addUserGame(userId, gameId);
         } catch (Exception e) {
             // 如果添加到游戏库失败，回滚库存
             update()
-                .setSql("gameStock = gameStock + 1")
-                .eq("gameId", gameId)
-                .update();
+                    .setSql("gameStock = gameStock + 1")
+                    .eq("gameId", gameId)
+                    .update();
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "购买失败，请重试");
         }
     }
@@ -337,32 +337,32 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
             if (StringUtils.isAnyBlank(
                     gameInfo.getGameName(),
                     gameInfo.getGameDescription()) ||
-                gameInfo.getGamePrice() == null ||
-                gameInfo.getGameStock() == null) {
+                    gameInfo.getGamePrice() == null ||
+                    gameInfo.getGameStock() == null) {
                 log.warn("游戏信息不完整: {}", gameInfo);
                 continue;
             }
-            
+
             // 检查游戏名是否已存在
             if (lambdaQuery().eq(Game::getGameName, gameInfo.getGameName()).exists()) {
                 log.warn("游戏名已存在: {}", gameInfo.getGameName());
                 continue;
             }
-            
+
             // 创建游戏对象
             Game game = new Game();
             game.setGameName(gameInfo.getGameName());
             game.setGameDescription(gameInfo.getGameDescription());
             game.setGamePrice(gameInfo.getGamePrice());
             game.setGameStock(gameInfo.getGameStock());
-            
+
             gameList.add(game);
         }
-        
+
         if (gameList.isEmpty()) {
             return 0;
         }
-        
+
         // 批量插入
         saveBatch(gameList);
         return gameList.size();

@@ -1,15 +1,15 @@
 package com.xm.gamehub;
 
+import com.xm.gamehub.utils.RedisUtil;
+import jakarta.annotation.Resource;
 import org.mybatis.spring.annotation.MapperScan;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.boot.CommandLineRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import jakarta.annotation.Resource;
-import com.xm.gamehub.utils.RedisUtil;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @MapperScan("com.xm.gamehub.mapper")
@@ -27,8 +27,9 @@ public class GameHubApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.info("启动中...");
-        log.info("检查Redis连接");
+        String activeProfile = System.getProperty("spring.profiles.active", "dev");
+        log.info("应用启动中... 当前环境: {}", activeProfile);
+        log.info("检查Redis连接...");
         RedisUtil.getInstance().checkConnection();
     }
 

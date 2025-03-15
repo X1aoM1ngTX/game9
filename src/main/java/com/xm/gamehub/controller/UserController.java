@@ -6,7 +6,9 @@ import com.xm.gamehub.common.ErrorCode;
 import com.xm.gamehub.common.ResultUtils;
 import com.xm.gamehub.exception.BusinessException;
 import com.xm.gamehub.model.domain.User;
-import com.xm.gamehub.model.request.admin.*;
+import com.xm.gamehub.model.request.admin.AdminUserUpdateRequest;
+import com.xm.gamehub.model.request.admin.BatchImportGamesRequest;
+import com.xm.gamehub.model.request.admin.BatchImportUsersRequest;
 import com.xm.gamehub.model.request.user.*;
 import com.xm.gamehub.service.GameService;
 import com.xm.gamehub.service.UserService;
@@ -36,7 +38,7 @@ import java.util.stream.Collectors;
 @Tag(name = "用户接口", description = "用户相关的所有接口")
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = { "http://localhost:3000" }, allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 @Slf4j
 public class UserController {
 
@@ -317,7 +319,7 @@ public class UserController {
     @Operation(summary = "批量导入用户", description = "批量导入用户")
     @PostMapping("/batchImportUsers")
     public BaseResponse<Integer> batchImportUsers(@RequestBody BatchImportUsersRequest importRequest,
-            HttpServletRequest httpRequest) {
+                                                  HttpServletRequest httpRequest) {
         // 仅管理员可操作
         if (!userService.isAdmin(httpRequest)) {
             throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
@@ -337,7 +339,7 @@ public class UserController {
     @Operation(summary = "批量导入游戏", description = "批量导入游戏")
     @PostMapping("/batchImportGames")
     public BaseResponse<Integer> batchImportGames(@RequestBody BatchImportGamesRequest importRequest,
-            HttpServletRequest httpRequest) {
+                                                  HttpServletRequest httpRequest) {
         // 仅管理员可操作
         if (!userService.isAdmin(httpRequest)) {
             throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
@@ -349,7 +351,7 @@ public class UserController {
 
     /**
      * 用户签到
-     * 
+     *
      * @param request HttpServletRequest
      * @return 是否签到成功
      */
@@ -367,7 +369,7 @@ public class UserController {
 
     /**
      * 检查今日是否已签到
-     * 
+     *
      * @param request HttpServletRequest
      * @return 是否签到成功
      */
@@ -385,7 +387,7 @@ public class UserController {
 
     /**
      * 获取签到历史
-     * 
+     *
      * @param year    年份
      * @param request HttpServletRequest
      * @return 签到历史
@@ -406,7 +408,7 @@ public class UserController {
 
     /**
      * 获取签到统计
-     * 
+     *
      * @param year    年份
      * @param request HttpServletRequest
      * @return 签到统计

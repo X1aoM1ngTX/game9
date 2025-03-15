@@ -1,9 +1,9 @@
 package com.xm.gamehub.model.request.userLibrary;
 
+import lombok.Data;
+
 import java.io.Serial;
 import java.io.Serializable;
-
-import lombok.Data;
 
 /**
  * 用户游戏库请求体
@@ -15,6 +15,6 @@ public class UserGameRequest implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -81234816125131L;
-    
+
     private Long gameId;
 } 

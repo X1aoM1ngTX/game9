@@ -12,16 +12,14 @@ import java.io.Serializable;
  */
 @Data
 public class GameStatusRequest implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -732424195231891767L;
     /**
      * 游戏ID
      */
     private Long gameId;
-    
     /**
      * 游戏状态
      */
     private boolean gameIsRemoved;
-
-    @Serial
-    private static final long serialVersionUID = -732424195231891767L;
 } 

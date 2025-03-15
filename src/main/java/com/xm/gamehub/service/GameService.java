@@ -1,9 +1,7 @@
 package com.xm.gamehub.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import com.baomidou.mybatisplus.extension.service.IService;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xm.gamehub.model.domain.Game;
 import com.xm.gamehub.model.request.admin.BatchImportGamesRequest;
 import com.xm.gamehub.model.request.game.GameCreateRequest;
@@ -11,6 +9,8 @@ import com.xm.gamehub.model.request.game.GameQueryRequest;
 import com.xm.gamehub.model.request.game.GameStatusRequest;
 import com.xm.gamehub.model.request.game.GameUpdateRequest;
 import com.xm.gamehub.model.vo.GameDetailVO;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -80,7 +80,7 @@ public interface GameService extends IService<Game> {
 
     /**
      * 购买游戏
-     * 
+     *
      * @param userId 用户ID
      * @param gameId 游戏ID
      * @return 是否购买成功

@@ -6,9 +6,9 @@ import java.io.Serializable;
 
 /**
  * 通用返回类
- * 
- * @author X1aoM1ngTX
+ *
  * @param <T>
+ * @author X1aoM1ngTX
  */
 @Data
 public class BaseResponse<T> implements Serializable {

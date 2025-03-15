@@ -13,7 +13,7 @@ import java.util.Date;
  */
 @Data
 public class GameDetailVO implements Serializable {
-    
+
     @Serial
     private static final long serialVersionUID = 1L;
 

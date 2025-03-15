@@ -9,9 +9,10 @@ public class ResultUtils {
 
     /**
      * 返回成功
+     *
      * @param data
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> BaseResponse<T> success(T data) {
         return new BaseResponse<>(0, data, "ok", "成功");
@@ -34,7 +35,7 @@ public class ResultUtils {
      * @param description
      * @return
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static BaseResponse error(int Code, String message, String description) {
         return new BaseResponse(Code, null, message, description);
     }
@@ -45,7 +46,7 @@ public class ResultUtils {
      * @param description
      * @return
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static BaseResponse error(ErrorCode errorCode, String message, String description) {
         return new BaseResponse(errorCode.getError_code(), null, message, description);
     }
@@ -55,7 +56,7 @@ public class ResultUtils {
      * @param description
      * @return
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static BaseResponse error(ErrorCode errorCode, String description) {
         return new BaseResponse(errorCode.getError_code(), null, errorCode.getMessage(), description);
     }

@@ -15,7 +15,7 @@ import java.util.Date;
  */
 @Data
 public class GameUpdateRequest implements Serializable {
-    
+
     @Serial
     private static final long serialVersionUID = 1L;
 
