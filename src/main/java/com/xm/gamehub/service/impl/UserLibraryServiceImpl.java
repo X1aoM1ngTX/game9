@@ -4,10 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xm.gamehub.common.ErrorCode;
 import com.xm.gamehub.exception.BusinessException;
+import com.xm.gamehub.mapper.UserLibraryMapper;
 import com.xm.gamehub.model.domain.Game;
 import com.xm.gamehub.model.domain.UserLibrary;
 import com.xm.gamehub.service.UserLibraryService;
-import com.xm.gamehub.mapper.UserLibraryMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +38,7 @@ public class UserLibraryServiceImpl extends ServiceImpl<UserLibraryMapper, UserL
         if (userId == null || userId <= 0 || gameId == null || gameId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
-        
+
         // 检查是否已拥有该游戏
         if (hasGame(userId, gameId)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "已拥有该游戏");
@@ -63,7 +63,7 @@ public class UserLibraryServiceImpl extends ServiceImpl<UserLibraryMapper, UserL
         if (userId == null || userId <= 0 || gameId == null || gameId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
-        
+
         // 检查是否拥有该游戏
         if (!hasGame(userId, gameId)) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "未拥有该游戏");
@@ -90,7 +90,7 @@ public class UserLibraryServiceImpl extends ServiceImpl<UserLibraryMapper, UserL
 
     /**
      * 检查用户是否拥有某游戏
-     * 
+     *
      * @param userId 用户ID
      * @param gameId 游戏ID
      * @return 是否拥有
@@ -100,7 +100,7 @@ public class UserLibraryServiceImpl extends ServiceImpl<UserLibraryMapper, UserL
         if (userId == null || userId <= 0 || gameId == null || gameId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
-        
+
         return lambdaQuery()
                 .eq(UserLibrary::getUserId, userId)
                 .eq(UserLibrary::getGameId, gameId)

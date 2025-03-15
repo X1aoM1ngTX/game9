@@ -5,9 +5,9 @@
 <mapper namespace="com.xm.gamehub.mapper.UserLibraryMapper">
 
     <resultMap id="BaseResultMap" type="com.xm.gamehub.model.domain.UserLibrary">
-            <id property="userLibraryId" column="userLibraryId" jdbcType="BIGINT"/>
-            <result property="userId" column="userId" jdbcType="BIGINT"/>
-            <result property="gameId" column="gameId" jdbcType="BIGINT"/>
+        <id property="userLibraryId" column="userLibraryId" jdbcType="BIGINT"/>
+        <result property="userId" column="userId" jdbcType="BIGINT"/>
+        <result property="gameId" column="gameId" jdbcType="BIGINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">

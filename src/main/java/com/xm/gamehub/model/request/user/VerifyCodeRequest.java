@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class VerifyCodeRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
-    
+
     private String email;
     private String code;
 } 

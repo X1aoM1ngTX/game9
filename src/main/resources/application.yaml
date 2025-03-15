@@ -34,9 +34,11 @@ spring:
           max-wait: -1ms
           max-idle: 8
           min-idle: 0
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}  # 默认使用开发环境
 
-logging: 
-  charset: 
+logging:
+  charset:
     file: UTF-8
     console: UTF-8
 

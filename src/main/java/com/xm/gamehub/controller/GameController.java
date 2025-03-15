@@ -7,24 +7,19 @@ import com.xm.gamehub.common.ResultUtils;
 import com.xm.gamehub.exception.BusinessException;
 import com.xm.gamehub.model.domain.Game;
 import com.xm.gamehub.model.domain.User;
-import com.xm.gamehub.model.request.game.GameCreateRequest;
-import com.xm.gamehub.model.request.game.GameQueryRequest;
-import com.xm.gamehub.model.request.game.GameStatusRequest;
-import com.xm.gamehub.model.request.game.GameUpdateRequest;
-import com.xm.gamehub.model.request.game.GamePurchaseRequest;
-import com.xm.gamehub.model.request.game.GameDeleteRequest;
+import com.xm.gamehub.model.request.game.*;
 import com.xm.gamehub.model.vo.GameDetailVO;
 import com.xm.gamehub.service.GameService;
 import com.xm.gamehub.service.UserService;
 import com.xm.gamehub.utils.UploadUtil;
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -178,7 +173,7 @@ public class GameController {
 
     /**
      * 删除游戏(物理删除)
-     * 
+     *
      * @param deleteRequest 删除请求
      * @param request       HttpServlet请求
      * @return 是否删除成功

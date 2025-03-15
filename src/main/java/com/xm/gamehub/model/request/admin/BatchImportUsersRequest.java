@@ -8,8 +8,10 @@ import java.util.List;
 
 @Data
 public class BatchImportUsersRequest implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 515684984113287L;
     private List<UserImportInfo> users;
-    
+
     @Data
     public static class UserImportInfo {
         private String userName;
@@ -18,7 +20,4 @@ public class BatchImportUsersRequest implements Serializable {
         private String userPhone;
         private Integer userIsAdmin;
     }
-
-    @Serial
-    private static final long serialVersionUID = 515684984113287L;
 } 

@@ -3,6 +3,9 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+deploy/
+.mvn/
+.cursor/
 
 ### STS ###
 .apt_generated
@@ -31,10 +34,12 @@ build/
 
 ### VS Code ###
 .vscode/
+.vs/
 
 # 环境配置
 .env
 .env.local
+application-prod.yaml
 
 # 自定义
 /JL.md

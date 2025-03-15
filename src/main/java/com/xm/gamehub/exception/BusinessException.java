@@ -3,6 +3,8 @@ package com.xm.gamehub.exception;
 import com.xm.gamehub.common.ErrorCode;
 import lombok.Getter;
 
+import java.io.Serial;
+
 /**
  * 自定义业务异常类
  *
@@ -11,6 +13,7 @@ import lombok.Getter;
 @Getter
 public class BusinessException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = -7034897190745766939L;
 
     /**

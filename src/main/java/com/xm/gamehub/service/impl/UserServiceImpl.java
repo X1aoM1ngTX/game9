@@ -6,14 +6,14 @@ import com.xm.gamehub.common.ErrorCode;
 import com.xm.gamehub.exception.BusinessException;
 import com.xm.gamehub.mapper.UserMapper;
 import com.xm.gamehub.model.domain.User;
-import com.xm.gamehub.model.request.user.*;
 import com.xm.gamehub.model.request.admin.AdminUserUpdateRequest;
 import com.xm.gamehub.model.request.admin.BatchImportUsersRequest;
+import com.xm.gamehub.model.request.user.*;
 import com.xm.gamehub.service.UserService;
-import com.xm.gamehub.utils.UserUtils;
-import com.xm.gamehub.utils.UploadUtil;
 import com.xm.gamehub.utils.EmailUtil;
 import com.xm.gamehub.utils.RedisUtil;
+import com.xm.gamehub.utils.UploadUtil;
+import com.xm.gamehub.utils.UserUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,10 +28,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Year;
-import java.util.concurrent.TimeUnit;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.ZoneId;
+import java.util.concurrent.TimeUnit;
 
 import static com.xm.gamehub.constant.UserConstant.ADMIN_ROLE;
 import static com.xm.gamehub.constant.UserConstant.USER_LOGIN_STATE;
@@ -45,23 +45,17 @@ import static com.xm.gamehub.constant.UserConstant.USER_LOGIN_STATE;
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
+    private static final String SALT = "xm";
+    private static final String VERIFY_CODE_PREFIX = "verify:code:";
+    private static String EMAIL_FROM;
     @Resource
     private UserMapper userMapper;
-
     @Resource
     private JavaMailSender javaMailSender;
-
     @Resource
     private UploadUtil uploadUtil;
-
     @Value("${spring.mail.username}")
     private String emailFrom;
-
-    private static String EMAIL_FROM;
-
-    private static final String SALT = "xm";
-
-    private static final String VERIFY_CODE_PREFIX = "verify:code:";
 
     // 初始化邮箱地址
     @PostConstruct

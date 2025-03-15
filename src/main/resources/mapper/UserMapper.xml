@@ -5,17 +5,17 @@
 <mapper namespace="com.xm.gamehub.mapper.UserMapper">
 
     <resultMap id="BaseResultMap" type="com.xm.gamehub.model.domain.User">
-            <id property="userId" column="userId" jdbcType="BIGINT"/>
-            <result property="userName" column="userName" jdbcType="VARCHAR"/>
-            <result property="userEmail" column="userEmail" jdbcType="VARCHAR"/>
-            <result property="userPhone" column="userPhone" jdbcType="VARCHAR"/>
-            <result property="userPassword" column="userPassword" jdbcType="VARCHAR"/>
-            <result property="userCreatedTime" column="userCreatedTime" jdbcType="TIMESTAMP"/>
-            <result property="userIsDelete" column="userIsDelete" jdbcType="TINYINT"/>
-            <result property="userIsAdmin" column="userIsAdmin" jdbcType="TINYINT"/>
-            <result property="userProfile" column="userProfile" jdbcType="VARCHAR"/>
-            <result property="userAvatar" column="userAvatar" jdbcType="VARCHAR"/>
-            <result property="userNickname" column="userNickname" jdbcType="VARCHAR"/>
+        <id property="userId" column="userId" jdbcType="BIGINT"/>
+        <result property="userName" column="userName" jdbcType="VARCHAR"/>
+        <result property="userEmail" column="userEmail" jdbcType="VARCHAR"/>
+        <result property="userPhone" column="userPhone" jdbcType="VARCHAR"/>
+        <result property="userPassword" column="userPassword" jdbcType="VARCHAR"/>
+        <result property="userCreatedTime" column="userCreatedTime" jdbcType="TIMESTAMP"/>
+        <result property="userIsDelete" column="userIsDelete" jdbcType="TINYINT"/>
+        <result property="userIsAdmin" column="userIsAdmin" jdbcType="TINYINT"/>
+        <result property="userProfile" column="userProfile" jdbcType="VARCHAR"/>
+        <result property="userAvatar" column="userAvatar" jdbcType="VARCHAR"/>
+        <result property="userNickname" column="userNickname" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">

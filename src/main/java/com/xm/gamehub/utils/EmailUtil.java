@@ -3,6 +3,8 @@ package com.xm.gamehub.utils;
 import com.xm.gamehub.common.ErrorCode;
 import com.xm.gamehub.exception.BusinessException;
 import com.xm.gamehub.model.entity.email.VerifyCodeEmail;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -13,35 +15,23 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
 public class EmailUtil {
+    private static final String VERIFY_CODE_PREFIX = "verify:code:";
     private volatile static EmailUtil instance;
-    
+    private static String EMAIL_FROM;
     @Resource
     private JavaMailSender javaMailSender;
-    
     @Resource
     private StringRedisTemplate stringRedisTemplate;
-    
     @Value("${spring.mail.username}")
     private String emailFrom;
 
-    private static String EMAIL_FROM;
-    private static final String VERIFY_CODE_PREFIX = "verify:code:";
-
     private EmailUtil() {
         // 私有构造函数
-    }
-
-    @PostConstruct
-    public void init() {
-        EMAIL_FROM = emailFrom;
-        instance = this;
     }
 
     public static EmailUtil getInstance() {
@@ -53,6 +43,12 @@ public class EmailUtil {
             }
         }
         return instance;
+    }
+
+    @PostConstruct
+    public void init() {
+        EMAIL_FROM = emailFrom;
+        instance = this;
     }
 
     /**
@@ -84,12 +80,12 @@ public class EmailUtil {
             helper.setFrom(EMAIL_FROM, VerifyCodeEmail.organization);
             helper.setTo(toEmail);
             helper.setSubject(VerifyCodeEmail.title);
-            
+
             // 6. 使用 VerifyCodeEmail 中的模板
             String content = String.format(
-                VerifyCodeEmail.content,
-                VerifyCodeEmail.title,
-                verifyCode
+                    VerifyCodeEmail.content,
+                    VerifyCodeEmail.title,
+                    verifyCode
             );
             helper.setText(content, true);
 

@@ -1,8 +1,8 @@
 package com.xm.gamehub.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.xm.gamehub.model.domain.Game;
 import com.xm.gamehub.model.domain.UserLibrary;
-import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ public interface UserLibraryService extends IService<UserLibrary> {
 
     /**
      * 检查用户是否拥有某游戏
-     * 
+     *
      * @param userId 用户ID
      * @param gameId 游戏ID
      * @return 是否拥有

@@ -9,8 +9,8 @@ public class CaptchaUtils {
 
     /**
      * 生成6位字母和数字混合的验证码
-     * 
-     * @return 生成6位字母和数字混合的验证码(A-Z,0-9)
+     *
+     * @return 生成6位字母和数字混合的验证码(A - Z, 0 - 9)
      */
     public static String generate_6_AZ09() {
         // 字符集（包括大小写字母和数字）
@@ -29,8 +29,8 @@ public class CaptchaUtils {
 
     /**
      * 生成6位纯数字验证码
-     * 
-     * @return 生成6位纯数字验证码(0-999999)
+     *
+     * @return 生成6位纯数字验证码(0 - 999999)
      */
     public static String generate_6_09() {
         Random random = new Random();

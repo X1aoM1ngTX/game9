@@ -6,21 +6,22 @@ import com.xm.gamehub.common.ResultUtils;
 import com.xm.gamehub.exception.BusinessException;
 import com.xm.gamehub.model.domain.Game;
 import com.xm.gamehub.model.domain.User;
+import com.xm.gamehub.model.request.userLibrary.UserGameRequest;
 import com.xm.gamehub.service.UserLibraryService;
 import com.xm.gamehub.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.List;
-import com.xm.gamehub.model.request.userLibrary.UserGameRequest;
 
 @Tag(name = "用户游戏库接口", description = "用户游戏库相关的所有接口")
 @RestController
 @RequestMapping("/userLibrary")
-@CrossOrigin(origins = {"http://localhost:3000"},allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 @Slf4j
 public class UserLibraryController {
 
@@ -34,7 +35,7 @@ public class UserLibraryController {
      * 添加游戏到用户游戏库
      *
      * @param addGameRequest 游戏请求体
-     * @param request       HttpServletRequest
+     * @param request        HttpServletRequest
      * @return 是否添加成功
      */
     @Operation(summary = "添加游戏到用户游戏库", description = "添加游戏到用户游戏库")
