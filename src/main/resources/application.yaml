@@ -62,6 +62,12 @@ aliyun:
     endpoint: oss-cn-guangzhou.aliyuncs.com
     bucketName: xmgame-bucket
 
+cloudflare:
+  r2:
+    domain: https://pub-7ffa66837b134ab0a7a00e6bdda1375b.r2.dev/
+    endpoint: https://1a63a68acfe38be8d33d84b44835fe80.r2.cloudflarestorage.com
+    bucketName: gamehub-bucket
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

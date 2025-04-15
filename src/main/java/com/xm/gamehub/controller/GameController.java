@@ -163,7 +163,7 @@ public class GameController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件为空");
         }
         try {
-            String url = UploadUtil.getInstance().uploadAliyunOss(file);
+            String url = UploadUtil.getInstance().uploadR2(file);
             return ResultUtils.success(url);
         } catch (IOException e) {
             log.error("文件上传失败", e);
