@@ -1,6 +1,6 @@
-package com.xm.gamehub;
+package com.xm.game9;
 
-import com.xm.gamehub.utils.RedisUtil;
+import com.xm.game9.utils.RedisUtil;
 import jakarta.annotation.Resource;
 import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
@@ -12,17 +12,17 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@MapperScan("com.xm.gamehub.mapper")
+@MapperScan("com.xm.game9.mapper")
 @EnableScheduling
-public class GameHubApplication implements CommandLineRunner {
+public class GameNineApplication implements CommandLineRunner {
 
-    private static final Logger log = LoggerFactory.getLogger(GameHubApplication.class);
+    private static final Logger log = LoggerFactory.getLogger(GameNineApplication.class);
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
     public static void main(String[] args) {
-        SpringApplication.run(GameHubApplication.class, args);
+        SpringApplication.run(GameNineApplication.class, args);
     }
 
     @Override

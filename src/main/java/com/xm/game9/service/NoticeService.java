@@ -21,6 +21,39 @@ public interface NoticeService extends IService<Notice> {
      * @return 新创建的公告ID
      */
     Long createNotice(NoticeCreateRequest noticeCreateRequest);
+
+    /**
+     * 更新公告信息
+     *
+     * @param id 公告ID
+     * @param notice 要更新的公告信息
+     * @return 更新后的公告
+     */
+    Notice updateNotice(Long id, Notice notice);
+    
+    /**
+     * 获取公告详情
+     *
+     * @param id 公告ID
+     * @return 公告详情
+     */
+    Notice getNoticeById(Long id);
+
+    /**
+     * 发布公告
+     *
+     * @param id 公告ID
+     * @return 是否成功
+     */
+    boolean publishNotice(Long id);
+
+    /**
+     * 将公告设为草稿
+     *
+     * @param id 公告ID
+     * @return 是否成功
+     */
+    boolean draftNotice(Long id);
     
     /**
      * 获取有效的公告列表（已发布且未过期的）
@@ -50,26 +83,18 @@ public interface NoticeService extends IService<Notice> {
     Page<Notice> getNoticePage(Integer pageNum, Integer pageSize, Integer status, Integer type, Long creatorId);
 
     /**
-     * 发布公告
-     *
-     * @param id 公告ID
-     * @return 是否成功
-     */
-    boolean publishNotice(Long id);
-
-    /**
-     * 将公告设为草稿
-     *
-     * @param id 公告ID
-     * @return 是否成功
-     */
-    boolean draftNotice(Long id);
-
-    /**
      * 逻辑删除公告
      *
      * @param id 公告ID
      * @return 是否成功
      */
     boolean deleteNotice(Long id);
+    
+    /**
+     * 批量删除公告
+     *
+     * @param ids 公告ID列表
+     * @return 是否全部删除成功
+     */
+    boolean batchDeleteNotices(List<Long> ids);
 }

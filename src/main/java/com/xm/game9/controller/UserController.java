@@ -426,4 +426,23 @@ public class UserController {
         long count = userService.countSignInDays(loginUser.getUserId(), year);
         return ResultUtils.success(count);
     }
+
+    /**
+     * 根据用户ID获取用户信息
+     *
+     * @param id 用户ID
+     * @return 用户信息
+     */
+    @Operation(summary = "获取用户信息", description = "根据用户ID获取用户信息")
+    @GetMapping("/{id}")
+    public BaseResponse<User> getUserById(@PathVariable Long id) {
+        if (id == null || id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID不合法");
+        }
+        User user = userService.getById(id);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
+        }
+        return ResultUtils.success(UserUtils.getSafetyUser(user));
+    }
 }

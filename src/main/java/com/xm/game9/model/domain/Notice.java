@@ -32,7 +32,7 @@ public class Notice {
     private String noticeContent;
 
     /**
-     * 公告类型（0-普通，1-重要，2-系统）
+     * 公告类型（0-普通，1-重要，2-系统，3-活动）
      */
     private Integer noticeType;
 
