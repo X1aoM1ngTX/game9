@@ -1,8 +1,8 @@
-package com.xm.gamehub.utils;
+package com.xm.game9.utils;
 
-import com.xm.gamehub.common.ErrorCode;
-import com.xm.gamehub.exception.BusinessException;
-import com.xm.gamehub.model.entity.email.VerifyCodeEmail;
+import com.xm.game9.common.ErrorCode;
+import com.xm.game9.exception.BusinessException;
+import com.xm.game9.model.entity.email.VerifyCodeEmail;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;

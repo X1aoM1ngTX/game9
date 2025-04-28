@@ -1,7 +1,7 @@
-package com.xm.gamehub.utils;
+package com.xm.game9.utils;
 
-import com.xm.gamehub.common.ErrorCode;
-import com.xm.gamehub.exception.BusinessException;
+import com.xm.game9.common.ErrorCode;
+import com.xm.game9.exception.BusinessException;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,6 @@
-package com.xm.gamehub.utils;
+package com.xm.game9.utils;
 
-import com.xm.gamehub.model.domain.User;
+import com.xm.game9.model.domain.User;
 
 /**
  * 用户工具类

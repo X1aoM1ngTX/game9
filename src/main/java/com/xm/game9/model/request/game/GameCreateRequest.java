@@ -1,4 +1,4 @@
-package com.xm.gamehub.model.request.game;
+package com.xm.game9.model.request.game;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

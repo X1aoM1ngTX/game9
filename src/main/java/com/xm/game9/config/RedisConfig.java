@@ -1,4 +1,4 @@
-package com.xm.gamehub.config;
+package com.xm.game9.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

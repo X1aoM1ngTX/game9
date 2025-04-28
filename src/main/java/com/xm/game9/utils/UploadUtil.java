@@ -1,9 +1,8 @@
-package com.xm.gamehub.utils;
+package com.xm.game9.utils;
 
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.ObjectMetadata;
-
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -12,10 +11,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.core.sync.RequestBody;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -41,13 +40,19 @@ public class UploadUtil {
     private static String r2AccessKeySecret;
     private static String r2BucketName;
 
-    @Value("${aliyun.oss.domain}")      private String domainTemp;
-    @Value("${aliyun.oss.endpoint}")    private String endpointTemp;
-    @Value("${aliyun.oss.bucketName}")  private String bucketNameTemp;
+    @Value("${aliyun.oss.domain}")
+    private String domainTemp;
+    @Value("${aliyun.oss.endpoint}")
+    private String endpointTemp;
+    @Value("${aliyun.oss.bucketName}")
+    private String bucketNameTemp;
 
-    @Value("${cloudflare.r2.domain}")       private String r2DomainTemp;
-    @Value("${cloudflare.r2.endpoint}")     private String r2EndpointTemp;
-    @Value("${cloudflare.r2.bucketName}")   private String r2BucketNameTemp;
+    @Value("${cloudflare.r2.domain}")
+    private String r2DomainTemp;
+    @Value("${cloudflare.r2.endpoint}")
+    private String r2EndpointTemp;
+    @Value("${cloudflare.r2.bucketName}")
+    private String r2BucketNameTemp;
 
     private UploadUtil() {
         // 私有构造函数
@@ -82,17 +87,17 @@ public class UploadUtil {
                     // 添加调试日志
                     log.info("创建R2客户端，访问密钥ID: {}", r2AccessKeyId != null ? "已设置" : "未设置");
                     log.info("创建R2客户端，访问密钥密码: {}", r2AccessKeySecret != null ? "已设置" : "未设置");
-                    
+
                     if (r2AccessKeyId == null || r2AccessKeyId.isEmpty()) {
                         log.error("Cloudflare R2访问密钥ID为空，无法创建R2客户端");
                         throw new IllegalStateException("Cloudflare R2访问密钥ID为空，无法创建R2客户端");
                     }
-                    
+
                     if (r2AccessKeySecret == null || r2AccessKeySecret.isEmpty()) {
                         log.error("Cloudflare R2访问密钥密码为空，无法创建R2客户端");
                         throw new IllegalStateException("Cloudflare R2访问密钥密码为空，无法创建R2客户端");
                     }
-                    
+
                     AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(r2AccessKeyId, r2AccessKeySecret);
                     r2Client = S3Client.builder()
                             .endpointOverride(java.net.URI.create(r2Endpoint))
@@ -175,7 +180,7 @@ public class UploadUtil {
         try {
             // 获取OSS客户端实例
             OSS oss = getOssClient();
-             // 设置 Content-Type
+            // 设置 Content-Type
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentType(file.getContentType());
             // 上传文件
@@ -196,12 +201,12 @@ public class UploadUtil {
         // 添加调试日志
         log.info("开始上传文件到Cloudflare R2，访问密钥ID: {}", r2AccessKeyId != null ? "已设置" : "未设置");
         log.info("开始上传文件到Cloudflare R2，访问密钥密码: {}", r2AccessKeySecret != null ? "已设置" : "未设置");
-        
+
         if (r2AccessKeyId == null || r2AccessKeyId.isEmpty()) {
             log.error("Cloudflare R2访问密钥ID为空，无法上传文件");
             throw new IllegalStateException("Cloudflare R2访问密钥ID为空，无法上传文件");
         }
-        
+
         if (r2AccessKeySecret == null || r2AccessKeySecret.isEmpty()) {
             log.error("Cloudflare R2访问密钥密码为空，无法上传文件");
             throw new IllegalStateException("Cloudflare R2访问密钥密码为空，无法上传文件");
@@ -229,17 +234,17 @@ public class UploadUtil {
         try {
             // 获取R2客户端实例
             S3Client r2 = getR2Client();
-            
+
             // 创建上传请求
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(r2BucketName)
                     .key(newFileName)
                     .contentType(contentType)
                     .build();
-            
+
             // 上传文件
             r2.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-            
+
             // 返回文件访问路径
             return r2Domain + newFileName;
         } catch (IOException e) {

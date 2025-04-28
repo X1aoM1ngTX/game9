@@ -1,13 +1,13 @@
-package com.xm.gamehub.service.impl;
+package com.xm.game9.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.xm.gamehub.common.ErrorCode;
-import com.xm.gamehub.exception.BusinessException;
-import com.xm.gamehub.mapper.UserLibraryMapper;
-import com.xm.gamehub.model.domain.Game;
-import com.xm.gamehub.model.domain.UserLibrary;
-import com.xm.gamehub.service.UserLibraryService;
+import com.xm.game9.common.ErrorCode;
+import com.xm.game9.exception.BusinessException;
+import com.xm.game9.mapper.UserLibraryMapper;
+import com.xm.game9.model.domain.Game;
+import com.xm.game9.model.domain.UserLibrary;
+import com.xm.game9.service.UserLibraryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

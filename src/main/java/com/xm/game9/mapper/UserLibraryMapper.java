@@ -1,8 +1,8 @@
-package com.xm.gamehub.mapper;
+package com.xm.game9.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.xm.gamehub.model.domain.Game;
-import com.xm.gamehub.model.domain.UserLibrary;
+import com.xm.game9.model.domain.Game;
+import com.xm.game9.model.domain.UserLibrary;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Select;
 

@@ -1,8 +1,8 @@
-package com.xm.gamehub.exception;
+package com.xm.game9.exception;
 
-import com.xm.gamehub.common.BaseResponse;
-import com.xm.gamehub.common.ErrorCode;
-import com.xm.gamehub.common.ResultUtils;
+import com.xm.game9.common.BaseResponse;
+import com.xm.game9.common.ErrorCode;
+import com.xm.game9.common.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

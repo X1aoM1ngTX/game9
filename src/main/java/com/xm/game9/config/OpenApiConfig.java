@@ -1,4 +1,4 @@
-package com.xm.gamehub.config;
+package com.xm.game9.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;

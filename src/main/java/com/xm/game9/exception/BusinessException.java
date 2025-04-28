@@ -1,6 +1,6 @@
-package com.xm.gamehub.exception;
+package com.xm.game9.exception;
 
-import com.xm.gamehub.common.ErrorCode;
+import com.xm.game9.common.ErrorCode;
 import lombok.Getter;
 
 import java.io.Serial;

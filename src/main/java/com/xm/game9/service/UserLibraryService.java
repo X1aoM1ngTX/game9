@@ -1,8 +1,8 @@
-package com.xm.gamehub.service;
+package com.xm.game9.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.xm.gamehub.model.domain.Game;
-import com.xm.gamehub.model.domain.UserLibrary;
+import com.xm.game9.model.domain.Game;
+import com.xm.game9.model.domain.UserLibrary;
 
 import java.util.List;
 

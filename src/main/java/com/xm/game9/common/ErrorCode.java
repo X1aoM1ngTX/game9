@@ -1,4 +1,4 @@
-package com.xm.gamehub.common;
+package com.xm.game9.common;
 
 import lombok.Getter;
 
@@ -28,5 +28,5 @@ public enum ErrorCode {
         this.message = message;
         this.description = description;
     }
-    
+
 }

@@ -1,14 +1,14 @@
-package com.xm.gamehub.controller;
+package com.xm.game9.controller;
 
-import com.xm.gamehub.common.BaseResponse;
-import com.xm.gamehub.common.ErrorCode;
-import com.xm.gamehub.common.ResultUtils;
-import com.xm.gamehub.exception.BusinessException;
-import com.xm.gamehub.model.domain.Game;
-import com.xm.gamehub.model.domain.User;
-import com.xm.gamehub.model.request.userLibrary.UserGameRequest;
-import com.xm.gamehub.service.UserLibraryService;
-import com.xm.gamehub.service.UserService;
+import com.xm.game9.common.BaseResponse;
+import com.xm.game9.common.ErrorCode;
+import com.xm.game9.common.ResultUtils;
+import com.xm.game9.exception.BusinessException;
+import com.xm.game9.model.domain.Game;
+import com.xm.game9.model.domain.User;
+import com.xm.game9.model.request.userLibrary.UserGameRequest;
+import com.xm.game9.service.UserLibraryService;
+import com.xm.game9.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;

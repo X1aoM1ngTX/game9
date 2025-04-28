@@ -1,6 +1,6 @@
 spring:
   application:
-    name: gamehub
+    name: game9
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/xmgame
@@ -66,7 +66,7 @@ cloudflare:
   r2:
     domain: https://pub-7ffa66837b134ab0a7a00e6bdda1375b.r2.dev/
     endpoint: https://1a63a68acfe38be8d33d84b44835fe80.r2.cloudflarestorage.com
-    bucketName: gamehub-bucket
+    bucketName: game9-bucket
 
 springdoc:
   swagger-ui:
@@ -74,4 +74,4 @@ springdoc:
     enabled: true
   api-docs:
     path: /v3/api-docs
-  packages-to-scan: com.xm.gamehub.controller
+  packages-to-scan: com.xm.game9.controller

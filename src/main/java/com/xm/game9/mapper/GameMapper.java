@@ -1,7 +1,7 @@
-package com.xm.gamehub.mapper;
+package com.xm.game9.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.xm.gamehub.model.domain.Game;
+import com.xm.game9.model.domain.Game;
 
 /**
  * @author X1aoM1ngTX

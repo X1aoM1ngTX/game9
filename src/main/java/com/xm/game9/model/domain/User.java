@@ -1,4 +1,4 @@
-package com.xm.gamehub.model.domain;
+package com.xm.game9.model.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;

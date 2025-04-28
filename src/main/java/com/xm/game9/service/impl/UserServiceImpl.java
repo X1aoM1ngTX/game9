@@ -1,19 +1,19 @@
-package com.xm.gamehub.service.impl;
+package com.xm.game9.service.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.xm.gamehub.common.ErrorCode;
-import com.xm.gamehub.exception.BusinessException;
-import com.xm.gamehub.mapper.UserMapper;
-import com.xm.gamehub.model.domain.User;
-import com.xm.gamehub.model.request.admin.AdminUserUpdateRequest;
-import com.xm.gamehub.model.request.admin.BatchImportUsersRequest;
-import com.xm.gamehub.model.request.user.*;
-import com.xm.gamehub.service.UserService;
-import com.xm.gamehub.utils.EmailUtil;
-import com.xm.gamehub.utils.RedisUtil;
-import com.xm.gamehub.utils.UploadUtil;
-import com.xm.gamehub.utils.UserUtils;
+import com.xm.game9.common.ErrorCode;
+import com.xm.game9.exception.BusinessException;
+import com.xm.game9.mapper.UserMapper;
+import com.xm.game9.model.domain.User;
+import com.xm.game9.model.request.admin.AdminUserUpdateRequest;
+import com.xm.game9.model.request.admin.BatchImportUsersRequest;
+import com.xm.game9.model.request.user.*;
+import com.xm.game9.service.UserService;
+import com.xm.game9.utils.EmailUtil;
+import com.xm.game9.utils.RedisUtil;
+import com.xm.game9.utils.UploadUtil;
+import com.xm.game9.utils.UserUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,8 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.xm.gamehub.constant.UserConstant.ADMIN_ROLE;
-import static com.xm.gamehub.constant.UserConstant.USER_LOGIN_STATE;
+import static com.xm.game9.constant.UserConstant.ADMIN_ROLE;
+import static com.xm.game9.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * @author X1aoM1ngTX

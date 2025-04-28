@@ -1,4 +1,4 @@
-package com.xm.gamehub.model.request.userLibrary;
+package com.xm.game9.model.request.userLibrary;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-CREATE DATABASE gamehub;
+CREATE DATABASE game9;
 
 CREATE TABLE user
 (

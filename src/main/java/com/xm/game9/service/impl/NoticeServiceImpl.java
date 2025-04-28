@@ -1,14 +1,14 @@
-package com.xm.gamehub.service.impl;
+package com.xm.game9.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.xm.gamehub.common.ErrorCode;
-import com.xm.gamehub.exception.BusinessException;
-import com.xm.gamehub.mapper.NoticeMapper;
-import com.xm.gamehub.model.domain.Notice;
-import com.xm.gamehub.model.request.notice.NoticeCreateRequest;
-import com.xm.gamehub.service.NoticeService;
+import com.xm.game9.common.ErrorCode;
+import com.xm.game9.exception.BusinessException;
+import com.xm.game9.mapper.NoticeMapper;
+import com.xm.game9.model.domain.Notice;
+import com.xm.game9.model.request.notice.NoticeCreateRequest;
+import com.xm.game9.service.NoticeService;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -62,7 +62,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice>
         notice.setNoticeStatus(0); // 默认为草稿状态
         notice.setNoticeIsDelete(0); // 默认未删除
         notice.setNoticeCreateTime(new Date()); // 设置创建时间
-        
+
         // 如果请求中包含创建者ID，则设置
         if (noticeCreateRequest.getNoticeCreatorId() != null) {
             notice.setNoticeCreatorId(noticeCreateRequest.getNoticeCreatorId());
@@ -79,7 +79,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice>
     /**
      * 更新公告信息
      *
-     * @param id 公告ID
+     * @param id     公告ID
      * @param notice 要更新的公告信息
      * @return 更新后的公告
      */
@@ -91,12 +91,12 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice>
         if (notice == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "公告内容为空");
         }
-        
+
         Notice existingNotice = getById(id);
         if (existingNotice == null || existingNotice.getNoticeIsDelete() == 1) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "公告不存在");
         }
-        
+
         // 更新公告信息
         if (notice.getNoticeTitle() != null) {
             // 验证标题长度
@@ -126,12 +126,12 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice>
             }
             existingNotice.setNoticeExpireTime(notice.getNoticeExpireTime());
         }
-        
+
         boolean updated = updateById(existingNotice);
         if (!updated) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新公告失败");
         }
-        
+
         return existingNotice;
     }
 
@@ -146,12 +146,12 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice>
         if (id == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "公告ID不合法");
         }
-        
+
         Notice notice = getById(id);
         if (notice == null || notice.getNoticeIsDelete() == 1) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "公告不存在或已删除");
         }
-        
+
         return notice;
     }
 
@@ -181,7 +181,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice>
         if (type == null || type < 0 || type > 3) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "公告类型参数错误");
         }
-        
+
         LambdaQueryWrapper<Notice> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Notice::getNoticeStatus, 1) // 已发布
                 .eq(Notice::getNoticeIsDelete, 0) // 未删除
@@ -216,7 +216,7 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice>
         if (type != null && (type < 0 || type > 3)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "公告类型参数错误");
         }
-        
+
         Page<Notice> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Notice> wrapper = new LambdaQueryWrapper<>();
 
@@ -260,28 +260,28 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice>
         if (id == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "公告ID不合法");
         }
-        
+
         // 检查公告是否存在
         Notice existingNotice = getById(id);
         if (existingNotice == null || existingNotice.getNoticeIsDelete() == 1) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "公告不存在或已删除");
         }
-        
+
         // 检查是否已经是发布状态
         if (existingNotice.getNoticeStatus() == 1) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "公告已经是发布状态");
         }
-        
+
         Notice notice = new Notice();
         notice.setNoticeId(id);
         notice.setNoticeStatus(1); // 设置为已发布状态
         notice.setNoticePublishTime(new Date()); // 设置发布时间
-        
+
         boolean result = updateById(notice);
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "发布失败");
         }
-        
+
         return true;
     }
 
@@ -296,27 +296,27 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice>
         if (id == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "公告ID不合法");
         }
-        
+
         // 检查公告是否存在
         Notice existingNotice = getById(id);
         if (existingNotice == null || existingNotice.getNoticeIsDelete() == 1) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "公告不存在或已删除");
         }
-        
+
         // 检查是否已经是草稿状态
         if (existingNotice.getNoticeStatus() == 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "公告已经是草稿状态");
         }
-        
+
         Notice notice = new Notice();
         notice.setNoticeId(id);
         notice.setNoticeStatus(0); // 设置为草稿状态
-        
+
         boolean result = updateById(notice);
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "设置草稿失败");
         }
-        
+
         return true;
     }
 
@@ -331,25 +331,25 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice>
         if (id == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "公告ID不合法");
         }
-        
+
         // 检查公告是否存在
         Notice existingNotice = getById(id);
         if (existingNotice == null || existingNotice.getNoticeIsDelete() == 1) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "公告不存在或已删除");
         }
-        
+
         Notice notice = new Notice();
         notice.setNoticeId(id);
         notice.setNoticeIsDelete(1); // 设置为已删除状态
-        
+
         boolean result = updateById(notice);
         if (!result) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除失败");
         }
-        
+
         return true;
     }
-    
+
     /**
      * 批量删除公告
      *
@@ -361,29 +361,29 @@ public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice>
         if (ids == null || ids.isEmpty()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "ID列表不能为空");
         }
-        
+
         boolean allSuccess = true;
         for (Long id : ids) {
             if (id == null || id <= 0) {
                 continue;
             }
-            
+
             // 检查公告是否存在
             Notice existingNotice = getById(id);
             if (existingNotice == null || existingNotice.getNoticeIsDelete() == 1) {
                 continue;
             }
-            
+
             boolean success = deleteNotice(id);
             if (!success) {
                 allSuccess = false;
             }
         }
-        
+
         if (!allSuccess) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "部分公告删除失败");
         }
-        
+
         return true;
     }
 }

@@ -1,4 +1,4 @@
-package com.xm.gamehub.model.vo;
+package com.xm.game9.model.vo;
 
 import lombok.Data;
 

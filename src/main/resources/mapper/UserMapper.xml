@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.xm.gamehub.mapper.UserMapper">
+<mapper namespace="com.xm.game9.mapper.UserMapper">
 
-    <resultMap id="BaseResultMap" type="com.xm.gamehub.model.domain.User">
+    <resultMap id="BaseResultMap" type="com.xm.game9.model.domain.User">
         <id property="userId" column="userId" jdbcType="BIGINT"/>
         <result property="userName" column="userName" jdbcType="VARCHAR"/>
         <result property="userEmail" column="userEmail" jdbcType="VARCHAR"/>

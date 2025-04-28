@@ -1,4 +1,4 @@
-package com.xm.gamehub.common;
+package com.xm.game9.common;
 
 import lombok.Data;
 

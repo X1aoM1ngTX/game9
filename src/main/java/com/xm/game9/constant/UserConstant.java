@@ -1,4 +1,4 @@
-package com.xm.gamehub.constant;
+package com.xm.game9.constant;
 
 
 /**

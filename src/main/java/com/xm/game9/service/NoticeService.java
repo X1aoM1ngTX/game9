@@ -1,9 +1,9 @@
-package com.xm.gamehub.service;
+package com.xm.game9.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.xm.gamehub.model.domain.Notice;
-import com.xm.gamehub.model.request.notice.NoticeCreateRequest;
+import com.xm.game9.model.domain.Notice;
+import com.xm.game9.model.request.notice.NoticeCreateRequest;
 
 import java.util.List;
 
@@ -25,12 +25,12 @@ public interface NoticeService extends IService<Notice> {
     /**
      * 更新公告信息
      *
-     * @param id 公告ID
+     * @param id     公告ID
      * @param notice 要更新的公告信息
      * @return 更新后的公告
      */
     Notice updateNotice(Long id, Notice notice);
-    
+
     /**
      * 获取公告详情
      *
@@ -54,7 +54,7 @@ public interface NoticeService extends IService<Notice> {
      * @return 是否成功
      */
     boolean draftNotice(Long id);
-    
+
     /**
      * 获取有效的公告列表（已发布且未过期的）
      *
@@ -89,7 +89,7 @@ public interface NoticeService extends IService<Notice> {
      * @return 是否成功
      */
     boolean deleteNotice(Long id);
-    
+
     /**
      * 批量删除公告
      *

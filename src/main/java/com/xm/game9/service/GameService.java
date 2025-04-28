@@ -1,14 +1,14 @@
-package com.xm.gamehub.service;
+package com.xm.game9.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.xm.gamehub.model.domain.Game;
-import com.xm.gamehub.model.request.admin.BatchImportGamesRequest;
-import com.xm.gamehub.model.request.game.GameCreateRequest;
-import com.xm.gamehub.model.request.game.GameQueryRequest;
-import com.xm.gamehub.model.request.game.GameStatusRequest;
-import com.xm.gamehub.model.request.game.GameUpdateRequest;
-import com.xm.gamehub.model.vo.GameDetailVO;
+import com.xm.game9.model.domain.Game;
+import com.xm.game9.model.request.admin.BatchImportGamesRequest;
+import com.xm.game9.model.request.game.GameCreateRequest;
+import com.xm.game9.model.request.game.GameQueryRequest;
+import com.xm.game9.model.request.game.GameStatusRequest;
+import com.xm.game9.model.request.game.GameUpdateRequest;
+import com.xm.game9.model.vo.GameDetailVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,4 +1,4 @@
-package com.xm.gamehub.model.request.game;
+package com.xm.game9.model.request.game;
 
 import lombok.Data;
 

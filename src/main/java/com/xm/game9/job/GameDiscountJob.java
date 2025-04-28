@@ -1,8 +1,8 @@
-package com.xm.gamehub.job;
+package com.xm.game9.job;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.xm.gamehub.model.domain.Game;
-import com.xm.gamehub.service.GameService;
+import com.xm.game9.model.domain.Game;
+import com.xm.game9.service.GameService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;

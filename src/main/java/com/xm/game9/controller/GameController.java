@@ -1,17 +1,17 @@
-package com.xm.gamehub.controller;
+package com.xm.game9.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.xm.gamehub.common.BaseResponse;
-import com.xm.gamehub.common.ErrorCode;
-import com.xm.gamehub.common.ResultUtils;
-import com.xm.gamehub.exception.BusinessException;
-import com.xm.gamehub.model.domain.Game;
-import com.xm.gamehub.model.domain.User;
-import com.xm.gamehub.model.request.game.*;
-import com.xm.gamehub.model.vo.GameDetailVO;
-import com.xm.gamehub.service.GameService;
-import com.xm.gamehub.service.UserService;
-import com.xm.gamehub.utils.UploadUtil;
+import com.xm.game9.common.BaseResponse;
+import com.xm.game9.common.ErrorCode;
+import com.xm.game9.common.ResultUtils;
+import com.xm.game9.exception.BusinessException;
+import com.xm.game9.model.domain.Game;
+import com.xm.game9.model.domain.User;
+import com.xm.game9.model.request.game.*;
+import com.xm.game9.model.vo.GameDetailVO;
+import com.xm.game9.service.GameService;
+import com.xm.game9.service.UserService;
+import com.xm.game9.utils.UploadUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,8 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-import static com.xm.gamehub.constant.UserConstant.ADMIN_ROLE;
-import static com.xm.gamehub.constant.UserConstant.USER_LOGIN_STATE;
+import static com.xm.game9.constant.UserConstant.ADMIN_ROLE;
+import static com.xm.game9.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 游戏接口

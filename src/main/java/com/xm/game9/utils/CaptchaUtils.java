@@ -1,4 +1,4 @@
-package com.xm.gamehub.utils;
+package com.xm.game9.utils;
 
 import java.util.Random;
 
