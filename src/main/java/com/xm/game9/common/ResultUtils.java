@@ -48,7 +48,7 @@ public class ResultUtils {
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static BaseResponse error(ErrorCode errorCode, String message, String description) {
-        return new BaseResponse(errorCode.getError_code(), null, message, description);
+        return new BaseResponse(errorCode.getErrorCode(), null, message, description);
     }
 
     /**
@@ -58,6 +58,6 @@ public class ResultUtils {
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static BaseResponse error(ErrorCode errorCode, String description) {
-        return new BaseResponse(errorCode.getError_code(), null, errorCode.getMessage(), description);
+        return new BaseResponse(errorCode.getErrorCode(), null, errorCode.getMessage(), description);
     }
 }

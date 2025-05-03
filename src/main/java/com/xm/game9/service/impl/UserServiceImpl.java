@@ -473,7 +473,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         try {
             // 4. 上传文件到阿里云OSS
-            String avatarUrl = uploadUtil.uploadAliyunOss(file);
+            String avatarUrl = uploadUtil.uploadR2(file);
 
             // 5. 更新用户头像URL
             User user = getById(userId);

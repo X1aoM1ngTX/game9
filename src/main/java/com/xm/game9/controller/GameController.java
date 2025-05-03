@@ -43,6 +43,9 @@ public class GameController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private UploadUtil uploadUtil;
+
     /**
      * 创建游戏
      *
@@ -159,15 +162,27 @@ public class GameController {
             throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
 
-        if (file.isEmpty()) {
+        if (file == null || file.isEmpty()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件为空");
         }
+        
         try {
-            String url = UploadUtil.getInstance().uploadR2(file);
+            // 确保上传服务可用
+            if (uploadUtil == null) {
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "文件上传服务未初始化");
+            }
+            
+            String url = uploadUtil.uploadR2(file);
             return ResultUtils.success(url);
+        } catch (BusinessException e) {
+            log.error("业务异常: {}", e.getDetailMessage());
+            throw e;
         } catch (IOException e) {
             log.error("文件上传失败", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "文件上传失败");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "文件上传失败: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("文件上传过程中发生未知错误", e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "文件上传失败，请稍后重试");
         }
     }
 

@@ -19,12 +19,12 @@ public enum ErrorCode {
     GAME_EXIST(50002, "游戏已存在", "游戏已存在"),
     OPERATION_ERROR(50003, "操作失败", "操作失败");
 
-    private final int error_code;
+    private final int errorCode;
     private final String message;
     private final String description;
 
-    ErrorCode(int error_code, String message, String description) {
-        this.error_code = error_code;
+    ErrorCode(int errorCode, String message, String description) {
+        this.errorCode = errorCode;
         this.message = message;
         this.description = description;
     }

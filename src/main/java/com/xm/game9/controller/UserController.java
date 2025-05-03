@@ -48,6 +48,9 @@ public class UserController {
     @Resource
     private GameService gameService;
 
+    @Resource
+    private UploadUtil uploadUtil;
+
     /**
      * 用户注册
      *
@@ -290,8 +293,7 @@ public class UserController {
         }
 
         try {
-            // 使用单例模式获取 UploadUtil 实例
-            String avatarUrl = UploadUtil.getInstance().uploadR2(file);
+            String avatarUrl = uploadUtil.uploadR2(file);
 
             // 更新用户头像
             User user = new User();

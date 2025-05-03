@@ -325,6 +325,12 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         }
     }
 
+    /**
+     * 批量导入游戏
+     *
+     * @param games 游戏列表
+     * @return 导入的游戏数量
+     */
     @Override
     public int batchImportGames(List<BatchImportGamesRequest.GameImportInfo> games) {
         if (games == null || games.isEmpty()) {
