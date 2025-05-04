@@ -39,7 +39,7 @@ public class NewsController {
 
     @Autowired
     private UserService userService;
-    
+
     @Autowired
     private UploadUtil uploadUtil;
 
@@ -79,7 +79,7 @@ public class NewsController {
     /**
      * 更新资讯
      */
-    @Operation(summary = "更新资讯", description = "登录用户更新指定资讯的信息")
+    @Operation(summary = "更新资讯", description = "登录用户只能更新自己的资讯")
     @PutMapping("/update/{id}")
     public BaseResponse<Boolean> updateNews(
             @Parameter(description = "资讯ID", required = true) @PathVariable Long id,
@@ -88,11 +88,22 @@ public class NewsController {
         if (id == null || id <= 0 || newsUpdateRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
         }
-        getLoginUser(request);
+
+        // 获取当前登录用户
+        User loginUser = getLoginUser(request);
+        Long userId = loginUser.getUserId();
+
+        // 获取资讯信息
         News newsToUpdate = newsService.getNewsById(id);
         if (newsToUpdate == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "资讯不存在");
         }
+
+        // 检查是否为资讯作者
+        if (!userId.equals(newsToUpdate.getNewsAuthorId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "只能更新自己创建的资讯");
+        }
+
         BeanUtils.copyProperties(newsUpdateRequest, newsToUpdate, "newsId", "authorId", "newsCreatedTime", "newsViews", "newsStatus", "isDelete");
         newsToUpdate.setNewsId(id);
         boolean success = newsService.updateNews(newsToUpdate);
@@ -113,13 +124,13 @@ public class NewsController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件为空");
         }
         getLoginUser(request); // 验证用户登录状态
-        
+
         try {
             // 确保上传服务可用
             if (uploadUtil == null) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "文件上传服务未初始化");
             }
-            
+
             String url = uploadUtil.uploadR2(file);
             return ResultUtils.success(url);
         } catch (BusinessException e) {
@@ -137,7 +148,7 @@ public class NewsController {
     /**
      * 删除资讯
      */
-    @Operation(summary = "删除资讯", description = "登录用户逻辑删除指定资讯")
+    @Operation(summary = "删除资讯", description = "登录用户只能删除自己发布的资讯")
     @DeleteMapping("/delete/{id}")
     public BaseResponse<Boolean> deleteNews(
             @Parameter(description = "资讯ID", required = true) @PathVariable Long id,
@@ -145,7 +156,23 @@ public class NewsController {
         if (id == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "资讯ID无效");
         }
-        getLoginUser(request);
+
+        // 获取当前登录用户
+        User loginUser = getLoginUser(request);
+        Long userId = loginUser.getUserId();
+
+        // 获取资讯信息
+        News news = newsService.getNewsById(id);
+        if (news == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "资讯不存在");
+        }
+
+        // 检查是否为资讯作者
+        if (!userId.equals(news.getNewsAuthorId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "只能删除自己发布的资讯");
+        }
+
+        // 执行删除操作
         boolean success = newsService.deleteNews(id);
         return ResultUtils.success(success);
     }
@@ -153,7 +180,7 @@ public class NewsController {
     /**
      * 发布资讯
      */
-    @Operation(summary = "发布资讯", description = "登录用户发布指定资讯")
+    @Operation(summary = "发布资讯", description = "登录用户只能发布自己的资讯")
     @PostMapping("/publish/{id}")
     public BaseResponse<Boolean> publishNews(
             @Parameter(description = "资讯ID", required = true) @PathVariable Long id,
@@ -161,7 +188,22 @@ public class NewsController {
         if (id == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "资讯ID无效");
         }
-        getLoginUser(request);
+
+        // 获取当前登录用户
+        User loginUser = getLoginUser(request);
+        Long userId = loginUser.getUserId();
+
+        // 获取资讯信息
+        News news = newsService.getNewsById(id);
+        if (news == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "资讯不存在");
+        }
+
+        // 检查是否为资讯作者
+        if (!userId.equals(news.getNewsAuthorId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "只能发布自己创建的资讯");
+        }
+
         boolean success = newsService.publishNews(id);
         return ResultUtils.success(success);
     }
@@ -169,7 +211,7 @@ public class NewsController {
     /**
      * 将资讯设为草稿
      */
-    @Operation(summary = "将资讯设为草稿", description = "登录用户将指定资讯设为草稿")
+    @Operation(summary = "将资讯设为草稿", description = "登录用户只能操作自己的资讯")
     @PostMapping("/draft/{id}")
     public BaseResponse<Boolean> draftNews(
             @Parameter(description = "资讯ID", required = true) @PathVariable Long id,
@@ -177,7 +219,22 @@ public class NewsController {
         if (id == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "资讯ID无效");
         }
-        getLoginUser(request);
+
+        // 获取当前登录用户
+        User loginUser = getLoginUser(request);
+        Long userId = loginUser.getUserId();
+
+        // 获取资讯信息
+        News news = newsService.getNewsById(id);
+        if (news == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "资讯不存在");
+        }
+
+        // 检查是否为资讯作者
+        if (!userId.equals(news.getNewsAuthorId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "只能操作自己创建的资讯");
+        }
+
         boolean success = newsService.draftNews(id);
         return ResultUtils.success(success);
     }
@@ -219,7 +276,7 @@ public class NewsController {
         Page<News> page = newsService.getNewsPage(pageNum, pageSize, 1, null);
         return ResultUtils.success(page);
     }
-    
+
     /**
      * 获取当前用户的草稿资讯列表
      */
@@ -239,7 +296,7 @@ public class NewsController {
         Page<News> page = newsService.getUserNewsPage(pageNum, pageSize, 0, loginUser.getUserId());
         return ResultUtils.success(page);
     }
-    
+
     /**
      * 获取当前用户的已发布资讯列表
      */

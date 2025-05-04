@@ -3,8 +3,6 @@ package com.xm.game9.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xm.game9.model.domain.News;
-// import com.xm.game9.model.request.news.NewsCreateRequest; // 未来可能需要创建
-// import com.xm.game9.model.request.news.NewsUpdateRequest; // 未来可能需要创建
 
 import java.util.List;
 
@@ -17,7 +15,7 @@ public interface NewsService extends IService<News> {
     /**
      * 创建资讯
      *
-     * @param news 资讯数据
+     * @param news     资讯数据
      * @param authorId 作者ID
      * @return 新创建的资讯ID
      */
@@ -72,7 +70,7 @@ public interface NewsService extends IService<News> {
      * @return 分页结果
      */
     Page<News> getNewsPage(Integer pageNum, Integer pageSize, Integer status, Long authorId);
-    
+
     /**
      * 获取指定用户的指定状态的资讯列表
      *

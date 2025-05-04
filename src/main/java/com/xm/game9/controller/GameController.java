@@ -165,13 +165,13 @@ public class GameController {
         if (file == null || file.isEmpty()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件为空");
         }
-        
+
         try {
             // 确保上传服务可用
             if (uploadUtil == null) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "文件上传服务未初始化");
             }
-            
+
             String url = uploadUtil.uploadR2(file);
             return ResultUtils.success(url);
         } catch (BusinessException e) {

@@ -182,7 +182,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         game.setGameDescription(gameUpdateRequest.getGameDescription());
         if (gameUpdateRequest.getGamePrice() != null) {
             try {
-                game.setGamePrice(new BigDecimal(String.valueOf(gameUpdateRequest.getGamePrice())));
+                game.setGamePrice(new BigDecimal(gameUpdateRequest.getGamePrice()));
             } catch (NumberFormatException e) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "价格格式不正确");
             }

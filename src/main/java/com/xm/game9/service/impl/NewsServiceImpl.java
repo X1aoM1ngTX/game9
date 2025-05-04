@@ -9,8 +9,8 @@ import com.xm.game9.exception.BusinessException;
 import com.xm.game9.mapper.NewsMapper;
 import com.xm.game9.model.domain.News;
 import com.xm.game9.service.NewsService;
-import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
@@ -24,14 +24,14 @@ import java.util.List;
 @Service
 public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
         implements NewsService {
-    
+
     @Resource
     private NewsMapper newsMapper;
 
     /**
      * 创建资讯
      *
-     * @param news 资讯对象
+     * @param news     资讯对象
      * @param authorId 作者ID
      * @return 资讯ID
      */
@@ -102,7 +102,7 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
             updateNews.setNewsContent(news.getNewsContent());
         }
         if (news.getNewsSummary() != null) {
-             if (news.getNewsSummary().length() > 500) {
+            if (news.getNewsSummary().length() > 500) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "资讯摘要长度不能超过500");
             }
             updateNews.setNewsSummary(news.getNewsSummary());
@@ -200,9 +200,9 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
     /**
      * 获取资讯分页列表
      *
-     * @param pageNum 页码
+     * @param pageNum  页码
      * @param pageSize 每页大小
-     * @param status 状态
+     * @param status   状态
      * @param authorId 作者ID
      * @return 资讯分页列表
      */
@@ -228,14 +228,14 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
 
         // 默认按更新时间降序，已发布的按发布时间降序
         if (status != null && status == 1) {
-             wrapper.orderByDesc(News::getNewsPublishTime);
+            wrapper.orderByDesc(News::getNewsPublishTime);
         } else {
-             wrapper.orderByDesc(News::getNewsUpdateTime);
+            wrapper.orderByDesc(News::getNewsUpdateTime);
         }
 
         return this.page(page, wrapper);
     }
-    
+
     /**
      * 获取指定用户的指定状态的资讯列表
      *
@@ -250,7 +250,7 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
         if (userId == null || userId <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID非法");
         }
-        
+
         if (pageNum == null || pageNum < 1) {
             pageNum = 1;
         }
@@ -261,8 +261,8 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
         Page<News> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<News> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(News::getNewsIsDelete, 0) // 查询未删除的
-               .eq(News::getNewsAuthorId, userId); // 查询指定用户的资讯
-        
+                .eq(News::getNewsAuthorId, userId); // 查询指定用户的资讯
+
         // 指定状态
         if (status != null) {
             wrapper.eq(News::getNewsStatus, status);
@@ -303,14 +303,14 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
      */
     @Override
     public void incrementNewsViews(Long id) {
-         if (id == null || id <= 0) {
+        if (id == null || id <= 0) {
             log.warn("Attempted to increment views for invalid news ID: " + id);
             return; // 或者抛出异常，取决于业务需求
         }
         // 使用 LambdaUpdateWrapper 原子性更新浏览次数
         LambdaUpdateWrapper<News> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(News::getNewsId, id)
-                     .setSql("newsViews = newsViews + 1");
+                .setSql("newsViews = newsViews + 1");
         boolean updated = this.update(updateWrapper);
         if (!updated) {
             // 可能资讯不存在或已被删除，记录日志

@@ -5,18 +5,18 @@
 <mapper namespace="com.xm.game9.mapper.NewsMapper">
 
     <resultMap id="BaseResultMap" type="com.xm.game9.model.domain.News">
-            <id property="newsId" column="newsId" jdbcType="BIGINT"/>
-            <result property="newsTitle" column="newsTitle" jdbcType="VARCHAR"/>
-            <result property="newsContent" column="newsContent" jdbcType="VARCHAR"/>
-            <result property="newsAuthorId" column="newsAuthorId" jdbcType="BIGINT"/>
-            <result property="newsStatus" column="newsStatus" jdbcType="INTEGER"/>
-            <result property="newsCreateTime" column="newsCreateTime" jdbcType="TIMESTAMP"/>
-            <result property="newsUpdateTime" column="newsUpdateTime" jdbcType="TIMESTAMP"/>
-            <result property="newsPublishTime" column="newsPublishTime" jdbcType="TIMESTAMP"/>
-            <result property="newsIsDelete" column="newsIsDelete" jdbcType="INTEGER"/>
-            <result property="newsCoverImage" column="newsCoverImage" jdbcType="VARCHAR"/>
-            <result property="newsSummary" column="newsSummary" jdbcType="VARCHAR"/>
-            <result property="newsViews" column="newsViews" jdbcType="INTEGER"/>
+        <id property="newsId" column="newsId" jdbcType="BIGINT"/>
+        <result property="newsTitle" column="newsTitle" jdbcType="VARCHAR"/>
+        <result property="newsContent" column="newsContent" jdbcType="VARCHAR"/>
+        <result property="newsAuthorId" column="newsAuthorId" jdbcType="BIGINT"/>
+        <result property="newsStatus" column="newsStatus" jdbcType="INTEGER"/>
+        <result property="newsCreateTime" column="newsCreateTime" jdbcType="TIMESTAMP"/>
+        <result property="newsUpdateTime" column="newsUpdateTime" jdbcType="TIMESTAMP"/>
+        <result property="newsPublishTime" column="newsPublishTime" jdbcType="TIMESTAMP"/>
+        <result property="newsIsDelete" column="newsIsDelete" jdbcType="INTEGER"/>
+        <result property="newsCoverImage" column="newsCoverImage" jdbcType="VARCHAR"/>
+        <result property="newsSummary" column="newsSummary" jdbcType="VARCHAR"/>
+        <result property="newsViews" column="newsViews" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="Base_Column_List">
