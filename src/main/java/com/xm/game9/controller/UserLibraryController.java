@@ -68,16 +68,29 @@ public class UserLibraryController {
     }
 
     /**
+     * 获取登录用户的游戏库列表
+     *
+     * @param request HttpServletRequest
+     * @return 游戏列表
+     */
+    @Operation(summary = "获取登录用户的游戏库列表", description = "获取登录用户的游戏库列表")
+    @GetMapping("/listSelfGames")
+    public BaseResponse<List<Game>> listSelfGames(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        List<Game> games = userLibraryService.getUserGames(loginUser.getUserId());
+        return ResultUtils.success(games);
+    }
+
+     /**
      * 获取用户的游戏库列表
      *
      * @param request HttpServletRequest
      * @return 游戏列表
      */
     @Operation(summary = "获取用户的游戏库列表", description = "获取用户的游戏库列表")
-    @GetMapping("/listUserGames")
-    public BaseResponse<List<Game>> listUserGames(HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
-        List<Game> games = userLibraryService.getUserGames(loginUser.getUserId());
+    @GetMapping("/listUserGames/{userId}")
+    public BaseResponse<List<Game>> listUserGamesByUserId(@PathVariable Long userId) {
+        List<Game> games = userLibraryService.getUserGames(userId);
         return ResultUtils.success(games);
     }
 }
