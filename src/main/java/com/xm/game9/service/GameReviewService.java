@@ -19,7 +19,7 @@ public interface GameReviewService extends IService<GameReview> {
     /**
      * 创建游戏评价
      *
-     * @param userId 用户ID
+     * @param userId            用户ID
      * @param gameReviewRequest 评价请求
      * @return 评价ID
      */
@@ -36,8 +36,8 @@ public interface GameReviewService extends IService<GameReview> {
     /**
      * 分页获取游戏评价
      *
-     * @param gameId 游戏ID
-     * @param current 当前页
+     * @param gameId   游戏ID
+     * @param current  当前页
      * @param pageSize 每页大小
      * @return 分页评价列表
      */
@@ -47,7 +47,7 @@ public interface GameReviewService extends IService<GameReview> {
      * 删除评价
      *
      * @param reviewId 评价ID
-     * @param userId 用户ID
+     * @param userId   用户ID
      * @return 是否删除成功
      */
     boolean deleteReview(Long reviewId, Long userId);
@@ -63,7 +63,7 @@ public interface GameReviewService extends IService<GameReview> {
     /**
      * 修改评价
      *
-     * @param userId 用户ID
+     * @param userId                  用户ID
      * @param gameReviewUpdateRequest 评价更新请求
      * @return 是否修改成功
      */

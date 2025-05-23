@@ -1,10 +1,6 @@
 package com.xm.game9.model.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.io.Serial;
@@ -23,43 +19,43 @@ public class GameReview implements Serializable {
     @Serial
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
-    
+
     /**
      * 评价ID
      */
     @TableId(type = IdType.AUTO)
     private Long reviewId;
-    
+
     /**
      * 用户ID
      */
     private Long userId;
-    
+
     /**
      * 游戏ID
      */
     private Long gameId;
-    
+
     /**
-     * 评分（1-5分，支持0.5分）
+     * 评分（1-5星）
      */
-    private BigDecimal rating;
-    
+    private Integer rating;
+
     /**
      * 评价内容
      */
     private String content;
-    
+
     /**
      * 创建时间
      */
     private Date createTime;
-    
+
     /**
      * 更新时间
      */
     private Date updateTime;
-    
+
     /**
      * 是否删除
      */

@@ -1,6 +1,5 @@
 package com.xm.game9.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xm.game9.common.ErrorCode;
@@ -25,7 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,15 +73,9 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
             throw new BusinessException(ErrorCode.NO_AUTH, "您需要先购买游戏才能评价");
         }
 
-        // 检查评分是否在有效范围内
-        if (gameReviewRequest.getRating().compareTo(new BigDecimal("1")) < 0 || 
-            gameReviewRequest.getRating().compareTo(new BigDecimal("5")) > 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "评分必须在1-5之间");
-        }
-
-        // 检查评分是否为0.5的倍数
-        if (gameReviewRequest.getRating().remainder(new BigDecimal("0.5")).compareTo(BigDecimal.ZERO) != 0) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "评分必须是0.5的倍数");
+        // 检查评分是否在有效范围内 (1-5 的整数)
+        if (gameReviewRequest.getRating() == null || gameReviewRequest.getRating() < 1 || gameReviewRequest.getRating() > 5) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "评分必须是1-5星的整数");
         }
 
         // 检查是否已经评价过
@@ -101,7 +94,7 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
         gameReview.setContent(gameReviewRequest.getContent());
         gameReview.setCreateTime(new Date());
         gameReview.setUpdateTime(new Date());
-        gameReview.setIsDeleted(false);
+        gameReview.setIsDeleted(0);
 
         boolean result = save(gameReview);
         if (!result) {
@@ -183,11 +176,16 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
             return 0.0;
         }
 
-        BigDecimal sum = reviews.stream()
-                .map(GameReview::getRating)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        // 计算5分制平均分
+        double sum = reviews.stream()
+                .mapToInt(GameReview::getRating)
+                .sum();
 
-        return sum.divide(new BigDecimal(reviews.size()), 1, BigDecimal.ROUND_HALF_UP).doubleValue();
+        // 转换为10分制平均分并保留一位小数
+        return BigDecimal.valueOf(sum)
+                .divide(BigDecimal.valueOf(reviews.size()), 1, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(2))
+                .doubleValue();
     }
 
     @Override
@@ -208,17 +206,11 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
             throw new BusinessException(ErrorCode.NO_AUTH, "无权修改他人的评价");
         }
 
-        // 检查评分是否在有效范围内
+        // 检查评分是否在有效范围内 (1-5 的整数)
         if (gameReviewUpdateRequest.getRating() != null) {
-            if (gameReviewUpdateRequest.getRating().compareTo(new BigDecimal("1")) < 0 || 
-                gameReviewUpdateRequest.getRating().compareTo(new BigDecimal("5")) > 0) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "评分必须在1-5之间");
-            }
-            
-            // 检查评分是否为0.5的倍数
-            if (gameReviewUpdateRequest.getRating().remainder(new BigDecimal("0.5")).compareTo(BigDecimal.ZERO) != 0) {
-                throw new BusinessException(ErrorCode.PARAMS_ERROR, "评分必须是0.5的倍数");
-            }
+             if (gameReviewUpdateRequest.getRating() < 1 || gameReviewUpdateRequest.getRating() > 5) {
+                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "评分必须是1-5星的整数");
+             }
         }
 
         // 更新评价
@@ -237,13 +229,13 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
         return gameReviews.stream().map(gameReview -> {
             GameReviewVO gameReviewVO = new GameReviewVO();
             BeanUtils.copyProperties(gameReview, gameReviewVO);
-            
+
             // 获取用户名
             User user = userService.getById(gameReview.getUserId());
             if (user != null) {
                 gameReviewVO.setUserName(user.getUserName());
             }
-            
+
             return gameReviewVO;
         }).collect(Collectors.toList());
     }

@@ -19,7 +19,8 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        userId,userName,userEmail,
+        userId
+        ,userName,userEmail,
         userPhone,userPassword,userCreatedTime,
         userIsDelete,userIsAdmin,userProfile,
         userAvatar,userNickname

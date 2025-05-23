@@ -25,10 +25,10 @@ public class GameReviewUpdateRequest implements Serializable {
     private Long reviewId;
 
     /**
-     * 评分（1-5分，支持0.5分）
+     * 评分（1-5星）
      */
-    @Schema(description = "评分（1-5分，支持0.5分）")
-    private BigDecimal rating;
+    @Schema(description = "评分（1-5星）")
+    private Integer rating;
 
     /**
      * 评价内容

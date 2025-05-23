@@ -16,7 +16,8 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        reviewId,userId,gameId,
+        reviewId
+        ,userId,gameId,
         rating,content,createTime,
         updateTime,isDeleted
     </sql>

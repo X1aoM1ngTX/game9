@@ -20,7 +20,8 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        newsId,newsTitle,newsContent,
+        newsId
+        ,newsTitle,newsContent,
         newsAuthorId,newsStatus,newsCreateTime,
         newsUpdateTime,newsPublishTime,newsIsDelete,
         newsCoverImage,newsSummary,newsViews

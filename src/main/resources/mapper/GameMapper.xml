@@ -24,7 +24,8 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        gameId,gameName,gameDescription,
+        gameId
+        ,gameName,gameDescription,
         gamePrice,gameStock,gameCreatedTime,
         gameReleaseDate,gameDev,gamePub,
         gameIsRemoved,gameDiscountedPrices,gameOnSale,

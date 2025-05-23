@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -35,7 +36,7 @@ public class GameReviewVO implements Serializable {
     private Long gameId;
 
     /**
-     * 评分（1-5分）
+     * 评分（1-5星）
      */
     private Integer rating;
 

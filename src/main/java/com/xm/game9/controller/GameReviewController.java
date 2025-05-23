@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static com.xm.game9.constant.UserConstant.USER_LOGIN_STATE;
-
 /**
  * 游戏评价接口
  */
@@ -39,14 +37,14 @@ public class GameReviewController {
     private UserService userService;
 
     /**
-     * 创建游戏评价
+     * 添加游戏评价
      *
      * @param gameReviewRequest 评价请求
-     * @param request HttpServletRequest
+     * @param request           HttpServletRequest
      * @return 评价ID
      */
-    @Operation(summary = "创建游戏评价", description = "创建新的游戏评价")
-    @PostMapping("/create")
+    @Operation(summary = "添加游戏评价", description = "添加新的游戏评价")
+    @PostMapping("/add")
     public BaseResponse<Long> createReview(@RequestBody GameReviewRequest gameReviewRequest, HttpServletRequest request) {
         if (gameReviewRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
@@ -75,8 +73,8 @@ public class GameReviewController {
     /**
      * 分页获取游戏评价
      *
-     * @param gameId 游戏ID
-     * @param current 当前页
+     * @param gameId   游戏ID
+     * @param current  当前页
      * @param pageSize 每页大小
      * @return 分页评价列表
      */
@@ -97,7 +95,7 @@ public class GameReviewController {
      * 删除评价
      *
      * @param reviewId 评价ID
-     * @param request HttpServletRequest
+     * @param request  HttpServletRequest
      * @return 是否删除成功
      */
     @Operation(summary = "删除评价", description = "删除指定的游戏评价")
@@ -131,7 +129,7 @@ public class GameReviewController {
      * 修改评价
      *
      * @param gameReviewUpdateRequest 评价更新请求
-     * @param request HttpServletRequest
+     * @param request                 HttpServletRequest
      * @return 是否修改成功
      */
     @Operation(summary = "修改评价", description = "修改指定的游戏评价")
