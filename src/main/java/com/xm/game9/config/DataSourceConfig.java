@@ -6,6 +6,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 
+/**
+ * @author X1aoM1ngTX
+ */
 @Configuration
 public class DataSourceConfig {
 

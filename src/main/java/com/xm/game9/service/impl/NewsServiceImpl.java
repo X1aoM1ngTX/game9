@@ -57,11 +57,11 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
 
         // 设置默认值和创建信息
         news.setNewsAuthorId(authorId);
-        news.setNewsStatus(0); // 默认为草稿
-        news.setNewsIsDelete(0); // 默认未删除
+        news.setNewsStatus(0);
+        news.setNewsIsDelete(0);
         news.setNewsCreateTime(new Date());
         news.setNewsUpdateTime(new Date());
-        news.setNewsViews(0); // 初始浏览次数为0
+        news.setNewsViews(0);
 
         boolean saveResult = this.save(news);
         if (!saveResult) {
@@ -147,14 +147,14 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
      */
     @Override
     public boolean publishNews(Long id) {
-        News news = getNewsById(id); // 复用查询和校验逻辑
+        News news = getNewsById(id);
         if (news.getNewsStatus() == 1) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "资讯已发布");
         }
 
         News updateNews = new News();
         updateNews.setNewsId(id);
-        updateNews.setNewsStatus(1); // 设置为已发布
+        updateNews.setNewsStatus(1);
         updateNews.setNewsPublishTime(new Date());
         updateNews.setNewsUpdateTime(new Date());
 
@@ -169,14 +169,14 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
      */
     @Override
     public boolean draftNews(Long id) {
-        News news = getNewsById(id); // 复用查询和校验逻辑
+        News news = getNewsById(id);
         if (news.getNewsStatus() == 0) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "资讯已经是草稿状态");
         }
 
         News updateNews = new News();
         updateNews.setNewsId(id);
-        updateNews.setNewsStatus(0); // 设置为草稿
+        updateNews.setNewsStatus(0);
         updateNews.setNewsUpdateTime(new Date());
         // 发布时间不清空，保留历史记录
 
@@ -191,9 +191,9 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
     @Override
     public List<News> getPublishedNews() {
         LambdaQueryWrapper<News> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(News::getNewsStatus, 1) // 已发布
-                .eq(News::getNewsIsDelete, 0) // 未删除
-                .orderByDesc(News::getNewsPublishTime); // 按发布时间降序
+        wrapper.eq(News::getNewsStatus, 1)
+                .eq(News::getNewsIsDelete, 0)
+                .orderByDesc(News::getNewsPublishTime);
         return this.list(wrapper);
     }
 
@@ -212,12 +212,12 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
             pageNum = 1;
         }
         if (pageSize == null || pageSize < 1) {
-            pageSize = 10; // 默认每页10条
+            pageSize = 10;
         }
 
         Page<News> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<News> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(News::getNewsIsDelete, 0); // 查询未删除的
+        wrapper.eq(News::getNewsIsDelete, 0);
 
         if (status != null && (status == 0 || status == 1)) {
             wrapper.eq(News::getNewsStatus, status);
@@ -255,13 +255,13 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
             pageNum = 1;
         }
         if (pageSize == null || pageSize < 1) {
-            pageSize = 10; // 默认每页10条
+            pageSize = 10;
         }
 
         Page<News> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<News> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(News::getNewsIsDelete, 0) // 查询未删除的
-                .eq(News::getNewsAuthorId, userId); // 查询指定用户的资讯
+        wrapper.eq(News::getNewsIsDelete, 0)
+                .eq(News::getNewsAuthorId, userId);
 
         // 指定状态
         if (status != null) {
@@ -286,11 +286,11 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
      */
     @Override
     public boolean deleteNews(Long id) {
-        News news = getNewsById(id); // 复用查询和校验逻辑
+        getNewsById(id);
 
         News updateNews = new News();
         updateNews.setNewsId(id);
-        updateNews.setNewsIsDelete(1); // 逻辑删除
+        updateNews.setNewsIsDelete(1);
         updateNews.setNewsUpdateTime(new Date());
 
         return this.updateById(updateNews);

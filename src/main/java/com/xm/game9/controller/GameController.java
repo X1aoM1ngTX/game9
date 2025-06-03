@@ -33,7 +33,7 @@ import static com.xm.game9.constant.UserConstant.USER_LOGIN_STATE;
 @Tag(name = "游戏接口", description = "游戏相关的所有接口")
 @RestController
 @RequestMapping("/game")
-@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
+@CrossOrigin(origins = { "http://localhost:3000" }, allowCredentials = "true")
 @Slf4j
 public class GameController {
 
@@ -118,7 +118,8 @@ public class GameController {
      */
     @Operation(summary = "更新游戏", description = "更新游戏")
     @PutMapping("/updateGame")
-    public BaseResponse<Boolean> updateGame(@RequestBody GameUpdateRequest gameUpdateRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> updateGame(@RequestBody GameUpdateRequest gameUpdateRequest,
+            HttpServletRequest request) {
         if (!isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
@@ -139,7 +140,7 @@ public class GameController {
     @Operation(summary = "设置游戏状态", description = "设置游戏状态")
     @PutMapping("/setGameRemovedStatus")
     public BaseResponse<Boolean> setGameStatus(@RequestBody GameStatusRequest gameStatusRequest,
-                                               HttpServletRequest request) {
+            HttpServletRequest request) {
         if (!isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
         }
@@ -217,7 +218,7 @@ public class GameController {
     @Operation(summary = "购买游戏", description = "用户购买游戏")
     @PostMapping("/purchase")
     public BaseResponse<Boolean> purchaseGame(@RequestBody GamePurchaseRequest purchaseRequest,
-                                              HttpServletRequest request) {
+            HttpServletRequest request) {
         // 1. 参数校验
         if (purchaseRequest == null || purchaseRequest.getGameId() == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");

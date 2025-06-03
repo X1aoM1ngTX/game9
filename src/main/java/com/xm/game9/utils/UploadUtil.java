@@ -41,6 +41,9 @@ public class UploadUtil {
     @Value("${cloudflare.r2.bucketName}")
     private String cloudflareR2BucketName;
 
+    @Value("${spring.profiles.active:dev}")
+    private String activeProfile;
+
     private String r2AccessKeyId;
     private String r2SecretAccessKey;
 
@@ -48,7 +51,6 @@ public class UploadUtil {
 
     @PostConstruct
     public void init() {
-        String activeProfile = System.getProperty("spring.profiles.active", "dev");
         log.info("UploadUtil 初始化开始，当前环境: {}", activeProfile);
 
         // 直接从系统环境变量获取

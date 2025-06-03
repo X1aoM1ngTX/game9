@@ -208,9 +208,9 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
 
         // 检查评分是否在有效范围内 (1-5 的整数)
         if (gameReviewUpdateRequest.getRating() != null) {
-             if (gameReviewUpdateRequest.getRating() < 1 || gameReviewUpdateRequest.getRating() > 5) {
-                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "评分必须是1-5星的整数");
-             }
+            if (gameReviewUpdateRequest.getRating() < 1 || gameReviewUpdateRequest.getRating() > 5) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "评分必须是1-5星的整数");
+            }
         }
 
         // 更新评价

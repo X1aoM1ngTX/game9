@@ -19,7 +19,7 @@ spring:
     host: smtp.qq.com
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
-    port: 465
+    port: ${MAIL_PORT:465}
     default-encoding: UTF-8
     protocol: smtps
   data:
@@ -38,6 +38,9 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}  # 默认使用开发环境
 
 logging:
+  level:
+    root: INFO
+    com.xm.game9: DEBUG
   charset:
     file: UTF-8
     console: UTF-8
@@ -50,45 +53,25 @@ server:
 mybatis-plus:
   global-config:
     db-config:
-      logic-delete-field: userIsDelete # 全局逻辑删除字段名
-      logic-delete-value: 1 # 逻辑已删除值
-      logic-not-delete-value: 0 # 逻辑未删除值
+      logic-delete-field: userIsDelete
+      logic-delete-value: 1
+      logic-not-delete-value: 0
   configuration:
     map-underscore-to-camel-case: false
 
-# 阿里云OSS配置
-aliyun:
-  oss:
-    domain: https://xmgame-bucket.oss-cn-guangzhou.aliyuncs.com/
-    endpoint: oss-cn-guangzhou.aliyuncs.com
-    bucketName: xmgame-bucket
-
-# Cloudflare R2配置
-# 重要：需要在环境变量中设置以下两个值：
-# - CLOUDFLARE_R2_ACCESS_KEY_ID: Cloudflare R2 API密钥ID
-# - CLOUDFLARE_R2_ACCESS_KEY_SECRET: Cloudflare R2 API密钥
-#
-# 设置环境变量的方法：
-# Windows:
-#   1. 系统属性 -> 高级 -> 环境变量 -> 新建
-#   2. 或在CMD中: set CLOUDFLARE_R2_ACCESS_KEY_ID=your_key_id
-#
-# Linux/Mac:
-#   export CLOUDFLARE_R2_ACCESS_KEY_ID=your_key_id
-#   export CLOUDFLARE_R2_ACCESS_KEY_SECRET=your_secret_key
-#
-# Java启动参数:
-#   -DCLOUDFLARE_R2_ACCESS_KEY_ID=your_key_id -DCLOUDFLARE_R2_ACCESS_KEY_SECRET=your_secret_key
-#
-# Docker:
-#   docker run -e CLOUDFLARE_R2_ACCESS_KEY_ID=your_key_id -e CLOUDFLARE_R2_ACCESS_KEY_SECRET=your_secret_key ...
-#
 cloudflare:
   r2:
     domain: https://pub-7ffa66837b134ab0a7a00e6bdda1375b.r2.dev/
     endpoint: https://1a63a68acfe38be8d33d84b44835fe80.r2.cloudflarestorage.com
     bucketName: gamehub-bucket
 
+# 文件上传配置
+file:
+  upload-dir: ./uploads/  # 文件上传根目录
+  allowed-types: image/jpeg,image/png,image/gif  # 允许的文件类型
+  max-size: 2097152  # 最大文件大小（2MB）
+
+# API文档配置
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -97,7 +80,8 @@ springdoc:
     path: /v3/api-docs
   packages-to-scan: com.xm.game9.controller
 
-file:
-  upload-dir: ./uploads/  # 文件上传根目录
-  allowed-types: image/jpeg,image/png,image/gif  # 允许的文件类型
-  max-size: 2097152  # 最大文件大小（2MB）
+# 存储配置
+storage:
+  type: local  # 开发环境使用本地存储
+  local:
+    base-path: ./uploads/

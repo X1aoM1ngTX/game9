@@ -10,7 +10,6 @@ import com.xm.game9.model.domain.User;
 import com.xm.game9.model.request.news.NewsCreateRequest;
 import com.xm.game9.model.request.news.NewsUpdateRequest;
 import com.xm.game9.service.NewsService;
-import com.xm.game9.service.UserService;
 import com.xm.game9.utils.UploadUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,9 +35,6 @@ public class NewsController {
 
     @Autowired
     private NewsService newsService;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private UploadUtil uploadUtil;
@@ -123,7 +119,7 @@ public class NewsController {
         if (file == null || file.isEmpty()) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件为空");
         }
-        getLoginUser(request); // 验证用户登录状态
+        getLoginUser(request);
 
         try {
             // 确保上传服务可用

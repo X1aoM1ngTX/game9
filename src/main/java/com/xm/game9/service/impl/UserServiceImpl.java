@@ -47,7 +47,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private static final String SALT = "xm";
     private static final String VERIFY_CODE_PREFIX = "verify:code:";
-    private static String EMAIL_FROM;
+
     @Resource
     private UserMapper userMapper;
     @Resource
@@ -59,9 +59,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     // 初始化邮箱地址
     @PostConstruct
-    public void init() {
-        EMAIL_FROM = emailFrom;
-    }
+    public void init() {}
 
     // 检查 Redis 连接
     private void checkRedisConnection() {
@@ -88,13 +86,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 registerRequest.getUserEmail(),
                 registerRequest.getUserPassword(),
                 registerRequest.getUserCheckPassword())) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+            throw new BusinessException(ErrorCode.NULL_ERROR, "注册信息不完整");
         }
         if (registerRequest.getUserName().length() < 4) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名过短");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名长度不能小于4位");
         }
         if (registerRequest.getUserPassword().length() < 8) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码过短");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码长度不能小于8位");
         }
         if (StringUtils.isAnyBlank(registerRequest.getUserEmail())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不能为空");
@@ -116,13 +114,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 4. 校验验证码
         String cacheCode = RedisUtil.getInstance().get(VERIFY_CODE_PREFIX + registerRequest.getUserEmail());
         if (cacheCode == null || !cacheCode.equals(registerRequest.getVerifyCode())) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误或已过期");
+            throw new BusinessException(ErrorCode.USER_EMAIL_CODE_ERROR, "验证码错误或已过期");
         }
 
         // 5. 账户不能重复
         User existUser = userMapper.selectByUserName(registerRequest.getUserName());
         if (existUser != null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名已存在");
+            throw new BusinessException(ErrorCode.USER_ACCOUNT_ALREADY_EXIST, "用户名已存在");
+        }
+
+        // 6. 检查邮箱是否已被注册
+        existUser = userMapper.selectByEmail(registerRequest.getUserEmail());
+        if (existUser != null) {
+            throw new BusinessException(ErrorCode.USER_EMAIL_ALREADY_EXIST, "邮箱已存在");
         }
 
         // 7. 加密密码
@@ -163,7 +167,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 1. 校验
         if (StringUtils.isAnyBlank(userName, userPassword)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+            throw new BusinessException(ErrorCode.NULL_ERROR, "登录信息不完整");
         }
 
         // 2. 加密
@@ -173,13 +177,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = userMapper.selectByUserName(userName);
         if (user == null) {
             log.info("user login failed, userName cannot match userPassword");
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
+            throw new BusinessException(ErrorCode.USER_ACCOUNT_NOT_EXIST, "用户名不存在");
         }
 
         // 4. 校验密码
         if (!user.getUserPassword().equals(encryptPassword)) {
             log.info("user login failed, userName cannot match userPassword");
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码错误");
+            throw new BusinessException(ErrorCode.USER_PASSWORD_ERROR, "密码错误");
         }
 
         // 5. 记录用户的登录态
@@ -207,7 +211,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         long userId = currentUser.getUserId();
         currentUser = getById(userId);
         if (currentUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND, "用户不存在");
         }
         return currentUser;
     }
@@ -240,12 +244,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public boolean userModify(UserModifyRequest updateRequest, Long userId) {
         if (StringUtils.isAnyBlank(updateRequest.getUserName(), updateRequest.getUserNickname())) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名和昵称不能为空");
+            throw new BusinessException(ErrorCode.NULL_ERROR, "用户名和昵称不能为空");
         }
 
         User user = getById(userId);
         if (user == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND, "用户不存在");
         }
 
         // 检查用户名是否被其他用户使用
@@ -254,7 +258,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         .eq(User::getUserName, updateRequest.getUserName())
                         .ne(User::getUserId, userId));
         if (existUser != null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名已被使用");
+            throw new BusinessException(ErrorCode.USER_ACCOUNT_ALREADY_EXIST, "用户名已存在");
         }
 
         user.setUserName(updateRequest.getUserName());
@@ -277,12 +281,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public boolean adminUserUpdate(AdminUserUpdateRequest updateRequest, Long userId) {
         if (StringUtils.isAnyBlank(updateRequest.getUserName(), updateRequest.getUserNickname())) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名和昵称不能为空");
+            throw new BusinessException(ErrorCode.NULL_ERROR, "用户名和昵称不能为空");
         }
 
         User user = getById(userId);
         if (user == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND, "用户不存在");
         }
 
         // 检查用户名是否被其他用户使用
@@ -291,7 +295,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         .eq(User::getUserName, updateRequest.getUserName())
                         .ne(User::getUserId, userId));
         if (existUser != null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名已被使用");
+            throw new BusinessException(ErrorCode.USER_ACCOUNT_ALREADY_EXIST, "用户名已存在");
         }
 
         user.setUserName(updateRequest.getUserName());
@@ -315,7 +319,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         checkRedisConnection();
 
         // 使用单例模式获取 EmailUtil 实例并发送验证码
-        EmailUtil.getInstance().sendVerificationCode(toEmail);
+        try {
+            EmailUtil.getInstance().sendVerificationCode(toEmail);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.USER_EMAIL_SEND_ERROR);
+        }
     }
 
     /**
@@ -457,18 +465,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID不合法");
         }
         if (file == null || file.isEmpty()) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像文件不能为空");
+            throw new BusinessException(ErrorCode.NULL_ERROR, "头像文件不能为空");
         }
 
         // 2. 校验文件大小（限制为2MB）
         if (file.getSize() > 2 * 1024 * 1024) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "头像文件大小不能超过2MB");
+            throw new BusinessException(ErrorCode.FILE_SIZE_ERROR, "头像文件大小不能超过2MB");
         }
 
         // 3. 校验文件类型
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "文件类型必须是图片");
+            throw new BusinessException(ErrorCode.FILE_TYPE_ERROR, "文件类型必须是图片");
         }
 
         try {
@@ -478,19 +486,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             // 5. 更新用户头像URL
             User user = getById(userId);
             if (user == null) {
-                throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
+                throw new BusinessException(ErrorCode.USER_NOT_FOUND, "用户不存在");
             }
 
             user.setUserAvatar(avatarUrl);
             boolean updated = updateById(user);
             if (!updated) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新用户头像失败");
+                throw new BusinessException(ErrorCode.USER_AVATAR_UPLOAD_ERROR, "更新用户头像失败");
             }
 
             return avatarUrl;
         } catch (IOException e) {
             log.error("上传头像失败", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "上传头像失败");
+            throw new BusinessException(ErrorCode.USER_AVATAR_UPLOAD_ERROR, "上传头像失败");
         }
     }
 
@@ -598,7 +606,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户ID不合法");
         }
         if (date == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR, "日期不能为空");
+            throw new BusinessException(ErrorCode.NULL_ERROR, "日期不能为空");
         }
 
         String key = String.format("sign:%d:%d", userId, date.getYear());
@@ -609,7 +617,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return Boolean.TRUE.equals(signed);
         } catch (Exception e) {
             log.error("检查签到状态失败 - userId: {}, date: {}, error: {}", userId, date, e.getMessage());
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "检查签到状态失败");
+            throw new BusinessException(ErrorCode.USER_SIGN_IN_ERROR, "检查签到状态失败");
         }
     }
 

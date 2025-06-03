@@ -7,6 +7,12 @@ import io.swagger.v3.oas.models.info.License;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * OpenAPI 配置类
+ * 
+ * @author X1aoM1ngTX
+ * @createDate 2024-11-05
+ */
 @Configuration
 public class OpenApiConfig {
 
@@ -14,11 +20,11 @@ public class OpenApiConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("XM Game API")
+                        .title("Game9 API")
                         .description("游戏商城后端接口文档")
                         .version("v1.0")
                         .contact(new Contact()
-                                .name("XM")
+                                .name("X1aoM1ngTX")
                                 .email("1062829664@qq.com")
                                 .url("https://github.com/X1aoM1ngTX"))
                         .license(new License()

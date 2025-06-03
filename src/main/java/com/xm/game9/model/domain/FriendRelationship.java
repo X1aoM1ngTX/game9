@@ -8,22 +8,22 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 游戏评价表
+ * 好友关系表
  *
- * @表名 gameReview
+ * @author X1aoM1ngTX
  */
-@TableName(value = "gameReview")
+@TableName(value = "friendRelationship")
 @Data
-public class GameReview implements Serializable {
+public class FriendRelationship implements Serializable {
     @Serial
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
     /**
-     * 评价ID
+     * 关系ID
      */
     @TableId(type = IdType.AUTO)
-    private Long reviewId;
+    private Long relationshipId;
 
     /**
      * 用户ID
@@ -31,33 +31,33 @@ public class GameReview implements Serializable {
     private Long userId;
 
     /**
-     * 游戏ID
+     * 好友ID
      */
-    private Long gameId;
+    private Long friendId;
 
     /**
-     * 评分（1-5星）
+     * 关系状态：0-待确认 1-已确认 2-已拒绝 3-已删除
      */
-    private Integer rating;
+    private Integer friendStatus;
 
     /**
-     * 评价内容
+     * 好友备注
      */
-    private String content;
+    private String friendRemark;
 
     /**
      * 创建时间
      */
-    private Date createTime;
+    private Date friendCreateTime;
 
     /**
      * 更新时间
      */
-    private Date updateTime;
+    private Date friendUpdateTime;
 
     /**
      * 是否删除
      */
     @TableLogic
-    private Integer isDeleted;
+    private Integer friendIsDeleted;
 } 

@@ -2,8 +2,9 @@ package com.xm.game9.common;
 
 /**
  * 封装返回类
- * author: xmcode
- * update: 2024-11-05 22:42:35
+ * 
+ * @author X1aoM1ngTX
+ * @createDate 2024-11-05
  */
 public class ResultUtils {
 
@@ -30,14 +31,14 @@ public class ResultUtils {
     }
 
     /**
-     * @param Code
+     * @param code
      * @param message
      * @param description
      * @return
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static BaseResponse error(int Code, String message, String description) {
-        return new BaseResponse(Code, null, message, description);
+    public static BaseResponse error(int code, String message, String description) {
+        return new BaseResponse(code, null, message, description);
     }
 
     /**

@@ -71,7 +71,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         // 检查游戏名是否重复
         long count = lambdaQuery().eq(Game::getGameName, gameName).count();
         if (count > 0) {
-            throw new BusinessException(ErrorCode.GAME_EXIST, "游戏名称已存在");
+            throw new BusinessException(ErrorCode.GAME_ALREADY_EXIST, "游戏名称已存在");
         }
 
         Game game = new Game();

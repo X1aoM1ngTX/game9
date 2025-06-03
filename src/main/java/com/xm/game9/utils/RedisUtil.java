@@ -9,6 +9,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.concurrent.TimeUnit;
 
@@ -19,6 +20,9 @@ public class RedisUtil {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+
+    @Value("${spring.profiles.active:dev}")
+    private String activeProfile;
 
     private RedisUtil() {
         // 私有构造函数
@@ -38,7 +42,6 @@ public class RedisUtil {
     @PostConstruct
     public void init() {
         instance = this;
-        String activeProfile = System.getProperty("spring.profiles.active", "dev");
         log.info("RedisUtil 初始化完成，当前环境: {}", activeProfile);
     }
 
