@@ -59,7 +59,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     // 初始化邮箱地址
     @PostConstruct
-    public void init() {}
+    public void init() {
+    }
 
     // 检查 Redis 连接
     private void checkRedisConnection() {

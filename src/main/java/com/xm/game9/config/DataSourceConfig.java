@@ -7,6 +7,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import javax.sql.DataSource;
 
 /**
+ * 数据源配置
+ *
  * @author X1aoM1ngTX
  */
 @Configuration

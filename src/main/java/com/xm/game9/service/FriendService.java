@@ -3,6 +3,7 @@ package com.xm.game9.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xm.game9.model.domain.FriendRelationship;
 import com.xm.game9.model.vo.FriendVO;
+import com.xm.game9.model.vo.FriendRequestVO;
 
 import java.util.List;
 
@@ -67,4 +68,27 @@ public interface FriendService extends IService<FriendRelationship> {
      * @return 是否修改成功
      */
     boolean updateFriendRemark(Long userId, Long friendId, String remark);
+
+    /**
+     * 获取收到的好友申请
+     * @param userId 用户ID
+     * @return 申请列表
+     */
+    List<FriendRequestVO> getReceivedRequests(Long userId);
+
+    /**
+     * 获取我发出的好友申请
+     * @param userId 用户ID
+     * @return 申请列表
+     */
+    List<FriendRequestVO> getSentRequests(Long userId);
+
+    /**
+     * 通过申请记录ID处理好友请求
+     * @param userId 当前用户ID
+     * @param id 申请记录ID
+     * @param accept 是否接受
+     * @return 是否成功
+     */
+    boolean handleFriendRequestById(Long userId, Long id, boolean accept);
 } 

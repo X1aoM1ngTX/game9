@@ -40,7 +40,7 @@ public class GameReviewController {
      * 添加游戏评价
      *
      * @param gameReviewRequest 评价请求
-     * @param request           HttpServletRequest
+     * @param request           HTTP请求
      * @return 评价ID
      */
     @Operation(summary = "添加游戏评价", description = "添加新的游戏评价")
@@ -95,7 +95,7 @@ public class GameReviewController {
      * 删除评价
      *
      * @param reviewId 评价ID
-     * @param request  HttpServletRequest
+     * @param request  HTTP请求
      * @return 是否删除成功
      */
     @Operation(summary = "删除评价", description = "删除指定的游戏评价")
@@ -129,7 +129,7 @@ public class GameReviewController {
      * 修改评价
      *
      * @param gameReviewUpdateRequest 评价更新请求
-     * @param request                 HttpServletRequest
+     * @param request                 HTTP请求
      * @return 是否修改成功
      */
     @Operation(summary = "修改评价", description = "修改指定的游戏评价")

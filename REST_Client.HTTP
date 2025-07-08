@@ -1,0 +1,431 @@
+### ==================== 用户接口 (UserController) ====================
+
+### 用户登录
+POST http://localhost:8080/api/user/login
+Content-Type: application/json
+
+{
+  "userName": "admin",
+  "userPassword": "12345678"
+}
+
+### 用户登录
+POST http://localhost:8080/api/user/login
+Content-Type: application/json
+
+{
+  "userName": "1000ye",
+  "userPassword": "12345678"
+}
+
+### 用户注册
+POST http://localhost:8080/api/user/register
+Content-Type: application/json
+
+{
+  "userName": "newUser",
+  "userPassword": "password123",
+  "checkPassword": "password123",
+  "userEmail": "newuser@example.com",
+  "emailCode": "123456"
+}
+
+### 用户注销
+POST http://localhost:8080/api/user/logout
+
+### 获取当前登录用户信息
+GET http://localhost:8080/api/user/current
+
+### 根据用户名或昵称搜索用户（管理员）
+GET http://localhost:8080/api/user/search?keyword=
+
+
+
+### 删除用户（管理员）
+POST http://localhost:8080/api/user/delete
+Content-Type: application/json
+
+{
+  "userId": 11
+}
+
+### 更新用户信息（管理员）
+PUT http://localhost:8080/api/user/update
+Content-Type: application/json
+
+{
+  "userId": 12,
+  "userNickname": "Updated Nickname",
+  "userPhone": "13800138000",
+  "userProfile": "Updated user profile.",
+  "userIsAdmin": 0
+}
+
+### 更新当前登录用户信息
+PUT http://localhost:8080/api/user/update/my
+Content-Type: application/json
+
+{
+  "userNickname": "My New Nickname",
+  "userAvatar": "https://example.com/new_avatar.jpg",
+  "userPhone": "13900139000",
+  "userProfile": "This is my updated profile description."
+}
+
+### 发送邮箱验证码
+POST http://localhost:8080/api/user/sendEmailCode
+Content-Type: application/json
+
+{
+  "toEmail": "1062829664@qq.com"
+}
+
+### 批量导入用户（管理员）
+POST http://localhost:8080/api/user/batchImportUsers
+Content-Type: application/json
+
+{
+  "users": [
+    {
+      "userName": "test05",
+      "userEmail": "test05@gmail.com",
+      "userPassword": "12345678"
+    },
+    {
+      "userName": "test06",
+      "userEmail": "test06@gmail.com",
+      "userPassword": "12345678"
+    }
+  ]
+}
+
+### 批量导入游戏（管理员 - 似乎应在GameController，但存在于UserController）
+POST http://localhost:8080/api/user/batchImportGames
+Content-Type: application/json
+
+{
+  "games": [
+    {
+      "gameName": "New Game A",
+      "gameDescription": "Description for Game A",
+      "gamePrice": 59.99,
+      "gameStock": 100,
+      "gameCover": "https://example.com/game_a_cover.jpg",
+      "gameReleaseDate": "2024-07-01",
+      "gameDeveloper": "Dev A",
+      "gamePublisher": "Pub A",
+      "gameTags": "Action,Adventure",
+      "gamePlatform": "PC,PS5"
+    }
+  ]
+}
+
+### 用户签到
+POST http://localhost:8080/api/user/signIn
+
+### 检查今日是否已签到
+GET http://localhost:8080/api/user/sign/check
+
+### 获取签到历史
+GET http://localhost:8080/api/user/sign/history
+
+### 获取签到统计（连续签到和总签到）
+GET http://localhost:8080/api/user/sign/count
+
+### 修改密码
+PUT http://localhost:8080/api/user/updatePassword
+Content-Type: application/json
+
+{
+  "oldPassword": "password123",
+  "newPassword": "newPassword456",
+  "confirmPassword": "newPassword456"
+}
+
+
+### ==================== 游戏接口 (GameController) ====================
+
+### 创建游戏（管理员）
+POST http://localhost:8080/api/game/createGame
+Content-Type: application/json
+
+{
+  "gameName": "Awesome Game",
+  "gameDescription": "An awesome game description.",
+  "gamePrice": 49.99,
+  "gameStock": 500,
+  "gameCover": "https://example.com/awesome_game.jpg",
+  "gameReleaseDate": "2024-12-31",
+  "gameDeveloper": "Awesome Devs",
+  "gamePublisher": "Awesome Pubs",
+  "gameTags": "RPG,Strategy",
+  "gamePlatform": "PC,Xbox"
+}
+
+### 查询所有游戏（公开）
+GET http://localhost:8080/api/game/getAllGames
+
+### 分页查询游戏（公开）
+POST http://localhost:8080/api/game/list/page
+Content-Type: application/json
+
+{
+  "current": 1,
+  "pageSize": 10,
+  "sortField": "gameReleaseDate",
+  "sortOrder": "descend",
+  "gameName": "",
+  "gameTags": ""
+}
+
+### 获取游戏详情（公开）
+GET http://localhost:8080/api/game/38 #替换为实际游戏ID
+
+### 更新游戏（管理员）
+PUT http://localhost:8080/api/game/updateGame
+Content-Type: application/json
+
+{
+  "gameId": 38,
+  #
+  替换为实际游戏ID
+  "gameName": "Awesome Game Updated",
+  "gamePrice": 55.00,
+  "gameStock": 450,
+  "gameTags": "RPG,Strategy,Updated"
+}
+
+### 设置游戏移除状态（管理员）
+PUT http://localhost:8080/api/game/setGameRemovedStatus
+Content-Type: application/json
+
+{
+  "gameId": 38,
+  #
+  替换为实际游戏ID
+  "removedStatus": 1
+  #
+  0表示未移除,
+  1表示已移除
+}
+
+### 上传游戏封面（管理员）
+# 注意：需要使用form-data格式，无法在此文件中直接测试
+# POST http://localhost:8080/api/game/upload
+# Content-Type: multipart/form-data
+# file: (选择文件)
+
+### 删除游戏（物理删除，管理员）
+POST http://localhost:8080/api/game/deleteGame
+Content-Type: application/json
+
+{
+  "gameId": 44
+}
+
+### 购买游戏（用户）
+POST http://localhost:8080/api/game/purchase
+Content-Type: application/json
+
+{
+  "gameId": 38
+}
+
+
+### ==================== 公告接口 (NoticeController) ====================
+
+### 创建公告（管理员）
+POST http://localhost:8080/api/notices/create
+Content-Type: application/json
+
+{
+  "noticeTitle": "紧急系统维护公告",
+  "noticeContent": "系统将于今晚10点进行紧急维护，预计1小时。",
+  "noticeType": 1,
+  "noticeExpireTime": "2025-08-01T00:00:00.000Z"
+}
+
+### 更新公告（管理员）
+PUT http://localhost:8080/api/notices/update/11 # 替换为实际公告ID
+Content-Type: application/json
+
+{
+  "noticeTitle": "系统维护通知（更新时间）",
+  "noticeContent": "维护时间更改为今晚11点。",
+  "noticeType": 1,
+  "noticeExpireTime": "2025-08-01T00:00:00.000Z"
+}
+
+### 发布公告（管理员）
+POST http://localhost:8080/api/notices/publish/11 # 替换为实际公告ID
+
+### 将公告设为草稿（管理员）
+POST http://localhost:8080/api/notices/draft/11 # 替换为实际公告ID
+
+### 获取公告详情（公开）
+GET http://localhost:8080/api/notices/get/11 # 替换为实际公告ID
+
+### 分页查询公告（管理员）
+GET http://localhost:8080/api/notices/list?pageNum=1&pageSize=5
+
+### 分页查询公告（带筛选条件，管理员）
+GET http://localhost:8080/api/notices/list?pageNum=1&pageSize=10&status=1&type=2&creatorId=1
+
+### 获取所有有效公告（公开）
+GET http://localhost:8080/api/notices/list/active
+
+### 获取指定类型的有效公告（公开）
+GET http://localhost:8080/api/notices/list/active/1 # 替换为实际类型ID
+
+### 逻辑删除公告（管理员）
+DELETE http://localhost:8080/api/notices/delete/11 # 替换为实际公告ID
+
+### 批量删除公告（管理员）
+DELETE http://localhost:8080/api/notices/delete/batch?ids=2,5 # 替换为实际公告ID列表
+
+
+### ==================== 资讯接口 (NewsController) ====================
+
+### 创建资讯（用户）
+POST http://localhost:8080/api/news/create
+Content-Type: application/json
+
+{
+  "newsTitle": "游戏发布会前瞻",
+  "newsContent": "各大厂商即将发布最新游戏，敬请期待...",
+  "newsSummary": "近期游戏发布会看点",
+  "newsCoverImage": ""
+}
+
+### 更新资讯（作者）
+PUT http://localhost:8080/api/news/update/12 # 替换为实际资讯ID
+Content-Type: application/json
+
+{
+  "newsTitle": "游戏发布会前瞻（更新）",
+  "newsContent": "更新了部分发布会时间和内容...",
+  "newsSummary": "近期游戏发布会详细看点",
+  "newsCoverImage": "https://example.com/images/news_cover_updated.jpg"
+}
+
+### 发布资讯（作者）
+POST http://localhost:8080/api/news/publish/12 # 替换为实际资讯ID
+
+### 将资讯设为草稿（作者）
+POST http://localhost:8080/api/news/draft/12 # 替换为实际资讯ID
+
+### 删除资讯（作者）
+DELETE http://localhost:8080/api/news/delete/12 # 替换为实际资讯ID
+
+### 获取资讯详情（公开）
+GET http://localhost:8080/api/news/get/12 # 替换为实际资讯ID
+
+### 分页查询资讯列表（公开）
+GET http://localhost:8080/api/news/list?pageNum=1&pageSize=10
+
+### 分页查询资讯列表（带筛选条件，公开）
+GET http://localhost:8080/api/news/list?pageNum=1&pageSize=10&status=1&authorId=1
+
+### 获取已发布的资讯列表（公开）
+GET http://localhost:8080/api/news/list/published?pageNum=1&pageSize=10
+
+### 获取当前用户的草稿资讯列表（用户）
+GET http://localhost:8080/api/news/my/drafts?pageNum=1&pageSize=10
+
+### 获取当前用户的已发布资讯列表（用户）
+GET http://localhost:8080/api/news/my/published?pageNum=1&pageSize=10
+
+### 上传资讯封面（用户）
+# 注意：需要使用form-data格式，无法在此文件中直接测试
+# POST http://localhost:8080/api/news/upload
+# Content-Type: multipart/form-data
+# file: (选择文件)
+
+
+### ==================== 用户库接口 (UserLibraryController) ====================
+
+### 添加游戏到用户游戏库
+POST http://localhost:8080/api/userLibrary/addGameToLibrary
+Content-Type: application/json
+
+{
+  "gameId": 38
+}
+
+### 获取当前用户的游戏库（用户）
+GET http://localhost:8080/api/userLibrary/listSelfGames
+
+### 获取当前用户指定游戏的状态（用户）
+GET http://localhost:8080/api/userLibrary/listUserGames/10 # 替换为实际游戏ID
+
+### 从用户游戏库移除游戏
+POST http://localhost:8080/api/userLibrary/removeGameFromLibrary
+Content-Type: application/json
+
+{
+  "gameId": 38
+}
+
+
+### ==================== 游戏评价接口 (GameReviewController) ====================
+
+### 添加游戏评价
+POST http://localhost:8080/api/game/review/add
+Content-Type: application/json
+
+{
+  "gameId": 56,
+  "rating": 4,
+  "content": "游戏体验不错，但还有一些小问题需要改进。"
+}
+
+### 获取游戏的所有评价
+GET http://localhost:8080/api/game/review/list?gameId=38
+
+### 分页获取游戏评价
+GET http://localhost:8080/api/game/review/page?gameId=56&current=1&pageSize=10
+
+### 删除评价
+POST http://localhost:8080/api/game/review/delete?reviewId=1
+
+### 获取游戏的平均评分
+GET http://localhost:8080/api/game/review/average?gameId=38
+
+### 修改评价
+POST http://localhost:8080/api/game/review/update
+Content-Type: application/json
+
+{
+  "reviewId": 1,
+  "rating": 5,
+  "content": "游戏体验非常棒，强烈推荐！"
+}
+
+### ==================== 好友系统接口 (FriendController) ====================
+
+### 发送好友请求
+POST http://localhost:8080/api/friend/add
+Content-Type: application/json
+
+{
+  "friendId": 10,
+  "friendRemark": "这是我的好友请求"
+}
+
+### 处理好友请求（接受/拒绝）
+POST http://localhost:8080/api/friend/handle?friendId=1&accept=true
+
+### 获取好友列表
+GET http://localhost:8080/api/friend/list
+
+### 获取收到的好友申请
+GET http://localhost:8080/api/friend/request/list
+
+### 获取我发出的好友申请
+GET http://localhost:8080/api/friend/request/sent
+
+### 删除好友
+POST http://localhost:8080/api/friend/delete?friendId=1
+
+### 修改好友备注
+POST http://localhost:8080/api/friend/remark?friendId=1&remark=新的备注

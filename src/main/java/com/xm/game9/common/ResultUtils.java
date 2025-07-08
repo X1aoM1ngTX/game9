@@ -2,9 +2,8 @@ package com.xm.game9.common;
 
 /**
  * 封装返回类
- * 
+ *
  * @author X1aoM1ngTX
- * @createDate 2024-11-05
  */
 public class ResultUtils {
 
@@ -12,7 +11,7 @@ public class ResultUtils {
      * 返回成功
      *
      * @param data
-     * @param <T>
+     * @param <T> 泛型
      * @return
      */
     public static <T> BaseResponse<T> success(T data) {
@@ -22,7 +21,7 @@ public class ResultUtils {
     /**
      * 返回错误码
      *
-     * @param errorCode
+     * @param errorCode 错误码
      * @return
      */
     @SuppressWarnings("rawtypes")
@@ -31,9 +30,9 @@ public class ResultUtils {
     }
 
     /**
-     * @param code
-     * @param message
-     * @param description
+     * @param code        错误码
+     * @param message     消息
+     * @param description 描述
      * @return
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -42,9 +41,9 @@ public class ResultUtils {
     }
 
     /**
-     * @param errorCode
-     * @param message
-     * @param description
+     * @param errorCode   错误码
+     * @param message     消息
+     * @param description 描述
      * @return
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -53,8 +52,8 @@ public class ResultUtils {
     }
 
     /**
-     * @param errorCode
-     * @param description
+     * @param errorCode   错误码
+     * @param description 描述
      * @return
      */
     @SuppressWarnings({"rawtypes", "unchecked"})

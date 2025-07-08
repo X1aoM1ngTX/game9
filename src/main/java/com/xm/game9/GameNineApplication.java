@@ -5,12 +5,12 @@ import jakarta.annotation.Resource;
 import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.beans.factory.annotation.Value;
 
 @SpringBootApplication
 @MapperScan("com.xm.game9.mapper")

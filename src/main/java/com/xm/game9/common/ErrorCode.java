@@ -18,7 +18,7 @@ public enum ErrorCode {
     SYSTEM_ERROR(50000, "系统内部异常", "系统内部异常"),
     NOT_FOUND_ERROR(50001, "未发现", "未发现"),
     OPERATION_ERROR(50003, "操作失败", "操作失败"),
-    
+
     // 用户系统相关错误码 (50100-50199)
     USER_NOT_FOUND(50100, "用户不存在", "找不到该用户"),
     USER_ALREADY_EXIST(50101, "用户已存在", "该用户已存在"),
@@ -40,7 +40,7 @@ public enum ErrorCode {
     USER_PHONE_CODE_ERROR(50117, "验证码错误", "手机验证码错误或已过期"),
     USER_PHONE_SEND_ERROR(50118, "验证码发送失败", "手机验证码发送失败"),
     USER_SIGN_IN_ERROR(50119, "签到失败", "用户签到失败"),
-    
+
     // 游戏系统相关错误码 (50200-50299)
     GAME_NOT_FOUND(50200, "游戏不存在", "找不到该游戏"),
     GAME_ALREADY_EXIST(50201, "游戏已存在", "该游戏已存在"),
@@ -55,7 +55,7 @@ public enum ErrorCode {
     GAME_LIBRARY_ERROR(50210, "游戏库错误", "游戏库操作错误"),
     GAME_LIBRARY_NOT_FOUND(50211, "游戏不存在", "游戏库中不存在该游戏"),
     GAME_LIBRARY_ALREADY_EXIST(50212, "游戏已存在", "游戏库中已存在该游戏"),
-    
+
     // 好友系统相关错误码 (50300-50399)
     FRIEND_REQUEST_EXIST(50300, "好友请求已存在", "已经发送过好友请求"),
     FRIEND_ALREADY_EXIST(50301, "好友关系已存在", "已经是好友关系"),
@@ -72,7 +72,7 @@ public enum ErrorCode {
     FRIEND_GROUP_LIMIT_EXCEEDED(50312, "分组数量超限", "好友分组数量已达到上限"),
     FRIEND_GROUP_DELETE_ERROR(50313, "分组删除失败", "好友分组删除失败"),
     FRIEND_ONLINE_STATUS_ERROR(50314, "在线状态更新失败", "用户在线状态更新失败"),
-    
+
     // 资讯系统相关错误码 (50400-50499)
     NEWS_NOT_FOUND(50400, "资讯不存在", "找不到该资讯"),
     NEWS_ALREADY_EXIST(50401, "资讯已存在", "该资讯已存在"),
@@ -83,7 +83,7 @@ public enum ErrorCode {
     NEWS_PUBLISH_ERROR(50406, "发布失败", "资讯发布失败"),
     NEWS_DRAFT_ERROR(50407, "草稿失败", "资讯草稿失败"),
     NEWS_NO_AUTH(50408, "无权限操作", "没有操作该资讯的权限"),
-    
+
     // 文件系统相关错误码 (50500-50599)
     FILE_UPLOAD_ERROR(50500, "文件上传失败", "文件上传失败"),
     FILE_DELETE_ERROR(50501, "文件删除失败", "文件删除失败"),
@@ -94,7 +94,7 @@ public enum ErrorCode {
     FILE_PATH_ERROR(50506, "文件路径错误", "文件路径不合法"),
     FILE_PERMISSION_ERROR(50507, "文件权限错误", "没有文件操作权限"),
     FILE_FORMAT_ERROR(50508, "文件格式错误", "文件格式不正确"),
-    
+
     // Redis相关错误码 (50600-50699)
     REDIS_CONNECTION_ERROR(50600, "Redis连接错误", "Redis连接失败"),
     REDIS_CONFIG_ERROR(50601, "Redis配置错误", "Redis配置错误"),

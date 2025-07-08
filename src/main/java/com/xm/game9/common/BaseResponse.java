@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * 通用返回类
  *
- * @param <T>
+ * @param <T> 泛型
  * @author X1aoM1ngTX
  */
 @Data

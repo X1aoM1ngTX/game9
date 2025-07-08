@@ -5,14 +5,6 @@ import com.xm.game9.model.domain.Game;
 
 /**
  * @author X1aoM1ngTX
- * @description 针对表【game(游戏表)】的数据库操作Mapper
- * @createDate 2024-11-11 14:15:44
- * @Entity generator.domain.Game
+ * @描述 针对表【game(游戏表)】的数据库操作Mapper
  */
-public interface GameMapper extends BaseMapper<Game> {
-
-}
-
-
-
-
+public interface GameMapper extends BaseMapper<Game> {}

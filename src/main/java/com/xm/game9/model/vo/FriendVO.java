@@ -50,4 +50,9 @@ public class FriendVO implements Serializable {
      * 关系创建时间
      */
     private Date createTime;
+
+    /**
+     * 是否在线
+     */
+    private Boolean isOnline;
 } 

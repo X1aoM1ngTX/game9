@@ -64,12 +64,12 @@ public class User implements Serializable {
      * 用户昵称
      */
     private String userNickname;
-    
+
     /**
      * 是否在线
      */
     private Boolean userIsOnline;
-    
+
     /**
      * 最后在线时间
      */

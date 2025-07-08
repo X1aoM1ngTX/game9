@@ -57,6 +57,10 @@ public class NewsController {
 
     /**
      * 创建资讯
+     *
+     * @param newsCreateRequest 资讯创建请求
+     * @param request           HTTP请求
+     * @return 资讯ID
      */
     @Operation(summary = "创建资讯", description = "所有登录用户创建一个新的资讯")
     @PostMapping("/create")
@@ -74,6 +78,11 @@ public class NewsController {
 
     /**
      * 更新资讯
+     *
+     * @param id                 资讯ID
+     * @param newsUpdateRequest 资讯更新请求
+     * @param request           HTTP请求
+     * @return 是否成功
      */
     @Operation(summary = "更新资讯", description = "登录用户只能更新自己的资讯")
     @PutMapping("/update/{id}")
@@ -110,7 +119,7 @@ public class NewsController {
      * 上传资讯封面
      *
      * @param file    资讯封面文件
-     * @param request HttpServletRequest
+     * @param request HTTP请求
      * @return 资讯封面访问路径
      */
     @Operation(summary = "上传资讯封面", description = "上传资讯封面")
@@ -143,6 +152,10 @@ public class NewsController {
 
     /**
      * 删除资讯
+     *
+     * @param id     资讯ID
+     * @param request HTTP请求
+     * @return 是否成功
      */
     @Operation(summary = "删除资讯", description = "登录用户只能删除自己发布的资讯")
     @DeleteMapping("/delete/{id}")
@@ -175,6 +188,10 @@ public class NewsController {
 
     /**
      * 发布资讯
+     *
+     * @param id     资讯ID
+     * @param request HTTP请求
+     * @return 是否成功
      */
     @Operation(summary = "发布资讯", description = "登录用户只能发布自己的资讯")
     @PostMapping("/publish/{id}")
@@ -206,6 +223,10 @@ public class NewsController {
 
     /**
      * 将资讯设为草稿
+     *
+     * @param id     资讯ID
+     * @param request HTTP请求
+     * @return 是否成功
      */
     @Operation(summary = "将资讯设为草稿", description = "登录用户只能操作自己的资讯")
     @PostMapping("/draft/{id}")
@@ -237,6 +258,12 @@ public class NewsController {
 
     /**
      * 分页查询资讯列表（可选条件：状态、作者）
+     *
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @param status   资讯状态
+     * @param authorId 作者ID
+     * @return 资讯列表
      */
     @Operation(summary = "分页查询资讯列表", description = "分页查询所有资讯列表")
     @GetMapping("/list")
@@ -257,6 +284,10 @@ public class NewsController {
 
     /**
      * 获取已发布的资讯列表（分页）
+     *
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @return 已发布的资讯列表
      */
     @Operation(summary = "获取已发布的资讯列表", description = "分页查询已发布的资讯列表")
     @GetMapping("/list/published")
@@ -275,6 +306,11 @@ public class NewsController {
 
     /**
      * 获取当前用户的草稿资讯列表
+     *
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @param request  HTTP请求
+     * @return 草稿资讯列表
      */
     @Operation(summary = "获取当前用户的草稿资讯列表", description = "分页查询当前登录用户的草稿资讯")
     @GetMapping("/my/drafts")
@@ -295,6 +331,11 @@ public class NewsController {
 
     /**
      * 获取当前用户的已发布资讯列表
+     *
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @param request  HTTP请求
+     * @return 已发布资讯列表
      */
     @Operation(summary = "获取当前用户的已发布资讯列表", description = "分页查询当前登录用户的已发布资讯")
     @GetMapping("/my/published")
@@ -315,6 +356,9 @@ public class NewsController {
 
     /**
      * 获取资讯详情
+     *
+     * @param id 资讯ID
+     * @return 资讯详情
      */
     @Operation(summary = "获取资讯详情", description = "获取指定已发布资讯的详细信息")
     @GetMapping("/get/{id}")
@@ -336,6 +380,10 @@ public class NewsController {
 
     /**
      * 获取草稿资讯详情
+     *
+     * @param id     资讯ID
+     * @param request HTTP请求
+     * @return 草稿资讯详情
      */
     @Operation(summary = "获取草稿资讯详情", description = "获取指定草稿资讯的详细信息")
     @GetMapping("/get/draft/{id}")

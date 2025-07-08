@@ -280,7 +280,7 @@ public class NoticeController {
     /**
      * 判断是否为管理员
      *
-     * @param request HttpServlet请求
+     * @param request HTTP请求
      * @return boolean (是否为管理员)
      */
     private boolean isAdmin(HttpServletRequest request) {

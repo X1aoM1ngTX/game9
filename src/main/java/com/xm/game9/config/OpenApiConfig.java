@@ -9,9 +9,8 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * OpenAPI 配置类
- * 
+ *
  * @author X1aoM1ngTX
- * @createDate 2024-11-05
  */
 @Configuration
 public class OpenApiConfig {

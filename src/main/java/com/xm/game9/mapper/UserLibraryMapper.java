@@ -11,14 +11,25 @@ import java.util.List;
 /**
  * @author X1aoM1ngTX
  * @描述 针对表【userLibrary(用户游戏库)】的数据库操作Mapper
- * @创建时间 2024-11-13 15:11:22
- * @实体 model.domain.UserLibrary
  */
 public interface UserLibraryMapper extends BaseMapper<UserLibrary> {
 
+    /**
+     * 根据用户ID和游戏ID删除用户游戏库
+     *
+     * @param userId 用户ID
+     * @param gameId 游戏ID
+     * @return 删除的行数
+     */
     @Delete("DELETE FROM UserLibrary WHERE userId = #{userId} AND gameId = #{gameId}")
     int deleteByUserIdAndGameId(Long userId, Long gameId);
 
+    /**
+     * 根据用户ID查询用户游戏库
+     *
+     * @param userId 用户ID
+     * @return 游戏列表
+     */
     @Select("SELECT g.* FROM Game g JOIN UserLibrary ul ON g.gameId = ul.gameId WHERE ul.userId = #{userId}")
     List<Game> selectGamesByUserId(Long userId);
 }

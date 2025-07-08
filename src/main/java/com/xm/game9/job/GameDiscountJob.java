@@ -13,6 +13,8 @@ import java.util.List;
 
 /**
  * 游戏折扣定时任务
+ *
+ * @author X1aoM1ngTX
  */
 @Component
 @Slf4j

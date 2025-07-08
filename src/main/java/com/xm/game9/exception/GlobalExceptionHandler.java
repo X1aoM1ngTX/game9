@@ -11,12 +11,18 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * 全局异常处理器
  *
  * @author X1aoM1ngTX
- * @date 2024-11-05 22:43:21
  */
 
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    /**
+     * 处理业务异常
+     *
+     * @param e 业务异常
+     * @return 响应
+     */
     @SuppressWarnings("rawtypes")
     @ExceptionHandler(BusinessException.class)
     public BaseResponse businessExceptionHandler(BusinessException e) {
@@ -25,6 +31,12 @@ public class GlobalExceptionHandler {
 
     }
 
+    /**
+     * 处理运行时异常
+     *
+     * @param e 运行时异常
+     * @return 响应
+     */
     @SuppressWarnings("rawtypes")
     @ExceptionHandler(RuntimeException.class)
     public BaseResponse runtimeExceptionHandler(RuntimeException e) {

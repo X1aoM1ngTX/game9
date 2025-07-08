@@ -20,5 +20,8 @@ export REDIS_HOST=localhost
 export REDIS_PORT=6379
 export REDIS_PASSWORD=XMTXyyds2025
 
+# CORS配置
+export CORS_ORIGINS=https://8.134.200.55
+
 # 启动应用
-java -jar game9-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod 
+java -jar game9-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod

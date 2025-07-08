@@ -5,11 +5,11 @@ import com.xm.game9.exception.BusinessException;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.concurrent.TimeUnit;
 
@@ -115,7 +115,7 @@ public class RedisUtil {
      */
     public boolean hasKey(String key) {
         try {
-            return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
+            return stringRedisTemplate.hasKey(key);
         } catch (Exception e) {
             log.error("Redis检查键是否存在失败: key={}, error={}", key, e.getMessage());
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis操作失败");

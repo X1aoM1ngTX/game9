@@ -38,12 +38,11 @@ build/
 
 # 环境配置
 .env
-.env.local
-application-prod.yaml
+.env.prod
+application-prod.yml
 
 # 自定义
 /JL.md
-/REST_Client.HTTP
 /BatchImportUsers.json
 /BatchImportGames.json
 src/main/resources/sql/xmgame.sql

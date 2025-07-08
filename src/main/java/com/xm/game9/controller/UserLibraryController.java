@@ -35,7 +35,7 @@ public class UserLibraryController {
      * 添加游戏到用户游戏库
      *
      * @param addGameRequest 游戏请求体
-     * @param request        HttpServletRequest
+     * @param request        HTTP请求
      * @return 是否添加成功
      */
     @Operation(summary = "添加游戏到用户游戏库", description = "添加游戏到用户游戏库")
@@ -53,7 +53,7 @@ public class UserLibraryController {
      * 从用户游戏库移除游戏
      *
      * @param removeGameRequest 游戏请求体
-     * @param request           HttpServletRequest
+     * @param request           HTTP请求
      * @return 是否移除成功
      */
     @Operation(summary = "从用户游戏库移除游戏", description = "从用户游戏库移除游戏")
@@ -70,7 +70,7 @@ public class UserLibraryController {
     /**
      * 获取登录用户的游戏库列表
      *
-     * @param request HttpServletRequest
+     * @param request HTTP请求
      * @return 游戏列表
      */
     @Operation(summary = "获取登录用户的游戏库列表", description = "获取登录用户的游戏库列表")
@@ -84,7 +84,7 @@ public class UserLibraryController {
     /**
      * 获取用户的游戏库列表
      *
-     * @param request HttpServletRequest
+     * @param request HTTP请求
      * @return 游戏列表
      */
     @Operation(summary = "获取用户的游戏库列表", description = "获取用户的游戏库列表")

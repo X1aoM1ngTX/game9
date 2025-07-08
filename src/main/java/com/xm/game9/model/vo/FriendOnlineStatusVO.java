@@ -12,39 +12,39 @@ import java.util.Date;
  */
 @Data
 public class FriendOnlineStatusVO implements Serializable {
-    
+
     private static final long serialVersionUID = 1L;
-    
+
     /**
      * 好友ID
      */
     private Long friendId;
-    
+
     /**
      * 好友用户名
      */
     private String userName;
-    
+
     /**
      * 好友昵称
      */
     private String userNickname;
-    
+
     /**
      * 好友头像
      */
     private String userAvatar;
-    
+
     /**
      * 是否在线
      */
     private Boolean isOnline;
-    
+
     /**
      * 最后在线时间
      */
     private Date lastOnlineTime;
-    
+
     /**
      * 在线状态描述
      */

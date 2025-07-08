@@ -49,16 +49,16 @@ public class FriendRelationship implements Serializable {
     /**
      * 创建时间
      */
-    private Date friendCreatedTime;
+    private Date friendCreateTime;
 
     /**
      * 更新时间
      */
-    private Date friendUpdatedTime;
+    private Date friendUpdateTime;
 
     /**
      * 是否删除
      */
     @TableLogic
-    private Integer friendIsDelete;
+    private Integer friendIsDeleted;
 }

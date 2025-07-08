@@ -12,6 +12,7 @@ import com.xm.game9.model.request.admin.BatchImportUsersRequest;
 import com.xm.game9.model.request.user.*;
 import com.xm.game9.service.GameService;
 import com.xm.game9.service.UserService;
+import com.xm.game9.utils.RedisUtil;
 import com.xm.game9.utils.UploadUtil;
 import com.xm.game9.utils.UserUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -75,7 +77,7 @@ public class UserController {
      * 用户登录
      *
      * @param loginRequest 登录请求
-     * @param request      HttpServletRequest
+     * @param request      HTTP请求
      * @return 用户
      */
     @Operation(summary = "用户登录", description = "用户登录")
@@ -88,13 +90,14 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         User user = userService.userLogin(loginRequest, request);
+        RedisUtil.getInstance().setWithExpire("user:online:" + user.getUserId(), "1", 60, TimeUnit.SECONDS);
         return ResultUtils.success(user);
     }
 
     /**
      * 用户注销
      *
-     * @param request HttpServletRequest
+     * @param request HTTP请求
      * @return 是否注销成功
      */
     @Operation(summary = "用户退出登录", description = "用户退出登录")
@@ -103,7 +106,12 @@ public class UserController {
         if (request == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
+        // 获取当前登录用户
+        User loginUser = userService.getLoginUser(request);
         boolean result = userService.userLogout(request);
+        if (loginUser != null) {
+            RedisUtil.getInstance().delete("user:online:" + loginUser.getUserId());
+        }
         return ResultUtils.success(result);
     }
 
@@ -111,7 +119,7 @@ public class UserController {
      * 发送验证码邮件
      *
      * @param request 发送请求
-     * @return 是否发送成功
+     * @return 验证码是否发送成功
      */
     @Operation(summary = "发送验证码邮件", description = "发送验证码到指定邮箱")
     @PostMapping("/sendEmailCode")
@@ -169,7 +177,7 @@ public class UserController {
     /**
      * 获取当前用户
      *
-     * @param request HttpServletRequest
+     * @param request HTTP请求
      * @return 当前用户
      */
     @Operation(summary = "获取当前用户", description = "获取当前用户")
@@ -186,7 +194,7 @@ public class UserController {
      * 查询用户
      *
      * @param username 用户名
-     * @param request  HttpServletRequest
+     * @param request  HTTP请求
      * @return 用户列表
      */
     @Operation(summary = "查询用户", description = "查询用户")
@@ -212,7 +220,7 @@ public class UserController {
      * 修改用户信息
      *
      * @param modifyRequest 用户更新请求
-     * @param request       HttpServlet请求
+     * @param request       HTTP请求
      * @return 是否更新成功
      */
     @Operation(summary = "修改用户自己的信息", description = "修改用户信息")
@@ -256,7 +264,7 @@ public class UserController {
      * 删除用户
      *
      * @param deleteRequest 用户删除请求
-     * @param request       HttpServletRequest
+     * @param request       HTTP请求
      * @return 是否删除成功
      */
     @Operation(summary = "删除用户", description = "删除用户")
@@ -276,7 +284,7 @@ public class UserController {
      * 更新用户头像
      *
      * @param file    头像文件
-     * @param request HttpServletRequest
+     * @param request HTTP请求
      * @return 新的头像URL
      */
     @Operation(summary = "更新用户头像", description = "上传并更新用户的头像")
@@ -315,7 +323,7 @@ public class UserController {
      * 批量导入用户
      *
      * @param importRequest 导入请求
-     * @param httpRequest   请求
+     * @param httpRequest   HTTP请求
      * @return 导入结果
      */
     @Operation(summary = "批量导入用户", description = "批量导入用户")
@@ -335,7 +343,7 @@ public class UserController {
      * 批量导入游戏
      *
      * @param importRequest 导入请求
-     * @param httpRequest   请求
+     * @param httpRequest   HTTP请求
      * @return 导入结果
      */
     @Operation(summary = "批量导入游戏", description = "批量导入游戏")
@@ -354,7 +362,7 @@ public class UserController {
     /**
      * 用户签到
      *
-     * @param request HttpServletRequest
+     * @param request HTTP请求
      * @return 是否签到成功
      */
     @Operation(summary = "用户签到", description = "用户每日签到")
@@ -372,7 +380,7 @@ public class UserController {
     /**
      * 检查今日是否已签到
      *
-     * @param request HttpServletRequest
+     * @param request HTTP请求
      * @return 是否签到成功
      */
     @Operation(summary = "检查今日是否已签到", description = "检查用户今日是否已完成签到")
@@ -391,7 +399,7 @@ public class UserController {
      * 获取签到历史
      *
      * @param year    年份
-     * @param request HttpServletRequest
+     * @param request HTTP请求
      * @return 签到历史
      */
     @Operation(summary = "获取签到历史", description = "获取用户指定年份的签到记录")
@@ -412,7 +420,7 @@ public class UserController {
      * 获取签到统计
      *
      * @param year    年份
-     * @param request HttpServletRequest
+     * @param request HTTP请求
      * @return 签到统计
      */
     @Operation(summary = "获取签到统计", description = "获取用户指定年份的签到总天数")
@@ -446,5 +454,21 @@ public class UserController {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "用户不存在");
         }
         return ResultUtils.success(UserUtils.getSafetyUser(user));
+    }
+
+    /**
+     * 用户心跳，刷新在线状态
+     * @param request HTTP请求
+     * @return 是否成功
+     */
+    @Operation(summary = "用户心跳", description = "刷新在线状态")
+    @PostMapping("/heartbeat")
+    public BaseResponse<Boolean> heartbeat(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
+        }
+        RedisUtil.getInstance().setWithExpire("user:online:" + loginUser.getUserId(), "1", 60, TimeUnit.SECONDS);
+        return ResultUtils.success(true);
     }
 }
