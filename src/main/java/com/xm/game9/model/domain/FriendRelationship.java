@@ -11,6 +11,7 @@ import java.util.Date;
  * 好友关系表
  *
  * @author X1aoM1ngTX
+ * @TableName friendRelationship
  */
 @TableName(value = "friendRelationship")
 @Data
@@ -48,16 +49,16 @@ public class FriendRelationship implements Serializable {
     /**
      * 创建时间
      */
-    private Date friendCreateTime;
+    private Date friendCreatedTime;
 
     /**
      * 更新时间
      */
-    private Date friendUpdateTime;
+    private Date friendUpdatedTime;
 
     /**
      * 是否删除
      */
     @TableLogic
-    private Integer friendIsDeleted;
-} 
+    private Integer friendIsDelete;
+}

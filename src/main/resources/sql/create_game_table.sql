@@ -1,5 +1,5 @@
 -- 游戏表
-create table game9.game (
+create table game (
     gameId bigint auto_increment comment '游戏ID' primary key,
     gameName varchar(256) not null comment '游戏名',
     gameDescription text null comment '游戏描述',

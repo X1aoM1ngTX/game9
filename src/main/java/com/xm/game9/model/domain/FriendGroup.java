@@ -8,56 +8,52 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 游戏评价表
+ * 好友分组表
  *
- * @表名 gameReview
+ * @TableName friendGroup
  */
-@TableName(value = "gameReview")
+@TableName(value = "friendGroup")
 @Data
-public class GameReview implements Serializable {
-    @Serial
+public class FriendGroup implements Serializable {
+    
     @TableField(exist = false)
+    @Serial
     private static final long serialVersionUID = 1L;
-
+    
     /**
-     * 评价ID
+     * 分组ID
      */
     @TableId(type = IdType.AUTO)
-    private Long reviewId;
-
+    private Long groupId;
+    
     /**
      * 用户ID
      */
     private Long userId;
-
+    
     /**
-     * 游戏ID
+     * 分组名称
      */
-    private Long gameId;
-
+    private String groupName;
+    
     /**
-     * 评分（1-5星）
+     * 分组排序
      */
-    private Integer gameReviewRating;
-
-    /**
-     * 评价内容
-     */
-    private String gameReviewContent;
-
+    private Integer groupOrder;
+    
     /**
      * 创建时间
      */
-    private Date gameReviewCreateTime;
+    private Date groupCreateTime;
 
     /**
      * 更新时间
      */
-    private Date gameReviewUpdateTime;
+    private Date groupUpdateTime;
 
     /**
      * 是否删除
      */
     @TableLogic
-    private Integer gameReviewIsDeleted;
-} 
+    private Integer groupIsDelete;
+}

@@ -1,5 +1,5 @@
 -- 创建资讯表 (news)
-create table game9.news (
+create table news (
     newsId bigint auto_increment comment '资讯ID' primary key,
     newsTitle varchar(255) not null comment '资讯标题',
     newsContent text not null comment '资讯内容',
@@ -14,6 +14,6 @@ create table game9.news (
     newsViews int default 0 null comment '浏览次数',
     constraint fk_news_author foreign key (newsAuthorId) references game9.user (userId)
 ) comment '资讯表';
-create index idx_news_author_id on game9.news (newsAuthorId);
-create index idx_news_publish_time on game9.news (newsPublishTime);
-create index idx_news_status on game9.news (newsStatus);
+create index idx_news_author_id on news (newsAuthorId);
+create index idx_news_publish_time on news (newsPublishTime);
+create index idx_news_status on news (newsStatus);

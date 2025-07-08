@@ -1,5 +1,5 @@
 -- 公告表
-create table game9.notice (
+create table notice (
     noticeId bigint auto_increment comment '公告Id' primary key,
     noticeTitle varchar(255) not null comment '公告标题',
     noticeContent text not null comment '公告内容',
@@ -11,20 +11,20 @@ create table game9.notice (
     noticeExpireTime datetime null comment '过期时间',
     noticeIsDelete tinyint default 0 not null comment '是否删除',
     constraint fk_notice_creator foreign key (noticeCreatorId) 
-        references game9.user (userId) 
+        references user (userId) 
         on update cascade 
         on delete set null
 ) comment '公告表';
 
 -- 创建索引
-create index idx_expire on game9.notice (noticeExpireTime);
-create index idx_is_delete on game9.notice (noticeIsDelete);
-create index idx_status_publish on game9.notice (noticeStatus, noticePublishTime);
+create index idx_expire on notice (noticeExpireTime);
+create index idx_is_delete on notice (noticeIsDelete);
+create index idx_status_publish on notice (noticeStatus, noticePublishTime);
 
 -- 创建触发器设置默认过期时间
 DELIMITER //
-CREATE TRIGGER game9_set_notice_expire_time
-BEFORE INSERT ON game9.notice
+CREATE TRIGGER set_notice_expire_time
+BEFORE INSERT ON notice
 FOR EACH ROW
 BEGIN
     IF NEW.noticeExpireTime IS NULL THEN

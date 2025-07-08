@@ -46,3 +46,4 @@ application-prod.yaml
 /REST_Client.HTTP
 /BatchImportUsers.json
 /BatchImportGames.json
+src/main/resources/sql/xmgame.sql

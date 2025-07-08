@@ -1,5 +1,5 @@
 -- 用户表
-create table game9.user (
+create table user (
     userId bigint auto_increment comment '用户ID' primary key,
     userName varchar(256) not null comment '用户名',
     userEmail varchar(256) null comment '用户邮箱',

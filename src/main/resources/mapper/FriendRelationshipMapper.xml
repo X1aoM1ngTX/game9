@@ -9,16 +9,17 @@
         <result column="friendId" property="friendId" />
         <result column="friendStatus" property="friendStatus" />
         <result column="friendRemark" property="friendRemark" />
-        <result column="friendCreateTime" property="friendCreateTime" />
-        <result column="friendUpdateTime" property="friendUpdateTime" />
-        <result column="friendIsDeleted" property="friendIsDeleted" />
+        <result column="groupId" property="groupId" />
+        <result column="friendCreatedTime" property="friendCreatedTime" />
+        <result column="friendUpdatedTime" property="friendUpdatedTime" />
+        <result column="friendIsDelete" property="friendIsDelete" />
     </resultMap>
 
     <sql id="Base_Column_List">
         relationshipId
         ,userId,friendId,
-        friendStatus,friendRemark,friendCreateTime,
-        friendUpdateTime,friendIsDeleted
+        friendStatus,friendRemark,groupId,
+        friendCreatedTime,friendUpdatedTime,friendIsDelete
     </sql>
 
     <!-- 好友视图映射 -->
@@ -29,7 +30,7 @@
         <result column="userAvatar" property="userAvatar" />
         <result column="userProfile" property="userProfile" />
         <result column="friendRemark" property="remark" />
-        <result column="friendCreateTime" property="createTime" />
+        <result column="friendCreatedTime" property="createTime" />
     </resultMap>
     
     <!-- 获取好友列表 -->
@@ -41,12 +42,12 @@
             u.userAvatar, 
             u.userProfile, 
             fr.friendRemark, 
-            fr.friendCreateTime 
+            fr.friendCreatedTime 
         FROM user u 
         JOIN friendRelationship fr ON u.userId = fr.friendId 
         WHERE fr.userId = #{userId} 
             AND fr.friendStatus = 1 
-            AND fr.friendIsDeleted = 0
+            AND fr.friendIsDelete = 0
     </select>
     
     <!-- 获取待处理的好友请求 -->
@@ -58,23 +59,23 @@
             u.userAvatar,
             u.userProfile,
             fr.friendRemark,
-            fr.friendCreateTime
+            fr.friendCreatedTime
         FROM friendRelationship fr
         JOIN user u ON fr.userId = u.userId
         WHERE fr.friendId = #{userId}
             AND fr.friendStatus = 0
-            AND fr.friendIsDeleted = 0
+            AND fr.friendIsDelete = 0
     </select>
     
     <!-- 撤回好友请求 -->
     <update id="withdrawRequest">
         UPDATE friendRelationship
-        SET friendIsDeleted = 1,
-            friendUpdateTime = NOW()
+        SET friendIsDelete = 1,
+            friendUpdatedTime = NOW()
         WHERE userId = #{userId}
             AND friendId = #{friendId}
             AND friendStatus = 0
-            AND friendIsDeleted = 0
+            AND friendIsDelete = 0
     </update>
     
     <!-- 搜索好友 -->
@@ -86,12 +87,12 @@
             u.userAvatar,
             u.userProfile,
             fr.friendRemark,
-            fr.friendCreateTime
+            fr.friendCreatedTime
         FROM friendRelationship fr
         JOIN user u ON fr.friendId = u.userId
         WHERE fr.userId = #{userId}
             AND fr.friendStatus = 1
-            AND fr.friendIsDeleted = 0
+            AND fr.friendIsDelete = 0
             AND (
                 u.userName LIKE CONCAT('%', #{keyword}, '%')
                 OR u.userNickname LIKE CONCAT('%', #{keyword}, '%')
@@ -106,9 +107,9 @@
             friendId,
             friendStatus,
             friendRemark,
-            friendCreateTime,
-            friendUpdateTime,
-            friendIsDeleted
+            friendCreatedTime,
+            friendUpdatedTime,
+            friendIsDelete
         ) VALUES (
             #{userId},
             #{friendId},
@@ -124,46 +125,46 @@
     <update id="acceptFriendRequest">
         UPDATE friendRelationship
         SET friendStatus = 1,
-            friendUpdateTime = NOW()
+            friendUpdatedTime = NOW()
         WHERE userId = #{userId}
             AND friendId = #{friendId}
             AND friendStatus = 0
-            AND friendIsDeleted = 0
+            AND friendIsDelete = 0
     </update>
 
     <!-- 拒绝好友请求 -->
     <update id="rejectFriendRequest">
         UPDATE friendRelationship
         SET friendStatus = 2,
-            friendUpdateTime = NOW()
+            friendUpdatedTime = NOW()
         WHERE userId = #{userId}
             AND friendId = #{friendId}
             AND friendStatus = 0
-            AND friendIsDeleted = 0
+            AND friendIsDelete = 0
     </update>
 
     <!-- 删除好友 -->
     <update id="deleteFriend">
         UPDATE friendRelationship
         SET friendStatus = 3,
-            friendUpdateTime = NOW()
+            friendUpdatedTime = NOW()
         WHERE (
             (userId = #{userId} AND friendId = #{friendId})
             OR (userId = #{friendId} AND friendId = #{userId})
         )
         AND friendStatus = 1
-        AND friendIsDeleted = 0
+        AND friendIsDelete = 0
     </update>
 
     <!-- 更新好友备注 -->
     <update id="updateFriendRemark">
         UPDATE friendRelationship
         SET friendRemark = #{remark},
-            friendUpdateTime = NOW()
+            friendUpdatedTime = NOW()
         WHERE userId = #{userId}
             AND friendId = #{friendId}
             AND friendStatus = 1
-            AND friendIsDeleted = 0
+            AND friendIsDelete = 0
     </update>
 
     <!-- 检查好友关系是否存在 -->
@@ -174,7 +175,7 @@
             (userId = #{userId} AND friendId = #{friendId})
             OR (userId = #{friendId} AND friendId = #{userId})
         )
-        AND friendIsDeleted = 0
+        AND friendIsDelete = 0
     </select>
 
     <!-- 检查是否有待处理的好友请求 -->
@@ -184,6 +185,80 @@
         WHERE userId = #{userId}
             AND friendId = #{friendId}
             AND friendStatus = 0
-            AND friendIsDeleted = 0
+            AND friendIsDelete = 0
+    </select>
+    
+    <!-- 获取指定分组的好友列表 -->
+    <select id="selectFriendsByGroup" resultMap="FriendVOResultMap">
+        SELECT 
+            u.userId as friendId, 
+            u.userName, 
+            u.userNickname, 
+            u.userAvatar, 
+            u.userProfile, 
+            fr.friendRemark, 
+            fr.friendCreatedTime 
+        FROM user u 
+        JOIN friendRelationship fr ON u.userId = fr.friendId 
+        WHERE fr.userId = #{userId} 
+            AND fr.friendStatus = 1 
+            AND fr.friendIsDelete = 0
+            AND (
+                <if test="groupId == null">
+                    fr.groupId IS NULL
+                </if>
+                <if test="groupId != null">
+                    fr.groupId = #{groupId}
+                </if>
+            )
+        ORDER BY fr.friendCreatedTime DESC
+    </select>
+    
+    <!-- 更新好友分组 -->
+    <update id="updateFriendGroup">
+        UPDATE friendRelationship
+        SET groupId = #{groupId},
+            friendUpdatedTime = NOW()
+        WHERE userId = #{userId}
+            AND friendId = #{friendId}
+            AND friendStatus = 1
+            AND friendIsDelete = 0
+    </update>
+    
+    <!-- 好友在线状态结果映射 -->
+    <resultMap id="FriendOnlineStatusVOMap" type="com.xm.game9.model.vo.FriendOnlineStatusVO">
+        <result column="friendId" property="friendId" />
+        <result column="userName" property="userName" />
+        <result column="userNickname" property="userNickname" />
+        <result column="userAvatar" property="userAvatar" />
+        <result column="isOnline" property="isOnline" />
+        <result column="lastOnlineTime" property="lastOnlineTime" />
+        <result column="onlineStatus" property="onlineStatus" />
+    </resultMap>
+    
+    <!-- 获取好友的在线状态 -->
+    <select id="selectFriendsOnlineStatus" resultMap="FriendOnlineStatusVOMap">
+        SELECT 
+            u.userId as friendId,
+            u.userName,
+            u.userNickname,
+            u.userAvatar,
+            u.isOnline,
+            u.lastOnlineTime,
+            CASE 
+                WHEN u.isOnline = 1 THEN '在线'
+                WHEN u.lastOnlineTime IS NULL THEN '从未上线'
+                WHEN TIMESTAMPDIFF(MINUTE, u.lastOnlineTime, NOW()) < 5 THEN '刚刚离线'
+                WHEN TIMESTAMPDIFF(HOUR, u.lastOnlineTime, NOW()) < 1 THEN CONCAT(TIMESTAMPDIFF(MINUTE, u.lastOnlineTime, NOW()), '分钟前在线')
+                WHEN TIMESTAMPDIFF(DAY, u.lastOnlineTime, NOW()) < 1 THEN CONCAT(TIMESTAMPDIFF(HOUR, u.lastOnlineTime, NOW()), '小时前在线')
+                WHEN TIMESTAMPDIFF(DAY, u.lastOnlineTime, NOW()) < 7 THEN CONCAT(TIMESTAMPDIFF(DAY, u.lastOnlineTime, NOW()), '天前在线')
+                ELSE '很久未上线'
+            END as onlineStatus
+        FROM user u
+        JOIN friendRelationship fr ON u.userId = fr.friendId
+        WHERE fr.userId = #{userId}
+            AND fr.friendStatus = 1
+            AND fr.friendIsDelete = 0
+        ORDER BY u.isOnline DESC, u.lastOnlineTime DESC
     </select>
 </mapper>

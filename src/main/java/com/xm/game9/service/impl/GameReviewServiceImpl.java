@@ -82,7 +82,7 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
         if (lambdaQuery()
                 .eq(GameReview::getUserId, userId)
                 .eq(GameReview::getGameId, gameReviewRequest.getGameId())
-                .eq(GameReview::getIsDeleted, false)
+                .eq(GameReview::getGameReviewIsDeleted, false)
                 .exists()) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "您已经评价过该游戏");
         }
@@ -90,11 +90,11 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
         GameReview gameReview = new GameReview();
         gameReview.setUserId(userId);
         gameReview.setGameId(gameReviewRequest.getGameId());
-        gameReview.setRating(gameReviewRequest.getRating());
-        gameReview.setContent(gameReviewRequest.getContent());
-        gameReview.setCreateTime(new Date());
-        gameReview.setUpdateTime(new Date());
-        gameReview.setIsDeleted(0);
+        gameReview.setGameReviewRating(gameReviewRequest.getRating());
+        gameReview.setGameReviewContent(gameReviewRequest.getContent());
+        gameReview.setGameReviewCreateTime(new Date());
+        gameReview.setGameReviewUpdateTime(new Date());
+        gameReview.setGameReviewIsDeleted(0);
 
         boolean result = save(gameReview);
         if (!result) {
@@ -112,8 +112,8 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
 
         List<GameReview> gameReviews = lambdaQuery()
                 .eq(GameReview::getGameId, gameId)
-                .eq(GameReview::getIsDeleted, false)
-                .orderByDesc(GameReview::getCreateTime)
+                .eq(GameReview::getGameReviewIsDeleted, false)
+                .orderByDesc(GameReview::getGameReviewCreateTime)
                 .list();
 
         return convertToVOList(gameReviews);
@@ -127,8 +127,8 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
 
         Page<GameReview> gameReviewPage = lambdaQuery()
                 .eq(GameReview::getGameId, gameId)
-                .eq(GameReview::getIsDeleted, false)
-                .orderByDesc(GameReview::getCreateTime)
+                .eq(GameReview::getGameReviewIsDeleted, false)
+                .orderByDesc(GameReview::getGameReviewCreateTime)
                 .page(new Page<>(current, pageSize));
 
         Page<GameReviewVO> gameReviewVOPage = new Page<>(gameReviewPage.getCurrent(), gameReviewPage.getSize(), gameReviewPage.getTotal());
@@ -156,8 +156,8 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
 
         return lambdaUpdate()
                 .eq(GameReview::getReviewId, reviewId)
-                .set(GameReview::getIsDeleted, true)
-                .set(GameReview::getUpdateTime, new Date())
+                .set(GameReview::getGameReviewIsDeleted, true)
+                .set(GameReview::getGameReviewUpdateTime, new Date())
                 .update();
     }
 
@@ -169,7 +169,7 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
 
         List<GameReview> reviews = lambdaQuery()
                 .eq(GameReview::getGameId, gameId)
-                .eq(GameReview::getIsDeleted, false)
+                .eq(GameReview::getGameReviewIsDeleted, false)
                 .list();
 
         if (reviews.isEmpty()) {
@@ -178,7 +178,7 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
 
         // 计算5分制平均分
         double sum = reviews.stream()
-                .mapToInt(GameReview::getRating)
+                .mapToInt(GameReview::getGameReviewRating)
                 .sum();
 
         // 转换为10分制平均分并保留一位小数
@@ -216,9 +216,9 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
         // 更新评价
         return lambdaUpdate()
                 .eq(GameReview::getReviewId, gameReviewUpdateRequest.getReviewId())
-                .set(gameReviewUpdateRequest.getRating() != null, GameReview::getRating, gameReviewUpdateRequest.getRating())
-                .set(StringUtils.isNotBlank(gameReviewUpdateRequest.getContent()), GameReview::getContent, gameReviewUpdateRequest.getContent())
-                .set(GameReview::getUpdateTime, new Date())
+                .set(gameReviewUpdateRequest.getRating() != null, GameReview::getGameReviewRating, gameReviewUpdateRequest.getRating())
+                .set(StringUtils.isNotBlank(gameReviewUpdateRequest.getContent()), GameReview::getGameReviewContent, gameReviewUpdateRequest.getContent())
+                .set(GameReview::getGameReviewUpdateTime, new Date())
                 .update();
     }
 

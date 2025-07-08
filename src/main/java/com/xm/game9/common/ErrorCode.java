@@ -66,6 +66,12 @@ public enum ErrorCode {
     FRIEND_REQUEST_REJECTED(50306, "好友请求被拒绝", "好友请求被拒绝"),
     FRIEND_LIMIT_EXCEEDED(50307, "好友数量超限", "好友数量已达到上限"),
     FRIEND_OPERATION_ERROR(50308, "好友操作失败", "好友相关操作失败"),
+    FRIEND_GROUP_EXISTS(50309, "分组名称已存在", "好友分组名称已存在"),
+    FRIEND_GROUP_NOT_FOUND(50310, "分组不存在", "找不到相关的好友分组"),
+    FRIEND_GROUP_NAME_ERROR(50311, "分组名称错误", "好友分组名称不合法"),
+    FRIEND_GROUP_LIMIT_EXCEEDED(50312, "分组数量超限", "好友分组数量已达到上限"),
+    FRIEND_GROUP_DELETE_ERROR(50313, "分组删除失败", "好友分组删除失败"),
+    FRIEND_ONLINE_STATUS_ERROR(50314, "在线状态更新失败", "用户在线状态更新失败"),
     
     // 资讯系统相关错误码 (50400-50499)
     NEWS_NOT_FOUND(50400, "资讯不存在", "找不到该资讯"),
