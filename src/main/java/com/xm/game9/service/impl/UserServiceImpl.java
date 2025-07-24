@@ -21,9 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.util.DigestUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -45,8 +46,8 @@ import static com.xm.game9.constant.UserConstant.USER_LOGIN_STATE;
 @Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-    private static final String SALT = "xm";
     private static final String VERIFY_CODE_PREFIX = "verify:code:";
+    private static final String SALT = "xm";
 
     @Resource
     private UserMapper userMapper;
@@ -56,6 +57,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UploadUtil uploadUtil;
     @Value("${spring.mail.username}")
     private String emailFrom;
+    @Resource
+    private RedisUtil redisUtil;
+
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     // 初始化邮箱地址
     @PostConstruct
@@ -65,7 +70,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     // 检查 Redis 连接
     private void checkRedisConnection() {
         try {
-            RedisUtil.getInstance().checkConnection();
+            redisUtil.checkConnection();
         } catch (BusinessException e) {
             log.error("Redis服务未启动: {}", e.getMessage());
             throw e;
@@ -113,7 +118,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         checkRedisConnection();
 
         // 4. 校验验证码
-        String cacheCode = RedisUtil.getInstance().get(VERIFY_CODE_PREFIX + registerRequest.getUserEmail());
+        String cacheCode = redisUtil.get(VERIFY_CODE_PREFIX + registerRequest.getUserEmail());
         if (cacheCode == null || !cacheCode.equals(registerRequest.getVerifyCode())) {
             throw new BusinessException(ErrorCode.USER_EMAIL_CODE_ERROR, "验证码错误或已过期");
         }
@@ -131,7 +136,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 7. 加密密码
-        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + registerRequest.getUserPassword()).getBytes());
+        String encryptPassword = passwordEncoder.encode(registerRequest.getUserPassword());
 
         // 8. 插入数据
         User user = new User();
@@ -146,7 +151,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 9. 删除验证码
         if (saveResult) {
-            RedisUtil.getInstance().delete(VERIFY_CODE_PREFIX + registerRequest.getUserEmail());
+            redisUtil.delete(VERIFY_CODE_PREFIX + registerRequest.getUserEmail());
             log.info("验证码删除成功: {}", registerRequest.getUserEmail());
         }
 
@@ -165,31 +170,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public User userLogin(UserLoginRequest loginRequest, HttpServletRequest request) {
         String userName = loginRequest.getUserName();
         String userPassword = loginRequest.getUserPassword();
-
         // 1. 校验
         if (StringUtils.isAnyBlank(userName, userPassword)) {
             throw new BusinessException(ErrorCode.NULL_ERROR, "登录信息不完整");
         }
-
-        // 2. 加密
-        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
-
-        // 3. 查询用户是否存在
+        // 2. 查询用户是否存在
         User user = userMapper.selectByUserName(userName);
         if (user == null) {
             log.info("user login failed, userName cannot match userPassword");
             throw new BusinessException(ErrorCode.USER_ACCOUNT_NOT_EXIST, "用户名不存在");
         }
-
-        // 4. 校验密码
-        if (!user.getUserPassword().equals(encryptPassword)) {
+        // 3. 校验密码（先BCrypt，后MD5，自动升级）
+        boolean passwordMatch = false;
+        if (passwordEncoder.matches(userPassword, user.getUserPassword())) {
+            passwordMatch = true;
+        } else {
+            // 兼容老用户MD5
+            String md5Password = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+            if (user.getUserPassword().equals(md5Password)) {
+                passwordMatch = true;
+                // 自动升级为BCrypt
+                user.setUserPassword(passwordEncoder.encode(userPassword));
+                updateById(user);
+                log.info("老用户密码已自动升级为BCrypt: {}", user.getUserId());
+            }
+        }
+        if (!passwordMatch) {
             log.info("user login failed, userName cannot match userPassword");
             throw new BusinessException(ErrorCode.USER_PASSWORD_ERROR, "密码错误");
         }
-
-        // 5. 记录用户的登录态
+        // 4. 记录用户的登录态
         request.getSession().setAttribute(USER_LOGIN_STATE, user);
-
+        log.info("[Service-登录] 用户名:{}, IP:{}, 时间:{}", userName, request.getRemoteAddr(), java.time.LocalDateTime.now());
         return UserUtils.getSafetyUser(user);
     }
 
@@ -268,6 +280,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setUserPhone(updateRequest.getUserPhone());
         user.setUserProfile(updateRequest.getUserProfile());
 
+        log.info("[Service-用户信息修改] 用户ID:{}, 时间:{}", userId, java.time.LocalDateTime.now());
         return updateById(user);
     }
 
@@ -345,7 +358,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 从Redis获取验证码
         String key = VERIFY_CODE_PREFIX + verifyRequest.getEmail();
-        String savedCode = RedisUtil.getInstance().get(key);
+        String savedCode = redisUtil.get(key);
 
         log.info("验证码校验 - 邮箱: {}, 输入验证码: {}, 存储验证码: {}",
                 verifyRequest.getEmail(), verifyRequest.getCode(), savedCode);
@@ -358,7 +371,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 验证码匹配（不区分大小写）
         if (savedCode.equalsIgnoreCase(verifyRequest.getCode())) {
             // 验证成功后刷新过期时间
-            RedisUtil.getInstance().expire(key, 5, TimeUnit.MINUTES);
+            redisUtil.expire(key, 5, TimeUnit.MINUTES);
             log.info("验证码验证成功 - 邮箱: {}", verifyRequest.getEmail());
             return true;
         }
@@ -396,7 +409,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 从Redis获取验证码
         String key = VERIFY_CODE_PREFIX + resetRequest.getEmail();
-        String savedCode = RedisUtil.getInstance().get(key);
+        String savedCode = redisUtil.get(key);
 
         log.info("重置密码 - 邮箱: {}, 验证码: {}, Redis中的验证码: {}",
                 resetRequest.getEmail(), resetRequest.getVerifyCode(), savedCode);
@@ -424,17 +437,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 加密新密码
-        String encryptedPassword = DigestUtils.md5DigestAsHex(
-                (SALT + resetRequest.getNewPassword()).getBytes());
+        String encryptedPassword = passwordEncoder.encode(resetRequest.getNewPassword());
         user.setUserPassword(encryptedPassword);
 
         // 更新成功后删除验证码
         boolean updated = updateById(user);
         if (updated) {
-            RedisUtil.getInstance().delete(key);
+            redisUtil.delete(key);
             log.info("重置密码成功 - 邮箱: {}", resetRequest.getEmail());
         }
 
+        log.info("[Service-重置密码] 邮箱:{}, 时间:{}", resetRequest.getEmail(), java.time.LocalDateTime.now());
         return updated;
     }
 
@@ -537,7 +550,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             User user = new User();
             user.setUserName(userInfo.getUserName());
             user.setUserEmail(userInfo.getUserEmail());
-            user.setUserPassword(DigestUtils.md5DigestAsHex((SALT + userInfo.getUserPassword()).getBytes()));
+            user.setUserPassword(passwordEncoder.encode(userInfo.getUserPassword()));
             user.setUserPhone(userInfo.getUserPhone());
             user.setUserIsAdmin(userInfo.getUserIsAdmin());
 
@@ -571,19 +584,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         try {
             // 判断是否已经签到
-            Boolean signed = RedisUtil.getInstance().getBit(key, dayOfYear);
+            Boolean signed = redisUtil.getBit(key, dayOfYear);
             if (Boolean.TRUE.equals(signed)) {
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "今天已经签到过了");
             }
 
             // 设置签到标记
-            RedisUtil.getInstance().setBit(key, dayOfYear, true);
+            redisUtil.setBit(key, dayOfYear, true);
 
             // 设置过期时间为下一年的1月1日
             LocalDate firstDayOfNextYear = today.plusYears(1).withDayOfYear(1);
             long expireSeconds = firstDayOfNextYear.atStartOfDay(ZoneId.systemDefault()).toEpochSecond()
                     - System.currentTimeMillis() / 1000;
-            RedisUtil.getInstance().expire(key, expireSeconds, TimeUnit.SECONDS);
+            redisUtil.expire(key, expireSeconds, TimeUnit.SECONDS);
 
             log.info("用户签到成功 - userId: {}, date: {}", userId, today);
         } catch (BusinessException e) {
@@ -614,7 +627,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         int dayOfYear = date.getDayOfYear() - 1;
 
         try {
-            Boolean signed = RedisUtil.getInstance().getBit(key, dayOfYear);
+            Boolean signed = redisUtil.getBit(key, dayOfYear);
             return Boolean.TRUE.equals(signed);
         } catch (Exception e) {
             log.error("检查签到状态失败 - userId: {}, date: {}, error: {}", userId, date, e.getMessage());
@@ -644,7 +657,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         try {
             int daysInYear = Year.of(year).length();
             for (int i = 0; i < daysInYear; i++) {
-                if (Boolean.TRUE.equals(RedisUtil.getInstance().getBit(key, i))) {
+                if (Boolean.TRUE.equals(redisUtil.getBit(key, i))) {
                     signInDates.add(LocalDate.ofYearDay(year, i + 1));
                 }
             }
@@ -673,7 +686,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         try {
             String key = String.format("sign:%d:%d", userId, year);
-            return RedisUtil.getInstance().bitCount(key);
+            return redisUtil.bitCount(key);
         } catch (Exception e) {
             log.error("统计签到次数失败 - userId: {}, year: {}, error: {}", userId, year, e.getMessage());
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "统计签到次数失败");

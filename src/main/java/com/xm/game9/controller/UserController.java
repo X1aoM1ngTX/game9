@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -52,6 +53,9 @@ public class UserController {
 
     @Resource
     private UploadUtil uploadUtil;
+
+    @Resource
+    private RedisUtil redisUtil;
 
     /**
      * 用户注册
@@ -89,9 +93,37 @@ public class UserController {
         if (StringUtils.isAnyBlank(loginRequest.getUserName(), loginRequest.getUserPassword())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
-        User user = userService.userLogin(loginRequest, request);
-        RedisUtil.getInstance().setWithExpire("user:online:" + user.getUserId(), "1", 60, TimeUnit.SECONDS);
-        return ResultUtils.success(user);
+        String userName = loginRequest.getUserName();
+        String failKey = "login:fail:" + userName;
+        String lockKey = "login:lock:" + userName;
+        // 登录失败次数限制
+        if (redisUtil.hasKey(lockKey)) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "账号已锁定，请10分钟后再试");
+        }
+        try {
+            User user = userService.userLogin(loginRequest, request);
+            // 登录成功，清除失败计数
+            redisUtil.delete(failKey);
+            log.info("[登录成功] 用户名:{}, IP:{}, 时间:{}", userName, request.getRemoteAddr(), LocalDateTime.now());
+            redisUtil.setWithExpire("user:online:" + user.getUserId(), "1", 60, TimeUnit.SECONDS);
+            return ResultUtils.success(user);
+        } catch (BusinessException e) {
+            // 登录失败，计数+1
+            long failCount = 1;
+            if (redisUtil.hasKey(failKey)) {
+                String val = redisUtil.get(failKey);
+                try { failCount = Long.parseLong(val) + 1; } catch (Exception ignore) {}
+            }
+            redisUtil.setWithExpire(failKey, String.valueOf(failCount), 10, TimeUnit.MINUTES);
+            log.warn("[登录失败] 用户名:{}, IP:{}, 时间:{}, 失败次数:{}", userName, request.getRemoteAddr(), LocalDateTime.now(), failCount);
+            // 超过5次锁定10分钟
+            if (failCount >= 5) {
+                redisUtil.setWithExpire(lockKey, "1", 10, TimeUnit.MINUTES);
+                log.warn("[账号锁定] 用户名:{}, IP:{}, 时间:{}", userName, request.getRemoteAddr(), LocalDateTime.now());
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "账号已锁定，请10分钟后再试");
+            }
+            throw e;
+        }
     }
 
     /**
@@ -110,7 +142,7 @@ public class UserController {
         User loginUser = userService.getLoginUser(request);
         boolean result = userService.userLogout(request);
         if (loginUser != null) {
-            RedisUtil.getInstance().delete("user:online:" + loginUser.getUserId());
+            redisUtil.delete("user:online:" + loginUser.getUserId());
         }
         return ResultUtils.success(result);
     }
@@ -128,11 +160,25 @@ public class UserController {
             if (request == null || StringUtils.isBlank(request.getToEmail())) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不能为空");
             }
+            String email = request.getToEmail();
+            String limitKey = "email:code:limit:" + email;
+            // 频率限制：1分钟最多3次
+            long count = 1;
+            if (redisUtil.hasKey(limitKey)) {
+                String val = redisUtil.get(limitKey);
+                try { count = Long.parseLong(val) + 1; } catch (Exception ignore) {}
+            }
+            if (count > 3) {
+                log.warn("[验证码发送频率超限] 邮箱:{}, IP:{}, 时间:{}", email, null, LocalDateTime.now());
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "验证码发送过于频繁，请稍后再试");
+            }
+            redisUtil.setWithExpire(limitKey, String.valueOf(count), 1, TimeUnit.MINUTES);
             // 验证邮箱格式
-            if (!request.getToEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式不正确");
             }
-            userService.sendEmailCode(request.getToEmail());
+            userService.sendEmailCode(email);
+            log.info("[验证码发送] 邮箱:{}, IP:{}, 时间:{}", email, null, LocalDateTime.now());
             return ResultUtils.success("验证码发送成功");
         } catch (BusinessException e) {
             throw e;
@@ -171,6 +217,7 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         boolean result = userService.resetPassword(resetRequest);
+        log.info("[重置密码] 邮箱:{}, 时间:{}", resetRequest.getEmail(), LocalDateTime.now());
         return ResultUtils.success(result);
     }
 
@@ -234,6 +281,7 @@ public class UserController {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
         boolean result = userService.userModify(modifyRequest, loginUser.getUserId());
+        log.info("[用户信息修改] 用户ID:{}, 时间:{}", loginUser.getUserId(), LocalDateTime.now());
         return ResultUtils.success(result);
     }
 
@@ -468,7 +516,7 @@ public class UserController {
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
-        RedisUtil.getInstance().setWithExpire("user:online:" + loginUser.getUserId(), "1", 60, TimeUnit.SECONDS);
+        redisUtil.setWithExpire("user:online:" + loginUser.getUserId(), "1", 60, TimeUnit.SECONDS);
         return ResultUtils.success(true);
     }
 }

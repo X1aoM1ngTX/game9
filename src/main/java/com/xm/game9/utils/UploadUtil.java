@@ -94,12 +94,24 @@ public class UploadUtil {
             log.info("开始初始化 Cloudflare R2 客户端，endpoint: {}, bucketName: {}", cloudflareR2Endpoint, cloudflareR2BucketName);
 
             // 初始化 Cloudflare R2 客户端
-            r2Client = S3Client.builder()
-                    .endpointOverride(URI.create(cloudflareR2Endpoint))
-                    .region(Region.US_EAST_1) // Cloudflare R2 使用 US-EAST-1 作为占位符
-                    .credentialsProvider(StaticCredentialsProvider.create(
-                            AwsBasicCredentials.create(r2AccessKeyId, r2SecretAccessKey)))
-                    .build();
+            // 处理 cloudflareR2Endpoint 可能包含非法字符（如多余的空格或换行）
+            String endpoint = cloudflareR2Endpoint != null ? cloudflareR2Endpoint.trim() : "";
+            // 检查 endpoint 是否以 http/https 开头，否则补全
+            if (!endpoint.startsWith("http://") && !endpoint.startsWith("https://")) {
+                endpoint = "https://" + endpoint;
+            }
+            try {
+                URI endpointUri = new URI(endpoint);
+                r2Client = S3Client.builder()
+                        .endpointOverride(endpointUri)
+                        .region(Region.US_EAST_1) // Cloudflare R2 使用 US-EAST-1 作为占位符
+                        .credentialsProvider(StaticCredentialsProvider.create(
+                                AwsBasicCredentials.create(r2AccessKeyId, r2SecretAccessKey)))
+                        .build();
+            } catch (Exception uriEx) {
+                log.error("Cloudflare R2 endpoint 格式错误: [{}]，请检查配置，错误信息: {}", endpoint, uriEx.getMessage());
+                throw new RuntimeException("Cloudflare R2 endpoint 格式错误: " + endpoint, uriEx);
+            }
 
             log.info("Cloudflare R2 客户端初始化成功");
         } catch (Exception e) {

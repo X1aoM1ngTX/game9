@@ -38,6 +38,8 @@ public class FriendServiceImpl extends ServiceImpl<FriendRelationshipMapper, Fri
     private UserService userService;
     @Resource
     private FriendRelationshipMapper friendRelationshipMapper;
+    @Resource
+    private RedisUtil redisUtil;
 
     /**
      * 发送好友请求
@@ -188,7 +190,7 @@ public class FriendServiceImpl extends ServiceImpl<FriendRelationshipMapper, Fri
         List<FriendVO> friendList = friendRelationshipMapper.selectFriendsByUserId(userId);
         // 查 Redis 并设置 isOnline
         for (FriendVO friend : friendList) {
-            boolean isOnline = RedisUtil.getInstance().hasKey("user:online:" + friend.getFriendId());
+            boolean isOnline = redisUtil.hasKey("user:online:" + friend.getFriendId());
             friend.setIsOnline(isOnline);
         }
         return friendList;

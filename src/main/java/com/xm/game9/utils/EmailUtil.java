@@ -27,6 +27,8 @@ public class EmailUtil {
     private JavaMailSender javaMailSender;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private RedisUtil redisUtil;
     @Value("${spring.mail.username}")
     private String emailFrom;
 
@@ -109,6 +111,6 @@ public class EmailUtil {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "Redis配置错误");
         }
 
-        RedisUtil.getInstance().checkConnection();
+        redisUtil.checkConnection();
     }
 } 

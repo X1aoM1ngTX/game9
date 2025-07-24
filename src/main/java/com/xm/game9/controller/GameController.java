@@ -114,6 +114,7 @@ public class GameController {
      * 更新游戏
      *
      * @param gameUpdateRequest 游戏更新请求
+     * @param request           HTTP请求
      * @return boolean (是否更新成功)
      */
     @Operation(summary = "更新游戏", description = "更新游戏")

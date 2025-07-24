@@ -2,7 +2,6 @@ package com.xm.game9.utils;
 
 import com.xm.game9.common.ErrorCode;
 import com.xm.game9.exception.BusinessException;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,34 +15,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Component
 public class RedisUtil {
-    private volatile static RedisUtil instance;
-
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
     @Value("${spring.profiles.active:dev}")
     private String activeProfile;
-
-    private RedisUtil() {
-        // 私有构造函数
-    }
-
-    public static RedisUtil getInstance() {
-        if (instance == null) {
-            synchronized (RedisUtil.class) {
-                if (instance == null) {
-                    instance = new RedisUtil();
-                }
-            }
-        }
-        return instance;
-    }
-
-    @PostConstruct
-    public void init() {
-        instance = this;
-        log.info("RedisUtil 初始化完成，当前环境: {}", activeProfile);
-    }
 
     /**
      * 设置带过期时间的字符串值
