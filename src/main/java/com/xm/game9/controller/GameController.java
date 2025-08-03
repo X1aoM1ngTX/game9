@@ -10,6 +10,7 @@ import com.xm.game9.model.domain.User;
 import com.xm.game9.model.request.game.*;
 import com.xm.game9.model.vo.GameDetailVO;
 import com.xm.game9.service.GameService;
+import com.xm.game9.service.SteamApiService;
 import com.xm.game9.service.UserService;
 import com.xm.game9.utils.UploadUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +30,8 @@ import static com.xm.game9.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 游戏接口
+ * 
+ * @author X1aoM1ngTX
  */
 @Tag(name = "游戏接口", description = "游戏相关的所有接口")
 @RestController
@@ -45,6 +48,9 @@ public class GameController {
 
     @Resource
     private UploadUtil uploadUtil;
+
+    @Resource
+    private SteamApiService steamApiService;
 
     /**
      * 创建游戏
@@ -234,6 +240,40 @@ public class GameController {
         // 3. 执行购买
         boolean result = gameService.purchaseGame(loginUser.getUserId(), purchaseRequest.getGameId());
         return ResultUtils.success(result);
+    }
+
+    /**
+     * 获取游戏当前在线玩家数量
+     *
+     * @param gameId 游戏ID
+     * @return 在线玩家数量
+     */
+    @Operation(summary = "获取游戏在线人数", description = "获取游戏当前在线玩家数量")
+    @GetMapping("/{gameId}/online-count")
+    public BaseResponse<Integer> getGameOnlineCount(@Parameter(description = "游戏ID") @PathVariable Long gameId) {
+        if (gameId == null || gameId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "游戏ID参数错误");
+        }
+
+        // 获取游戏信息
+        Game game = gameService.getById(gameId);
+        if (game == null) {
+            throw new BusinessException(ErrorCode.GAME_NOT_FOUND, "游戏不存在");
+        }
+
+        // 如果游戏没有设置游戏应用ID，返回0
+        if (game.getGameAppId() == null || game.getGameAppId().trim().isEmpty()) {
+            return ResultUtils.success(0);
+        }
+
+        // 调用Steam API获取在线人数
+        try {
+            Integer appid = Integer.parseInt(game.getGameAppId());
+            return steamApiService.getNumberOfCurrentPlayers(appid);
+        } catch (NumberFormatException e) {
+            log.warn("游戏应用ID格式错误: {}", game.getGameAppId());
+            return ResultUtils.success(0);
+        }
     }
 
     /**

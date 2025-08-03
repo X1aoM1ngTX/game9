@@ -31,8 +31,6 @@ public class GameDiscountJob {
      */
     @Scheduled(cron = "0 * * * * *")
     public void checkDiscountExpiration() {
-        log.info("开始检查游戏折扣过期情况");
-
         // 先查询所有过期的游戏，用于日志记录
         String checkSql = """
                 SELECT gameId, gameName, gameSaleEndTime
@@ -49,27 +47,29 @@ public class GameDiscountJob {
             return game;
         });
 
-        log.info("发现 {} 个过期折扣游戏", expiredGames.size());
-        for (Game game : expiredGames) {
-            log.info("游戏 {} (ID: {}) 的折扣已过期，过期时间: {}",
-                    game.getGameName(), game.getGameId(), game.getGameSaleEndTime());
-        }
+        // 只有在发现过期游戏时才打印日志
+        if (!expiredGames.isEmpty()) {
+            log.info("开始检查游戏折扣过期情况");
+            log.info("发现 {} 个过期折扣游戏", expiredGames.size());
+            for (Game game : expiredGames) {
+                log.info("游戏 {} (ID: {}) 的折扣已过期，过期时间: {}",
+                        game.getGameName(), game.getGameId(), game.getGameSaleEndTime());
+            }
 
-        // 更新过期的折扣
-        String updateSql = """
-                    UPDATE game
-                    SET gameOnSale = 0,
-                        gameDiscountedPrices = NULL,
-                        gameDiscount = NULL,
-                        gameSaleStartTime = NULL,
-                        gameSaleEndTime = NULL
-                    WHERE gameOnSale = 1 AND gameSaleEndTime < NOW()
-                """;
+            // 更新过期的折扣
+            String updateSql = """
+                        UPDATE game
+                        SET gameOnSale = 0,
+                            gameDiscountedPrices = NULL,
+                            gameDiscount = NULL,
+                            gameSaleStartTime = NULL,
+                            gameSaleEndTime = NULL
+                        WHERE gameOnSale = 1 AND gameSaleEndTime < NOW()
+                    """;
 
-        int updatedCount = jdbcTemplate.update(updateSql);
-        log.info("实际更新了 {} 个游戏的折扣状态", updatedCount);
+            int updatedCount = jdbcTemplate.update(updateSql);
+            log.info("实际更新了 {} 个游戏的折扣状态", updatedCount);
 
-        if (updatedCount > 0) {
             // 验证更新结果
             String verifySql = """
                         SELECT COUNT(*)
@@ -98,8 +98,6 @@ public class GameDiscountJob {
                 log.warn("预期更新 {} 个游戏，实际更新了 {} 个游戏",
                         expiredGames.size(), updatedCount);
             }
-        } else {
-            log.info("没有发现需要更新的过期折扣");
         }
     }
 } 

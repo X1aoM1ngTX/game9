@@ -88,4 +88,8 @@ public class Game implements Serializable {
      * 游戏封面
      */
     private String gameCover;
+    /**
+     * 游戏应用ID
+     */
+    private String gameAppId;
 }

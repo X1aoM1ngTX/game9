@@ -25,6 +25,8 @@ import static com.xm.game9.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 公告管理控制器
+ * 
+ * @author X1aoM1ngTX
  */
 @Slf4j
 @RestController

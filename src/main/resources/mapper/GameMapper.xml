@@ -21,6 +21,7 @@
         <result property="gameSaleEndTime" column="gameSaleEndTime" jdbcType="TIMESTAMP"/>
         <result property="gameDiscount" column="gameDiscount" jdbcType="DECIMAL"/>
         <result property="gameCover" column="gameCover" jdbcType="VARCHAR"/>
+        <result property="gameAppId" column="gameAppId" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -30,6 +31,6 @@
         gameReleaseDate,gameDev,gamePub,
         gameIsRemoved,gameDiscountedPrices,gameOnSale,
         gameSaleStartTime,gameSaleEndTime,gameDiscount,
-        gameCover
+        gameCover,gameAppId
     </sql>
 </mapper>

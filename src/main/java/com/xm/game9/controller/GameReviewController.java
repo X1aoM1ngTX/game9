@@ -22,6 +22,8 @@ import java.util.List;
 
 /**
  * 游戏评价接口
+ * 
+ * @author X1aoM1ngTX
  */
 @Tag(name = "游戏评价接口", description = "游戏评价相关的所有接口")
 @RestController

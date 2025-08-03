@@ -86,4 +86,9 @@ public class GameDetailVO implements Serializable {
      * 游戏封面
      */
     private String gameCover;
+
+    /**
+     * Steam应用ID
+     */
+    private Long steamAppId;
 } 

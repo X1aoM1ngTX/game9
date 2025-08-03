@@ -16,7 +16,8 @@ create table game
     gameOnSale           tinyint(1) default 0 not null comment '游戏是否正在打折',
     gameSaleStartTime    datetime null comment '游戏折扣开始时间',
     gameSaleEndTime      datetime null comment '游戏折扣结束时间',
-    gameCover            varchar(512) null comment '游戏封面'
+    gameCover            varchar(512) null comment '游戏封面',
+    gameAppId            varchar(12) null comment '游戏应用ID',
 ) comment '游戏表';
 
 DELIMITER

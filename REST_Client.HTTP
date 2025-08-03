@@ -231,6 +231,8 @@ Content-Type: application/json
   "gameId": 38
 }
 
+### 获取游戏在线人数（公开）
+GET http://localhost:8080/api/game/36/online-count
 
 ### ==================== 公告接口 (NoticeController) ====================
 
@@ -429,3 +431,24 @@ POST http://localhost:8080/api/friend/delete?friendId=1
 
 ### 修改好友备注
 POST http://localhost:8080/api/friend/remark?friendId=1&remark=新的备注
+
+### ==================== 愿望单接口 (WishlistController) ====================
+
+### 添加游戏到愿望单
+POST http://localhost:8080/api/wishlist/add
+Content-Type: application/json
+
+{
+  "gameId": 1
+}
+
+### 从愿望单移除游戏
+POST http://localhost:8080/api/wishlist/remove
+Content-Type: application/json
+
+{
+  "gameId": 1
+}
+
+### 获取当前用户的愿望单
+GET http://localhost:8080/api/wishlist/my
