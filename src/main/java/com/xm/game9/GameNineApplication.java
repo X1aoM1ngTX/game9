@@ -11,8 +11,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import javax.sql.DataSource;
 import java.sql.Connection;
 
@@ -31,9 +29,6 @@ public class GameNineApplication implements CommandLineRunner {
 
     @Value("${spring.profiles.active:dev}")
     private String activeProfile;
-
-    @Autowired
-    private Environment env;
 
     @Resource
     private DataSource dataSource;
