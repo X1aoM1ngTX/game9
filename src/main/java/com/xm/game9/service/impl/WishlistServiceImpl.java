@@ -14,10 +14,10 @@ import com.xm.game9.model.vo.WishlistVO;
 import com.xm.game9.service.GameService;
 import com.xm.game9.service.UserService;
 import com.xm.game9.service.WishlistService;
-import org.springframework.stereotype.Service;
-
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Service;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +45,7 @@ public class WishlistServiceImpl extends ServiceImpl<WishlistMapper, Wishlist> i
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
-        
+
         // 检查是否已存在相同的记录
         QueryWrapper<Wishlist> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userId", loginUser.getUserId());
@@ -53,7 +53,7 @@ public class WishlistServiceImpl extends ServiceImpl<WishlistMapper, Wishlist> i
         if (this.count(queryWrapper) > 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "该游戏已在愿望单中");
         }
-        
+
         Wishlist wishlist = new Wishlist();
         wishlist.setUserId(loginUser.getUserId());
         wishlist.setGameId(wishlistAddRequest.getGameId());
@@ -105,10 +105,10 @@ public class WishlistServiceImpl extends ServiceImpl<WishlistMapper, Wishlist> i
         }
         List<Long> gameIds = wishlistItems.stream().map(Wishlist::getGameId).collect(Collectors.toList());
         List<Game> games = gameService.listByIds(gameIds);
-        
+
         // 创建一个Map来快速查找游戏信息
         Map<Long, Game> gameMap = games.stream().collect(Collectors.toMap(Game::getGameId, game -> game));
-        
+
         return wishlistItems.stream().map(wishlist -> {
             WishlistVO wishlistVO = new WishlistVO();
             wishlistVO.setWishlistId(wishlist.getWishlistId());

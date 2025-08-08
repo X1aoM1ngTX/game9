@@ -6,8 +6,8 @@ import com.xm.game9.exception.BusinessException;
 import com.xm.game9.mapper.FriendRelationshipMapper;
 import com.xm.game9.model.domain.FriendRelationship;
 import com.xm.game9.model.domain.User;
-import com.xm.game9.model.vo.FriendVO;
 import com.xm.game9.model.vo.FriendRequestVO;
+import com.xm.game9.model.vo.FriendVO;
 import com.xm.game9.service.FriendService;
 import com.xm.game9.service.UserService;
 import com.xm.game9.utils.RedisUtil;
@@ -288,7 +288,7 @@ public class FriendServiceImpl extends ServiceImpl<FriendRelationshipMapper, Fri
 
     /**
      * 获取收到的好友申请
-     * 
+     *
      * @param userId 用户ID
      * @return 申请列表
      */
@@ -310,9 +310,9 @@ public class FriendServiceImpl extends ServiceImpl<FriendRelationshipMapper, Fri
 
     /**
      * 通过申请记录ID处理好友请求
-     * 
+     *
      * @param userId 当前用户ID
-     * @param id 申请记录ID
+     * @param id     申请记录ID
      * @param accept 是否接受
      * @return 是否成功
      */

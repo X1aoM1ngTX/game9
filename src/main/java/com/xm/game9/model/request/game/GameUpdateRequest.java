@@ -87,5 +87,5 @@ public class GameUpdateRequest implements Serializable {
     /**
      * Steam应用ID
      */
-    private Long steamAppId;
+    private String gameAppId;
 }

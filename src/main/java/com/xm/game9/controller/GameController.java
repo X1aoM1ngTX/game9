@@ -30,7 +30,7 @@ import static com.xm.game9.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 游戏接口
- * 
+ *
  * @author X1aoM1ngTX
  */
 @Tag(name = "游戏接口", description = "游戏相关的所有接口")
@@ -159,12 +159,16 @@ public class GameController {
      * 上传游戏封面
      *
      * @param file    游戏封面文件
+     * @param gameId  游戏ID（可选，如果提供则直接更新游戏封面）
      * @param request HTTP请求
      * @return 游戏封面访问路径
      */
-    @Operation(summary = "上传游戏封面", description = "上传游戏封面")
+    @Operation(summary = "上传游戏封面", description = "上传游戏封面，如果提供gameId则直接更新游戏封面")
     @PostMapping("/upload")
-    public BaseResponse<String> upload(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
+    public BaseResponse<String> upload(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "gameId", required = false) Long gameId,
+            HttpServletRequest request) {
         // 检查管理员权限
         if (!isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
@@ -181,6 +185,20 @@ public class GameController {
             }
 
             String url = uploadUtil.uploadR2(file);
+            
+            // 如果提供了游戏ID，直接更新游戏封面
+            if (gameId != null && gameId > 0) {
+                Game game = new Game();
+                game.setGameId(gameId);
+                game.setGameCover(url);
+                boolean updated = gameService.updateById(game);
+                if (!updated) {
+                    log.warn("更新游戏封面失败，游戏ID: {}", gameId);
+                } else {
+                    log.info("成功更新游戏封面，游戏ID: {}, 封面URL: {}", gameId, url);
+                }
+            }
+            
             return ResultUtils.success(url);
         } catch (BusinessException e) {
             log.error("业务异常: {}", e.getDetailMessage());

@@ -89,3 +89,6 @@ storage:
   local:
     base-path: ./uploads/
 
+steam:
+  api:
+    key: ${STEAM_API_KEY:}

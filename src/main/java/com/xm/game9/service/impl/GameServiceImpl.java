@@ -78,6 +78,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         game.setGameName(gameName);
         game.setGamePrice(gamePrice);
         game.setGameStock(gameStock);
+        game.setGameAppId(gameCreateRequest.getGameAppId());
 
         boolean saveResult = save(game);
         if (!saveResult) {
@@ -229,6 +230,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
             game.setGameDiscountedPrices(null);
         }
         game.setGameCover(gameUpdateRequest.getGameCover());
+        game.setGameAppId(gameUpdateRequest.getGameAppId());
         return updateById(game);
     }
 

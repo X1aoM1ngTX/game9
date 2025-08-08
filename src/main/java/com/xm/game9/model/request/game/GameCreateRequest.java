@@ -27,5 +27,5 @@ public class GameCreateRequest implements Serializable {
     @Schema(description = "游戏库存")
     private Integer gameStock;
     @Schema(description = "Steam应用ID")
-    private Long steamAppId;
+    private String gameAppId;
 }

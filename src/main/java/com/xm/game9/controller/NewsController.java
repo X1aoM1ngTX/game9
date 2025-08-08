@@ -25,7 +25,7 @@ import static com.xm.game9.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * 资讯管理控制器
- * 
+ *
  * @author X1aoM1ngTX
  */
 @Slf4j
@@ -81,7 +81,7 @@ public class NewsController {
     /**
      * 更新资讯
      *
-     * @param id                 资讯ID
+     * @param id                资讯ID
      * @param newsUpdateRequest 资讯更新请求
      * @param request           HTTP请求
      * @return 是否成功
@@ -155,7 +155,7 @@ public class NewsController {
     /**
      * 删除资讯
      *
-     * @param id     资讯ID
+     * @param id      资讯ID
      * @param request HTTP请求
      * @return 是否成功
      */
@@ -191,7 +191,7 @@ public class NewsController {
     /**
      * 发布资讯
      *
-     * @param id     资讯ID
+     * @param id      资讯ID
      * @param request HTTP请求
      * @return 是否成功
      */
@@ -226,7 +226,7 @@ public class NewsController {
     /**
      * 将资讯设为草稿
      *
-     * @param id     资讯ID
+     * @param id      资讯ID
      * @param request HTTP请求
      * @return 是否成功
      */
@@ -383,7 +383,7 @@ public class NewsController {
     /**
      * 获取草稿资讯详情
      *
-     * @param id     资讯ID
+     * @param id      资讯ID
      * @param request HTTP请求
      * @return 草稿资讯详情
      */

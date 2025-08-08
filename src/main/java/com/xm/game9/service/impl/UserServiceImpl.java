@@ -23,8 +23,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.util.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -48,7 +48,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private static final String VERIFY_CODE_PREFIX = "verify:code:";
     private static final String SALT = "xm";
-
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     @Resource
     private UserMapper userMapper;
     @Resource
@@ -59,8 +59,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private String emailFrom;
     @Resource
     private RedisUtil redisUtil;
-
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     // 初始化邮箱地址
     @PostConstruct

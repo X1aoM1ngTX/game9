@@ -32,16 +32,15 @@ public class BusinessException extends RuntimeException {
      * @param message     消息
      * @param code        错误码
      * @param description 描述
-    public BusinessException(String message, int code, String description) {
-        super(message);
-        this.code = code;
-        this.description = description;
-    }
-
-    /**
-     * 构造函数
-     *
-     * @param errorCode 错误码
+     *                    public BusinessException(String message, int code, String description) {
+     *                    super(message);
+     *                    this.code = code;
+     *                    this.description = description;
+     *                    }
+     *                    <p>
+     *                    /**
+     *                    构造函数
+     * @param errorCode   错误码
      */
     public BusinessException(ErrorCode errorCode) {
         super(errorCode.getMessage());

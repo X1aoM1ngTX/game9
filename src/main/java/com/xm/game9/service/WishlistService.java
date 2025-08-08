@@ -5,8 +5,8 @@ import com.xm.game9.model.domain.Wishlist;
 import com.xm.game9.model.request.wishlist.WishlistAddRequest;
 import com.xm.game9.model.request.wishlist.WishlistRemoveRequest;
 import com.xm.game9.model.vo.WishlistVO;
-
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.List;
 
 /**

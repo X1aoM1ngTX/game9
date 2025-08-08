@@ -6,8 +6,8 @@ import com.xm.game9.common.ResultUtils;
 import com.xm.game9.exception.BusinessException;
 import com.xm.game9.model.domain.User;
 import com.xm.game9.model.request.friend.FriendAddRequest;
-import com.xm.game9.model.vo.FriendVO;
 import com.xm.game9.model.vo.FriendRequestVO;
+import com.xm.game9.model.vo.FriendVO;
 import com.xm.game9.service.FriendService;
 import com.xm.game9.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +17,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,8 +69,8 @@ public class FriendController {
     /**
      * 处理好友请求
      *
-     * @param id 申请记录ID
-     * @param accept 是否接受
+     * @param id      申请记录ID
+     * @param accept  是否接受
      * @param request 请求
      * @return 是否成功
      */
@@ -103,7 +102,7 @@ public class FriendController {
 
     /**
      * 获取收到的好友申请
-     * 
+     *
      * @param request 请求
      * @return 申请列表
      */
@@ -117,7 +116,7 @@ public class FriendController {
 
     /**
      * 获取我发出的好友申请
-     * 
+     *
      * @param request 请求
      * @return 申请列表
      */

@@ -11,7 +11,7 @@ public class ResultUtils {
      * 返回成功
      *
      * @param data
-     * @param <T> 泛型
+     * @param <T>  泛型
      * @return
      */
     public static <T> BaseResponse<T> success(T data) {

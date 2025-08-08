@@ -8,16 +8,16 @@ import com.xm.game9.model.vo.WishlistVO;
 import com.xm.game9.service.WishlistService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.annotation.Resource;
 import java.util.List;
 
 /**
  * 愿望单控制器
- * 
+ *
  * @author X1aoM1ngTX
  */
 @Tag(name = "愿望单接口", description = "愿望单相关的所有接口")

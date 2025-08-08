@@ -5,20 +5,22 @@
 <mapper namespace="com.xm.game9.mapper.WishlistMapper">
 
     <resultMap id="BaseResultMap" type="com.xm.game9.model.domain.Wishlist">
-            <id property="wishlistId" column="wishlistId" jdbcType="BIGINT"/>
-            <result property="userId" column="userId" jdbcType="BIGINT"/>
-            <result property="gameId" column="gameId" jdbcType="BIGINT"/>
-            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
-            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
-            <result property="isDeleted" column="isDeleted" jdbcType="TINYINT"/>
+        <id property="wishlistId" column="wishlistId" jdbcType="BIGINT"/>
+        <result property="userId" column="userId" jdbcType="BIGINT"/>
+        <result property="gameId" column="gameId" jdbcType="BIGINT"/>
+        <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+        <result property="isDeleted" column="isDeleted" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        wishlistId,userId,gameId,
+        wishlistId
+        ,userId,gameId,
         createTime,updateTime,isDeleted
     </sql>
-    
-    <insert id="insert" parameterType="com.xm.game9.model.domain.Wishlist" useGeneratedKeys="true" keyProperty="wishlistId">
+
+    <insert id="insert" parameterType="com.xm.game9.model.domain.Wishlist" useGeneratedKeys="true"
+            keyProperty="wishlistId">
         INSERT INTO wishlist (userId, gameId)
         VALUES (#{userId}, #{gameId})
     </insert>

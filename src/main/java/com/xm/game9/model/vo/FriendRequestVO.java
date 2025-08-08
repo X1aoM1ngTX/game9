@@ -1,6 +1,7 @@
 package com.xm.game9.model.vo;
 
 import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Date;
 

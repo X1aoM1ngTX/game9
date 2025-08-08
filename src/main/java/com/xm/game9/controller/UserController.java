@@ -112,7 +112,10 @@ public class UserController {
             long failCount = 1;
             if (redisUtil.hasKey(failKey)) {
                 String val = redisUtil.get(failKey);
-                try { failCount = Long.parseLong(val) + 1; } catch (Exception ignore) {}
+                try {
+                    failCount = Long.parseLong(val) + 1;
+                } catch (Exception ignore) {
+                }
             }
             redisUtil.setWithExpire(failKey, String.valueOf(failCount), 10, TimeUnit.MINUTES);
             log.warn("[登录失败] 用户名:{}, IP:{}, 时间:{}, 失败次数:{}", userName, request.getRemoteAddr(), LocalDateTime.now(), failCount);
@@ -166,7 +169,10 @@ public class UserController {
             long count = 1;
             if (redisUtil.hasKey(limitKey)) {
                 String val = redisUtil.get(limitKey);
-                try { count = Long.parseLong(val) + 1; } catch (Exception ignore) {}
+                try {
+                    count = Long.parseLong(val) + 1;
+                } catch (Exception ignore) {
+                }
             }
             if (count > 3) {
                 log.warn("[验证码发送频率超限] 邮箱:{}, IP:{}, 时间:{}", email, null, LocalDateTime.now());
@@ -506,6 +512,7 @@ public class UserController {
 
     /**
      * 用户心跳，刷新在线状态
+     *
      * @param request HTTP请求
      * @return 是否成功
      */
