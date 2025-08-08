@@ -39,6 +39,7 @@ build/
 # 环境配置
 .env
 .env.prod
+/start.sh
 application-prod.yml
 
 # 自定义
@@ -46,3 +47,5 @@ application-prod.yml
 /BatchImportUsers.json
 /BatchImportGames.json
 src/main/resources/sql/xmgame.sql
+/PROJECT_RESUME.md
+.gitignore
