@@ -294,6 +294,30 @@ public class GameController {
         }
     }
 
+    /** 
+     * 通过Steam URL更新游戏AppID
+     *
+     * @param gameSteamUrlUpdateRequest Steam URL更新请求
+     * @param request HTTP请求
+     * @return 是否更新成功
+     */
+    @Operation(summary = "通过Steam URL更新游戏AppID", description = "输入Steam游戏商店URL，自动解析并更新游戏的AppID")
+    @PutMapping("/updateSteamUrl")
+    public BaseResponse<Boolean> updateGameSteamUrl(@RequestBody GameSteamUrlUpdateRequest gameSteamUrlUpdateRequest,
+                                                   HttpServletRequest request) {
+        // 检查管理员权限
+        if (!isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "用户无权限");
+        }
+
+        if (gameSteamUrlUpdateRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
+        }
+
+        boolean result = gameService.updateGameAppIdBySteamUrl(gameSteamUrlUpdateRequest);
+        return ResultUtils.success(result);
+    }
+
     /**
      * 判断是否为管理员
      *

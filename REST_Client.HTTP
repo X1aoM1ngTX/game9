@@ -234,6 +234,15 @@ Content-Type: application/json
 ### 获取游戏在线人数（公开）
 GET http://localhost:8080/api/game/36/online-count
 
+### 通过Steam URL更新游戏AppID（管理员）
+PUT http://localhost:8080/api/game/updateSteamUrl
+Content-Type: application/json
+
+{
+  "gameId": 56  ,
+  "steamUrl": "https://store.steampowered.com/app/391540/Undertale/ "
+}
+
 ### ==================== 公告接口 (NoticeController) ====================
 
 ### 创建公告（管理员）

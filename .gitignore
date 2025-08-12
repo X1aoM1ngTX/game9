@@ -49,3 +49,5 @@ application-prod.yml
 src/main/resources/sql/xmgame.sql
 /PROJECT_RESUME.md
 .gitignore
+待实现功能清单.md
+Game9项目面试问答指南.md

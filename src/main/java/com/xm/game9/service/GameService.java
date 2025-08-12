@@ -7,6 +7,7 @@ import com.xm.game9.model.request.admin.BatchImportGamesRequest;
 import com.xm.game9.model.request.game.GameCreateRequest;
 import com.xm.game9.model.request.game.GameQueryRequest;
 import com.xm.game9.model.request.game.GameStatusRequest;
+import com.xm.game9.model.request.game.GameSteamUrlUpdateRequest;
 import com.xm.game9.model.request.game.GameUpdateRequest;
 import com.xm.game9.model.vo.GameDetailVO;
 import org.springframework.stereotype.Service;
@@ -91,5 +92,13 @@ public interface GameService extends IService<Game> {
      * 批量导入游戏
      */
     int batchImportGames(List<BatchImportGamesRequest.GameImportInfo> games);
+
+    /**
+     * 通过Steam URL更新游戏AppID
+     *
+     * @param gameSteamUrlUpdateRequest Steam URL更新请求
+     * @return 是否更新成功
+     */
+    boolean updateGameAppIdBySteamUrl(GameSteamUrlUpdateRequest gameSteamUrlUpdateRequest);
 
 }

@@ -11,10 +11,12 @@ import com.xm.game9.model.request.admin.BatchImportGamesRequest;
 import com.xm.game9.model.request.game.GameCreateRequest;
 import com.xm.game9.model.request.game.GameQueryRequest;
 import com.xm.game9.model.request.game.GameStatusRequest;
+import com.xm.game9.model.request.game.GameSteamUrlUpdateRequest;
 import com.xm.game9.model.request.game.GameUpdateRequest;
 import com.xm.game9.model.vo.GameDetailVO;
 import com.xm.game9.service.GameService;
 import com.xm.game9.service.UserLibraryService;
+import com.xm.game9.utils.SteamUrlParser;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -156,6 +158,7 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         gameDetailVO.setGameDiscount(game.getGameDiscount());
         gameDetailVO.setGameSaleEndTime(game.getGameSaleEndTime());
         gameDetailVO.setGameDiscountedPrices(game.getGameDiscountedPrices());
+        gameDetailVO.setGameAppId(game.getGameAppId());
 
         return gameDetailVO;
     }
@@ -374,6 +377,57 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
         // 批量插入
         saveBatch(gameList);
         return gameList.size();
+    }
+
+    /**
+     * 通过Steam URL更新游戏AppID
+     *
+     * @param gameSteamUrlUpdateRequest Steam URL更新请求
+     * @return 是否更新成功
+     */
+    @Override
+    public boolean updateGameAppIdBySteamUrl(GameSteamUrlUpdateRequest gameSteamUrlUpdateRequest) {
+        if (gameSteamUrlUpdateRequest == null || gameSteamUrlUpdateRequest.getGameId() == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
+        }
+
+        String steamUrl = gameSteamUrlUpdateRequest.getSteamUrl();
+        if (StringUtils.isBlank(steamUrl)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "Steam URL不能为空");
+        }
+
+        // 检查游戏是否存在
+        Game game = getById(gameSteamUrlUpdateRequest.getGameId());
+        if (game == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "游戏不存在");
+        }
+
+        // 解析Steam URL获取AppID
+        String appId = SteamUrlParser.extractAppId(steamUrl);
+        if (appId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "无效的Steam URL格式");
+        }
+
+        // 验证AppID是否为有效数字
+        try {
+            Integer.parseInt(appId);
+        } catch (NumberFormatException e) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "无效的Steam AppID");
+        }
+
+        // 更新游戏的AppID
+        game.setGameAppId(appId);
+        boolean result = updateById(game);
+        
+        if (result) {
+            log.info("成功更新游戏AppID - 游戏ID: {}, 游戏名: {}, Steam URL: {}, AppID: {}", 
+                    game.getGameId(), game.getGameName(), steamUrl, appId);
+        } else {
+            log.error("更新游戏AppID失败 - 游戏ID: {}, 游戏名: {}, Steam URL: {}", 
+                    game.getGameId(), game.getGameName(), steamUrl);
+        }
+        
+        return result;
     }
 
 }
