@@ -68,8 +68,8 @@ public class EmailUtil {
         checkRedisConnection();
 
         try {
-            // 3. 生成6位随机验证码
-            String verifyCode = CaptchaUtils.generate_6_AZ09();
+            // 3. 生成6位纯数字验证码
+            String verifyCode = CaptchaUtils.generate_6_09();
             String key = VERIFY_CODE_PREFIX + toEmail;
             stringRedisTemplate.opsForValue().set(key, verifyCode, 5, TimeUnit.MINUTES);
             log.info("为邮箱 {} 生成验证码: {}", toEmail, verifyCode);

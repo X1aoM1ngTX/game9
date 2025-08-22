@@ -21,10 +21,13 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+
+import jakarta.validation.Valid;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -41,7 +44,7 @@ import java.util.stream.Collectors;
 @Tag(name = "用户接口", description = "用户相关的所有接口")
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
+@Validated
 @Slf4j
 public class UserController {
 
@@ -278,7 +281,7 @@ public class UserController {
      */
     @Operation(summary = "修改用户自己的信息", description = "修改用户信息")
     @PostMapping("/modify")
-    public BaseResponse<Boolean> userModify(@RequestBody UserModifyRequest modifyRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> userModify(@RequestBody @Valid UserModifyRequest modifyRequest, HttpServletRequest request) {
         if (modifyRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
@@ -299,7 +302,7 @@ public class UserController {
      */
     @Operation(summary = "管理员用户信息修改", description = "管理员用户信息修改")
     @PostMapping("/adminUpdate")
-    public BaseResponse<Boolean> adminUserUpdate(@RequestBody AdminUserUpdateRequest updateRequest) {
+    public BaseResponse<Boolean> adminUserUpdate(@RequestBody @Valid AdminUserUpdateRequest updateRequest) {
         if (updateRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }

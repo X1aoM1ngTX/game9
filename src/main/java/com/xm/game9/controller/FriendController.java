@@ -29,7 +29,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/friend")
-@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 @Tag(name = "好友系统接口", description = "好友系统相关的所有接口")
 @Slf4j
 public class FriendController {

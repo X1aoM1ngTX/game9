@@ -70,7 +70,16 @@ public class SecurityFilter implements Filter {
     private boolean containsAttackPattern(String uri) {
         String lowerUri = uri.toLowerCase();
         
-        // 检查常见的攻击模式
+        // 检查常见的攻击模式，但排除合法的API路径
+        // 排除 /api/user/adminUpdate 等合法路径
+        if (lowerUri.contains("/api/user/adminupdate") || 
+            lowerUri.contains("/api/user/delete") ||
+            lowerUri.contains("/api/game/update") ||
+            lowerUri.contains("/api/game/delete")) {
+            return false;
+        }
+        
+        // 检查典型的攻击模式
         return lowerUri.contains("..") || 
                lowerUri.contains("<script") ||
                lowerUri.contains("javascript:") ||
@@ -79,13 +88,14 @@ public class SecurityFilter implements Filter {
                lowerUri.contains("onerror=") ||
                lowerUri.contains("onclick=") ||
                lowerUri.contains("xss") ||
-               lowerUri.contains("sql") ||
-               lowerUri.contains("select") ||
-               lowerUri.contains("insert") ||
-               lowerUri.contains("update") ||
-               lowerUri.contains("delete") ||
-               lowerUri.contains("drop") ||
-               lowerUri.contains("union") ||
+               // 更精确的SQL注入检测
+               (lowerUri.contains("sql") && !lowerUri.contains("/api/")) ||
+               (lowerUri.contains("select") && !lowerUri.contains("/api/")) ||
+               (lowerUri.contains("insert") && !lowerUri.contains("/api/")) ||
+               (lowerUri.contains("update") && !lowerUri.contains("/api/")) ||
+               (lowerUri.contains("delete") && !lowerUri.contains("/api/")) ||
+               (lowerUri.contains("drop") && !lowerUri.contains("/api/")) ||
+               (lowerUri.contains("union") && !lowerUri.contains("/api/")) ||
                lowerUri.contains("exec(") ||
                lowerUri.contains("system(") ||
                lowerUri.contains("eval(") ||

@@ -23,7 +23,6 @@ import java.util.List;
 @Tag(name = "愿望单接口", description = "愿望单相关的所有接口")
 @RestController
 @RequestMapping("/wishlist")
-@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 @Slf4j
 public class WishlistController {
 

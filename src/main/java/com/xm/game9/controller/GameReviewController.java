@@ -28,7 +28,6 @@ import java.util.List;
 @Tag(name = "游戏评价接口", description = "游戏评价相关的所有接口")
 @RestController
 @RequestMapping("/game/review")
-@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 @Slf4j
 public class GameReviewController {
 

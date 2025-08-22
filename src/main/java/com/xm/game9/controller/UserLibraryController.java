@@ -26,7 +26,6 @@ import java.util.List;
 @Tag(name = "用户游戏库接口", description = "用户游戏库相关的所有接口")
 @RestController
 @RequestMapping("/userLibrary")
-@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 @Slf4j
 public class UserLibraryController {
 

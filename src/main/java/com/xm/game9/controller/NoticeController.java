@@ -32,7 +32,6 @@ import static com.xm.game9.constant.UserConstant.USER_LOGIN_STATE;
 @RestController
 @RequestMapping("/notices")
 @Tag(name = "公告接口", description = "公告相关的所有接口")
-@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 public class NoticeController {
 
     @Autowired

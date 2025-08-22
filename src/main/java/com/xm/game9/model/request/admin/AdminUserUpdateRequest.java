@@ -1,5 +1,6 @@
 package com.xm.game9.model.request.admin;
 
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.io.Serial;
@@ -20,6 +21,9 @@ public class AdminUserUpdateRequest implements Serializable {
     private String userName;
     private String userNickname;
     private String userEmail;
+    
+    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
     private String userPhone;
+    
     private Integer userIsAdmin;
 }

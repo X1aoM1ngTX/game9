@@ -36,7 +36,6 @@ import static com.xm.game9.constant.UserConstant.USER_LOGIN_STATE;
 @Tag(name = "游戏接口", description = "游戏相关的所有接口")
 @RestController
 @RequestMapping("/game")
-@CrossOrigin(origins = {"http://localhost:3000"}, allowCredentials = "true")
 @Slf4j
 public class GameController {
 
