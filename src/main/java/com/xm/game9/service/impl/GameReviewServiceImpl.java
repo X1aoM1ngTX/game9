@@ -228,7 +228,13 @@ public class GameReviewServiceImpl extends ServiceImpl<GameReviewMapper, GameRev
     private List<GameReviewVO> convertToVOList(List<GameReview> gameReviews) {
         return gameReviews.stream().map(gameReview -> {
             GameReviewVO gameReviewVO = new GameReviewVO();
-            BeanUtils.copyProperties(gameReview, gameReviewVO);
+            // 手动设置属性，避免字段名不匹配问题
+            gameReviewVO.setReviewId(gameReview.getReviewId());
+            gameReviewVO.setUserId(gameReview.getUserId());
+            gameReviewVO.setGameId(gameReview.getGameId());
+            gameReviewVO.setRating(gameReview.getGameReviewRating());
+            gameReviewVO.setContent(gameReview.getGameReviewContent());
+            gameReviewVO.setCreateTime(gameReview.getGameReviewCreateTime());
 
             // 获取用户名
             User user = userService.getById(gameReview.getUserId());

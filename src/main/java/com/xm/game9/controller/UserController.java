@@ -511,6 +511,55 @@ public class UserController {
     }
 
     /**
+     * 检查用户名是否已被注册（注册时使用，不需要权限）
+     *
+     * @param userName 用户名
+     * @return 用户名是否可用
+     */
+    @Operation(summary = "检查用户名是否可用", description = "检查用户名是否已被注册，注册时使用，不需要权限")
+    @GetMapping("/checkUsernameAvailable")
+    public BaseResponse<Boolean> checkUsernameAvailable(@RequestParam String userName) {
+        if (StringUtils.isBlank(userName)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名不能为空");
+        }
+        
+        // 检查用户名是否已被注册
+        User existUser = userService.lambdaQuery()
+                .eq(User::getUserName, userName)
+                .one();
+        
+        // 如果用户名已被注册，返回false；否则返回true
+        return ResultUtils.success(existUser == null);
+    }
+
+  /**
+     * 检查邮箱是否已被注册（注册时使用，不需要权限）
+     *
+     * @param email 邮箱地址
+     * @return 邮箱是否可用
+     */
+    @Operation(summary = "检查邮箱是否可用", description = "检查邮箱是否已被注册，注册时使用，不需要权限")
+    @GetMapping("/checkEmailAvailable")
+    public BaseResponse<Boolean> checkEmailAvailable(@RequestParam String email) {
+        if (StringUtils.isBlank(email)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不能为空");
+        }
+        
+        // 验证邮箱格式
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式不正确");
+        }
+        
+        // 检查邮箱是否已被注册
+        User existUser = userService.lambdaQuery()
+                .eq(User::getUserEmail, email)
+                .one();
+        
+        // 如果邮箱已被注册，返回false；否则返回true
+        return ResultUtils.success(existUser == null);
+    }
+
+    /**
      * 用户心跳，刷新在线状态
      *
      * @param request HTTP请求
