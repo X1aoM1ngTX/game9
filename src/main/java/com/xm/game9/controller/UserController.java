@@ -453,6 +453,7 @@ public class UserController {
      * 获取签到历史
      *
      * @param year    年份
+     * @param userId  用户ID（可选，不传则获取当前用户）
      * @param request HTTP请求
      * @return 签到历史
      */
@@ -460,13 +461,18 @@ public class UserController {
     @GetMapping("/sign/history")
     public BaseResponse<List<LocalDate>> getSignInHistory(
             @RequestParam(defaultValue = "#{T(java.time.Year).now().getValue()}") Integer year,
+            @RequestParam(required = false) Long userId,
             HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
-        if (loginUser == null) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
+        // 如果没有传入userId，则获取当前登录用户
+        if (userId == null) {
+            User loginUser = userService.getLoginUser(request);
+            if (loginUser == null) {
+                throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
+            }
+            userId = loginUser.getUserId();
         }
 
-        List<LocalDate> history = userService.getSignInHistory(loginUser.getUserId(), year);
+        List<LocalDate> history = userService.getSignInHistory(userId, year);
         return ResultUtils.success(history);
     }
 
