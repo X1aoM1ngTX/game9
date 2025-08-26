@@ -275,7 +275,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setUserName(updateRequest.getUserName());
         user.setUserNickname(updateRequest.getUserNickname());
         user.setUserEmail(updateRequest.getUserEmail());
-        user.setUserPhone(updateRequest.getUserPhone());
+        
+        // 校验手机号格式
+        if (StringUtils.isNotBlank(updateRequest.getUserPhone())) {
+            if (!updateRequest.getUserPhone().matches("^1[3-9]\\d{9}$")) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "手机号格式不正确");
+            }
+            // 检查手机号是否被其他用户使用
+            User existPhoneUser = userMapper.selectOne(
+                    Wrappers.<User>lambdaQuery()
+                            .eq(User::getUserPhone, updateRequest.getUserPhone())
+                            .ne(User::getUserId, userId));
+            if (existPhoneUser != null) {
+                throw new BusinessException(ErrorCode.USER_PHONE_ALREADY_EXIST, "手机号已被其他用户使用");
+            }
+            user.setUserPhone(updateRequest.getUserPhone());
+        }
+        
         user.setUserProfile(updateRequest.getUserProfile());
 
         log.info("[Service-用户信息修改] 用户ID:{}, 时间:{}", userId, java.time.LocalDateTime.now());
@@ -313,7 +329,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setUserName(updateRequest.getUserName());
         user.setUserNickname(updateRequest.getUserNickname());
         user.setUserEmail(updateRequest.getUserEmail());
-        user.setUserPhone(updateRequest.getUserPhone());
+        
+        // 校验手机号格式
+        if (StringUtils.isNotBlank(updateRequest.getUserPhone())) {
+            if (!updateRequest.getUserPhone().matches("^1[3-9]\\d{9}$")) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "手机号格式不正确");
+            }
+            // 检查手机号是否被其他用户使用
+            User existPhoneUser = userMapper.selectOne(
+                    Wrappers.<User>lambdaQuery()
+                            .eq(User::getUserPhone, updateRequest.getUserPhone())
+                            .ne(User::getUserId, userId));
+            if (existPhoneUser != null) {
+                throw new BusinessException(ErrorCode.USER_PHONE_ALREADY_EXIST, "手机号已被其他用户使用");
+            }
+            user.setUserPhone(updateRequest.getUserPhone());
+        }
+        
         user.setUserIsAdmin(updateRequest.getUserIsAdmin());
 
         return updateById(user);

@@ -21,7 +21,6 @@ public class UserModifyRequest implements Serializable {
     private String userNickname;
     private String userEmail;
     
-    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
     private String userPhone;
     
     private String userProfile;

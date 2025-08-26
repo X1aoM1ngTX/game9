@@ -1,7 +1,6 @@
 package com.xm.game9.interceptor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.xm.game9.common.BaseResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;

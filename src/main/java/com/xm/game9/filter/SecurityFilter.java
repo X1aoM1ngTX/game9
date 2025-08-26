@@ -3,7 +3,6 @@ package com.xm.game9.filter;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.Arrays;

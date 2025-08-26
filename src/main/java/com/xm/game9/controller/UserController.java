@@ -569,6 +569,33 @@ public class UserController {
     }
 
     /**
+     * 检查手机号是否已被注册（注册时使用，不需要权限）
+     *
+     * @param phone 手机号
+     * @return 手机号是否可用
+     */
+    @Operation(summary = "检查手机号是否可用", description = "检查手机号是否已被注册，注册时使用，不需要权限")
+    @GetMapping("/checkPhoneAvailable")
+    public BaseResponse<Boolean> checkPhoneAvailable(@RequestParam String phone) {
+        if (StringUtils.isBlank(phone)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "手机号不能为空");
+        }
+        
+        // 验证手机号格式
+        if (!phone.matches("^1[3-9]\\d{9}$")) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "手机号格式不正确");
+        }
+        
+        // 检查手机号是否已被注册
+        User existUser = userService.lambdaQuery()
+                .eq(User::getUserPhone, phone)
+                .one();
+        
+        // 如果手机号已被注册，返回false；否则返回true
+        return ResultUtils.success(existUser == null);
+    }
+
+    /**
      * 用户心跳，刷新在线状态
      *
      * @param request HTTP请求
