@@ -1,0 +1,164 @@
+package com.xm.game9.config;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xm.game9.model.domain.ChatMessage;
+import com.xm.game9.model.vo.ChatMessageVO;
+import com.xm.game9.service.ChatMessageService;
+import com.xm.game9.service.ChatSessionService;
+import com.xm.game9.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+
+import java.util.Date;
+import java.util.List;
+
+/**
+ * WebSocket消息控制器
+ *
+ * @author X1aoM1ngTX
+ */
+@Controller
+@Slf4j
+public class WebSocketController {
+    
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+    
+    @Autowired
+    private ChatMessageService chatMessageService;
+    
+    @Autowired
+    private ChatSessionService chatSessionService;
+    
+    @Autowired
+    private UserService userService;
+    
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    
+    /**
+     * 处理聊天消息
+     */
+    @MessageMapping("/chat.send")
+    public void sendMessage(@Payload String messagePayload) {
+        try {
+            // 解析消息
+            ChatMessageVO message = objectMapper.readValue(messagePayload, ChatMessageVO.class);
+            
+            // 保存消息到数据库
+            Long messageId = chatMessageService.sendMessage(
+                message.getSenderId(),
+                message.getReceiverId(),
+                message.getContent(),
+                message.getMessageType()
+            );
+            
+            // 设置消息ID和创建时间
+            message.setMessageId(messageId);
+            message.setCreateTime(new Date());
+            message.setStatus(0); // 已发送
+            
+            // 更新会话信息
+            Long sessionId = chatSessionService.getOrCreateSession(
+                message.getSenderId(), 
+                message.getReceiverId()
+            );
+            chatSessionService.updateSession(sessionId, message.getContent(), message.getSenderId());
+            
+            // 尝试发送消息给接收者（如果在线）
+            try {
+                messagingTemplate.convertAndSendToUser(
+                    message.getReceiverId().toString(),
+                    "/queue/messages",
+                    message
+                );
+                log.info("消息实时发送成功: 发送者={}, 接收者={}, 内容={}", 
+                    message.getSenderId(), message.getReceiverId(), message.getContent());
+            } catch (Exception e) {
+                log.warn("接收者不在线，消息已保存到数据库: 接收者={}", message.getReceiverId());
+            }
+            
+            // 发送确认消息给发送者
+            messagingTemplate.convertAndSendToUser(
+                message.getSenderId().toString(),
+                "/queue/confirm",
+                message
+            );
+            
+        } catch (Exception e) {
+            log.error("消息发送失败", e);
+        }
+    }
+    
+    /**
+     * 推送离线消息给用户
+     * 
+     * @param userId 用户ID
+     */
+    public void pushOfflineMessages(Long userId) {
+        try {
+            // 获取用户的离线消息（未读消息）
+            List<ChatMessageVO> offlineMessages = chatMessageService.getOfflineMessages(userId);
+            
+            if (offlineMessages != null && !offlineMessages.isEmpty()) {
+                log.info("推送离线消息给用户: userId={}, 消息数量={}", userId, offlineMessages.size());
+                
+                // 逐条推送离线消息
+                for (ChatMessageVO message : offlineMessages) {
+                    messagingTemplate.convertAndSendToUser(
+                        userId.toString(),
+                        "/queue/offline",
+                        message
+                    );
+                }
+                
+                // 标记这些消息为已推送
+                chatMessageService.markMessagesAsPushed(userId, offlineMessages.stream()
+                    .map(ChatMessageVO::getMessageId)
+                    .toArray(Long[]::new));
+            }
+        } catch (Exception e) {
+            log.error("推送离线消息失败: userId={}", userId, e);
+        }
+    }
+    
+    /**
+     * 处理消息已读回执
+     */
+    @MessageMapping("/chat.read")
+    public void markMessageAsRead(@Payload String readPayload) {
+        try {
+            // 解析已读回执
+            ChatMessageVO message = objectMapper.readValue(readPayload, ChatMessageVO.class);
+            
+            // 标记消息为已读
+            chatMessageService.markMessagesAsRead(
+                message.getReceiverId(),
+                message.getSenderId()
+            );
+            
+            // 清除未读消息数
+            Long sessionId = chatSessionService.getOrCreateSession(
+                message.getReceiverId(),
+                message.getSenderId()
+            );
+            chatSessionService.clearUnreadCount(sessionId, message.getReceiverId());
+            
+            // 发送已读回执给发送者
+            messagingTemplate.convertAndSendToUser(
+                message.getSenderId().toString(),
+                "/queue/read",
+                message
+            );
+            
+            log.info("消息已读: 发送者={}, 接收者={}", 
+                message.getSenderId(), message.getReceiverId());
+            
+        } catch (Exception e) {
+            log.error("处理消息已读失败", e);
+        }
+    }
+}

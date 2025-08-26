@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xm.game9.mapper.ChatSessionMapper">
+    
+    <!-- 获取用户会话列表 -->
+    <select id="getUserSessions" resultType="com.xm.game9.model.domain.ChatSession">
+        SELECT *
+        FROM chat_session
+        WHERE (user1Id = #{userId} OR user2Id = #{userId})
+        ORDER BY lastMessageTime DESC
+    </select>
+    
+    <!-- 获取两个用户之间的会话 -->
+    <select id="getSessionByUsers" resultType="com.xm.game9.model.domain.ChatSession">
+        SELECT *
+        FROM chat_session
+        WHERE (user1Id = #{user1Id} AND user2Id = #{user2Id})
+           OR (user1Id = #{user2Id} AND user2Id = #{user1Id})
+        LIMIT 1
+    </select>
+    
+    <!-- 更新会话信息 -->
+    <update id="updateSession">
+        UPDATE chat_session
+        SET lastMessage = #{lastMessage},
+            lastMessageTime = #{messageTime},
+            unreadCountUser1 = CASE 
+                WHEN #{isUser1Sender} = true THEN unreadCountUser1
+                ELSE unreadCountUser1 + 1 
+            END,
+            unreadCountUser2 = CASE 
+                WHEN #{isUser1Sender} = false THEN unreadCountUser2
+                ELSE unreadCountUser2 + 1 
+            END,
+            updateTime = NOW()
+        WHERE sessionId = #{sessionId}
+    </update>
+    
+</mapper>

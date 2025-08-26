@@ -94,4 +94,13 @@ public interface FriendService extends IService<FriendRelationship> {
      * @return 是否成功
      */
     boolean handleFriendRequestById(Long userId, Long id, boolean accept);
+
+    /**
+     * 判断是否是好友关系
+     *
+     * @param userId   用户ID
+     * @param friendId 好友ID
+     * @return 是否是好友
+     */
+    boolean isFriend(Long userId, Long friendId);
 } 

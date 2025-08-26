@@ -344,4 +344,25 @@ public class FriendServiceImpl extends ServiceImpl<FriendRelationshipMapper, Fri
         success = this.save(reverse);
         return success;
     }
+
+    /**
+     * 判断是否是好友关系
+     *
+     * @param userId   用户ID
+     * @param friendId 好友ID
+     * @return 是否是好友
+     */
+    @Override
+    public boolean isFriend(Long userId, Long friendId) {
+        if (userId == null || friendId == null) {
+            return false;
+        }
+        
+        return lambdaQuery()
+                .eq(FriendRelationship::getUserId, userId)
+                .eq(FriendRelationship::getFriendId, friendId)
+                .eq(FriendRelationship::getFriendStatus, 1)
+                .eq(FriendRelationship::getFriendIsDeleted, 0)
+                .exists();
+    }
 }
