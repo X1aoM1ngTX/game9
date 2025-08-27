@@ -45,8 +45,12 @@ public class WebSocketController {
     @MessageMapping("/chat.send")
     public void sendMessage(@Payload String messagePayload) {
         try {
+            log.info("收到WebSocket消息: {}", messagePayload);
+            
             // 解析消息
             ChatMessageVO message = objectMapper.readValue(messagePayload, ChatMessageVO.class);
+            log.info("解析后的消息: 发送者={}, 接收者={}, 内容={}", 
+                message.getSenderId(), message.getReceiverId(), message.getContent());
             
             // 保存消息到数据库
             Long messageId = chatMessageService.sendMessage(
@@ -75,18 +79,21 @@ public class WebSocketController {
                     "/queue/messages",
                     message
                 );
-                log.info("消息实时发送成功: 发送者={}, 接收者={}, 内容={}", 
-                    message.getSenderId(), message.getReceiverId(), message.getContent());
             } catch (Exception e) {
-                log.warn("接收者不在线，消息已保存到数据库: 接收者={}", message.getReceiverId());
+                log.warn("接收者不在线，消息已保存到数据库: 接收者={}, 错误={}", 
+                    message.getReceiverId(), e.getMessage());
             }
             
             // 发送确认消息给发送者
-            messagingTemplate.convertAndSendToUser(
-                message.getSenderId().toString(),
-                "/queue/confirm",
-                message
-            );
+            try {
+                messagingTemplate.convertAndSendToUser(
+                    message.getSenderId().toString(),
+                    "/queue/confirm",
+                    message
+                );
+            } catch (Exception e) {
+                log.warn("发送确认消息失败: {}", e.getMessage());
+            }
             
         } catch (Exception e) {
             log.error("消息发送失败", e);
@@ -104,8 +111,6 @@ public class WebSocketController {
             List<ChatMessageVO> offlineMessages = chatMessageService.getOfflineMessages(userId);
             
             if (offlineMessages != null && !offlineMessages.isEmpty()) {
-                log.info("推送离线消息给用户: userId={}, 消息数量={}", userId, offlineMessages.size());
-                
                 // 逐条推送离线消息
                 for (ChatMessageVO message : offlineMessages) {
                     messagingTemplate.convertAndSendToUser(

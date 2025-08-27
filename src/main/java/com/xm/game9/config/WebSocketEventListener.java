@@ -29,14 +29,17 @@ public class WebSocketEventListener {
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        Long userId = (Long) headerAccessor.getSessionAttributes().get("userId");
         
-        if (userId != null) {
-            onlineStatusManager.userOnline(userId);
-            log.info("WebSocket连接建立: userId={}", userId);
+        // 安全地获取session attributes
+        if (headerAccessor.getSessionAttributes() != null) {
+            Long userId = (Long) headerAccessor.getSessionAttributes().get("userId");
             
-            // 推送离线消息给用户
-            webSocketController.pushOfflineMessages(userId);
+            if (userId != null) {
+                onlineStatusManager.userOnline(userId);
+                
+                // 推送离线消息给用户
+                webSocketController.pushOfflineMessages(userId);
+            }
         }
     }
     
@@ -50,7 +53,6 @@ public class WebSocketEventListener {
         
         if (userId != null) {
             onlineStatusManager.userOffline(userId);
-            log.info("WebSocket连接断开: userId={}", userId);
         }
     }
 }
