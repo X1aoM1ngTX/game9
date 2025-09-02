@@ -1,7 +1,6 @@
-package com.xm.game9.config;
+package com.xm.game9.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.xm.game9.model.domain.ChatMessage;
 import com.xm.game9.model.vo.ChatMessageVO;
 import com.xm.game9.service.ChatMessageService;
 import com.xm.game9.service.ChatSessionService;
@@ -11,10 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.user.SimpUser;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Controller;
 
 import java.util.Date;
 import java.util.List;
+import com.xm.game9.model.domain.User;
 
 /**
  * WebSocket消息控制器
@@ -37,6 +39,9 @@ public class WebSocketController {
     @Autowired
     private UserService userService;
     
+    @Autowired
+    private SimpUserRegistry userRegistry; // 注入用户注册表，用于调试
+    
     private final ObjectMapper objectMapper = new ObjectMapper();
     
     /**
@@ -51,6 +56,13 @@ public class WebSocketController {
             ChatMessageVO message = objectMapper.readValue(messagePayload, ChatMessageVO.class);
             log.info("解析后的消息: 发送者={}, 接收者={}, 内容={}", 
                 message.getSenderId(), message.getReceiverId(), message.getContent());
+            
+            // 获取发送者信息
+            User sender = userService.getById(message.getSenderId());
+            if (sender != null) {
+                message.setSenderNickname(sender.getUserNickname());
+                message.setSenderAvatar(sender.getUserAvatar());
+            }
             
             // 保存消息到数据库
             Long messageId = chatMessageService.sendMessage(
@@ -72,6 +84,16 @@ public class WebSocketController {
             );
             chatSessionService.updateSession(sessionId, message.getContent(), message.getSenderId());
             
+            // --- 增强日志：准备推送消息 ---
+            log.info("准备推送消息给用户 {}: {}", message.getReceiverId(), message.getContent());
+            // 检查接收者在线状态
+            SimpUser simpUser = userRegistry.getUser(message.getReceiverId().toString());
+            log.info("推送前检查用户 {} 在线状态: {}, 会话数: {}", 
+                message.getReceiverId(), 
+                simpUser != null ? "在线" : "离线",
+                simpUser != null ? simpUser.getSessions().size() : 0);
+            // --- 增强日志结束 ---
+            
             // 尝试发送消息给接收者（如果在线）
             try {
                 messagingTemplate.convertAndSendToUser(
@@ -79,9 +101,10 @@ public class WebSocketController {
                     "/queue/messages",
                     message
                 );
+                log.info("消息成功推送给用户 {}", message.getReceiverId());
             } catch (Exception e) {
-                log.warn("接收者不在线，消息已保存到数据库: 接收者={}, 错误={}", 
-                    message.getReceiverId(), e.getMessage());
+                // 将日志级别提升到 ERROR，并打印完整堆栈
+                log.error("向用户 {} 推送消息失败: {}", message.getReceiverId(), e.getMessage(), e);
             }
             
             // 发送确认消息给发送者
@@ -92,7 +115,8 @@ public class WebSocketController {
                     message
                 );
             } catch (Exception e) {
-                log.warn("发送确认消息失败: {}", e.getMessage());
+                log.warn("发送确认消息失败: 发送者={}, 错误={}", 
+                    message.getSenderId(), e.getMessage());
             }
             
         } catch (Exception e) {

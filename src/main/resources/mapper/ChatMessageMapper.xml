@@ -32,6 +32,7 @@
     </select>
     
     <!-- 更新消息状态为已读 -->
+    <!-- 参数说明: senderId 表示发送消息的用户ID, receiverId 表示接收消息的用户ID -->
     <update id="updateMessageStatus">
         UPDATE chat_message
         SET messageStatus = 2,

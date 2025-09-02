@@ -25,6 +25,15 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
     @Autowired
     private ChatMessageMapper chatMessageMapper;
     
+    /**
+     * 发送消息
+     *
+     * @param senderId   发送者ID
+     * @param receiverId 接收者ID
+     * @param content    消息内容
+     * @param messageType 消息类型（0文本，1图片，2文件等）
+     * @return 消息ID
+     */
     @Override
     public Long sendMessage(Long senderId, Long receiverId, String content, Integer messageType) {
         ChatMessage message = new ChatMessage();
@@ -40,23 +49,51 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         return message.getMessageId();
     }
     
+    /**
+    * 获取聊天消息列表，分页
+    *
+    * @param userId   用户ID
+    * @param friendId 好友ID
+    * @param page     页码
+    * @param size     每页大小
+    * @return 分页结果
+    */
     @Override
     public IPage<ChatMessageVO> getChatMessageList(Long userId, Long friendId, int page, int size) {
         Page<ChatMessageVO> pageParam = new Page<>(page, size);
         return chatMessageMapper.getChatMessageList(pageParam, userId, friendId);
     }
     
+    /**
+     * 获取用户未读消息总数
+     *
+     * @param userId 用户ID
+     * @return 未读消息数
+     */
     @Override
     public Long getUnreadCount(Long userId) {
         return chatMessageMapper.getUnreadCount(userId);
     }
     
+    /**
+     * 标记消息为已读
+     *
+     * @param readerId  阅读者ID
+     * @param senderId  发送者ID
+     * @return 更新是否成功
+     */
     @Override
-    public boolean markMessagesAsRead(Long userId, Long friendId) {
-        int result = chatMessageMapper.updateMessageStatus(friendId, userId);
+    public boolean markMessagesAsRead(Long readerId, Long senderId) {
+        int result = chatMessageMapper.updateMessageStatus(senderId, readerId);
         return result > 0;
     }
     
+    /**
+     * 获取用户的离线消息
+     *
+     * @param userId 用户ID
+     * @return 离线消息列表
+     */
     @Override
     public List<ChatMessageVO> getOfflineMessages(Long userId) {
         // 获取用户的所有未读消息
@@ -81,6 +118,13 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
         }).toList();
     }
     
+    /**
+     * 标记消息为已推送
+     *
+     * @param userId     用户ID
+     * @param messageIds 消息ID数组
+     * @return 更新是否成功
+     */
     @Override
     public boolean markMessagesAsPushed(Long userId, Long[] messageIds) {
         if (messageIds == null || messageIds.length == 0) {
@@ -93,7 +137,7 @@ public class ChatMessageServiceImpl extends ServiceImpl<ChatMessageMapper, ChatM
                    .in("message_id", (Object[]) messageIds);
         
         ChatMessage updateEntity = new ChatMessage();
-        updateEntity.setStatus(2); // 已推送状态
+        updateEntity.setStatus(1); // 已推送状态
         
         return update(updateEntity, queryWrapper);
     }

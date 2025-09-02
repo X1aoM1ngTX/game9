@@ -14,8 +14,7 @@
     <select id="getSessionByUsers" resultType="com.xm.game9.model.domain.ChatSession">
         SELECT *
         FROM chat_session
-        WHERE (user1Id = #{user1Id} AND user2Id = #{user2Id})
-           OR (user1Id = #{user2Id} AND user2Id = #{user1Id})
+        WHERE user1Id = #{user1Id} AND user2Id = #{user2Id}
         LIMIT 1
     </select>
     
@@ -25,12 +24,12 @@
         SET lastMessage = #{lastMessage},
             lastMessageTime = #{messageTime},
             unreadCountUser1 = CASE 
-                WHEN #{isUser1Sender} = true THEN unreadCountUser1
-                ELSE unreadCountUser1 + 1 
+                WHEN #{isUser1Sender} = false THEN unreadCountUser1 + 1 
+                ELSE unreadCountUser1
             END,
             unreadCountUser2 = CASE 
-                WHEN #{isUser1Sender} = false THEN unreadCountUser2
-                ELSE unreadCountUser2 + 1 
+                WHEN #{isUser1Sender} = true THEN unreadCountUser2 + 1 
+                ELSE unreadCountUser2
             END,
             updateTime = NOW()
         WHERE sessionId = #{sessionId}

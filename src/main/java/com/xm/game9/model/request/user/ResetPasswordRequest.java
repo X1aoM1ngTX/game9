@@ -13,4 +13,5 @@ public class ResetPasswordRequest implements Serializable {
     private String email;
     private String verifyCode;
     private String newPassword;
-} 
+    private Boolean encrypted = false;
+}

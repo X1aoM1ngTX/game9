@@ -11,6 +11,7 @@ import com.xm.game9.model.request.admin.BatchImportUsersRequest;
 import com.xm.game9.model.request.user.*;
 import com.xm.game9.service.UserService;
 import com.xm.game9.utils.EmailUtil;
+import com.xm.game9.utils.EncryptionUtil;
 import com.xm.game9.utils.RedisUtil;
 import com.xm.game9.utils.UploadUtil;
 import com.xm.game9.utils.UserUtils;
@@ -92,22 +93,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 registerRequest.getUserCheckPassword())) {
             throw new BusinessException(ErrorCode.NULL_ERROR, "注册信息不完整");
         }
+        
+        // 2. 如果密码是加密的，先解密
+        String userPassword = registerRequest.getUserPassword();
+        String userCheckPassword = registerRequest.getUserCheckPassword();
+        Boolean encrypted = registerRequest.getEncrypted() != null ? registerRequest.getEncrypted() : false;
+        
+        if (encrypted) {
+            try {
+                userPassword = EncryptionUtil.decrypt(userPassword);
+                userCheckPassword = EncryptionUtil.decrypt(userCheckPassword);
+            } catch (Exception e) {
+                log.error("密码解密失败", e);
+                throw new BusinessException(ErrorCode.USER_PASSWORD_ERROR, "密码解密失败");
+            }
+        }
+        
+        // 3. 验证数据长度
         if (registerRequest.getUserName().length() < 4) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户名长度不能小于4位");
         }
-        if (registerRequest.getUserPassword().length() < 8) {
+        if (userPassword.length() < 8) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码长度不能小于8位");
         }
         if (StringUtils.isAnyBlank(registerRequest.getUserEmail())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱不能为空");
         }
 
-        // 2. 两次密码不一致
-        if (!registerRequest.getUserPassword().equals(registerRequest.getUserCheckPassword())) {
+        // 4. 两次密码不一致
+        if (!userPassword.equals(userCheckPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次密码不一致");
         }
 
-        // 3. 校验邮箱格式
+        // 5. 校验邮箱格式
         if (!registerRequest.getUserEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式不正确");
         }
@@ -115,28 +133,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 检查 Redis 连接
         checkRedisConnection();
 
-        // 4. 校验验证码
+        // 6. 校验验证码
         String cacheCode = redisUtil.get(VERIFY_CODE_PREFIX + registerRequest.getUserEmail());
         if (cacheCode == null || !cacheCode.equals(registerRequest.getVerifyCode())) {
             throw new BusinessException(ErrorCode.USER_EMAIL_CODE_ERROR, "验证码错误或已过期");
         }
 
-        // 5. 账户不能重复
+        // 7. 账户不能重复
         User existUser = userMapper.selectByUserName(registerRequest.getUserName());
         if (existUser != null) {
             throw new BusinessException(ErrorCode.USER_ACCOUNT_ALREADY_EXIST, "用户名已存在");
         }
 
-        // 6. 检查邮箱是否已被注册
+        // 8. 检查邮箱是否已被注册
         existUser = userMapper.selectByEmail(registerRequest.getUserEmail());
         if (existUser != null) {
             throw new BusinessException(ErrorCode.USER_EMAIL_ALREADY_EXIST, "邮箱已存在");
         }
 
-        // 7. 加密密码
-        String encryptPassword = passwordEncoder.encode(registerRequest.getUserPassword());
+        // 9. 加密密码
+        String encryptPassword = passwordEncoder.encode(userPassword);
 
-        // 8. 插入数据
+        // 10. 插入数据
         User user = new User();
         user.setUserName(registerRequest.getUserName());
         user.setUserEmail(registerRequest.getUserEmail());
@@ -147,7 +165,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         log.info("用户注册成功: {}", user.getUserId());
 
-        // 9. 删除验证码
+        // 11. 删除验证码
         if (saveResult) {
             redisUtil.delete(VERIFY_CODE_PREFIX + registerRequest.getUserEmail());
             log.info("验证码删除成功: {}", registerRequest.getUserEmail());
@@ -168,17 +186,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public User userLogin(UserLoginRequest loginRequest, HttpServletRequest request) {
         String userName = loginRequest.getUserName();
         String userPassword = loginRequest.getUserPassword();
+        Boolean encrypted = loginRequest.getEncrypted() != null ? loginRequest.getEncrypted() : false;
+        
         // 1. 校验
         if (StringUtils.isAnyBlank(userName, userPassword)) {
             throw new BusinessException(ErrorCode.NULL_ERROR, "登录信息不完整");
         }
-        // 2. 查询用户是否存在
+        
+        // 2. 如果密码是加密的，先解密
+        if (encrypted) {
+            try {
+                userPassword = EncryptionUtil.decrypt(userPassword);
+            } catch (Exception e) {
+                log.error("密码解密失败", e);
+                throw new BusinessException(ErrorCode.USER_PASSWORD_ERROR, "密码解密失败");
+            }
+        }
+        
+        // 3. 查询用户是否存在
         User user = userMapper.selectByUserName(userName);
         if (user == null) {
             log.info("user login failed, userName cannot match userPassword");
             throw new BusinessException(ErrorCode.USER_ACCOUNT_NOT_EXIST, "用户名不存在");
         }
-        // 3. 校验密码（先BCrypt，后MD5，自动升级）
+        // 4. 校验密码（先BCrypt，后MD5，自动升级）
         boolean passwordMatch = false;
         if (passwordEncoder.matches(userPassword, user.getUserPassword())) {
             passwordMatch = true;
@@ -197,7 +228,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("user login failed, userName cannot match userPassword");
             throw new BusinessException(ErrorCode.USER_PASSWORD_ERROR, "密码错误");
         }
-        // 4. 记录用户的登录态
+        // 5. 记录用户的登录态
         request.getSession().setAttribute(USER_LOGIN_STATE, user);
         log.info("[Service-登录] 用户名:{}, IP:{}, 时间:{}", userName, request.getRemoteAddr(), java.time.LocalDateTime.now());
         return UserUtils.getSafetyUser(user);
@@ -428,12 +459,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         resetRequest.getNewPassword())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不完整");
         }
+        
+        // 如果密码是加密的，先解密
+        String newPassword = resetRequest.getNewPassword();
+        Boolean encrypted = resetRequest.getEncrypted() != null ? resetRequest.getEncrypted() : false;
+        
+        if (encrypted) {
+            try {
+                newPassword = EncryptionUtil.decrypt(newPassword);
+            } catch (Exception e) {
+                log.error("密码解密失败", e);
+                throw new BusinessException(ErrorCode.USER_PASSWORD_ERROR, "密码解密失败");
+            }
+        }
 
         // 检查 Redis 连接
         checkRedisConnection();
 
         // 验证密码格式
-        if (resetRequest.getNewPassword().length() < 8) {
+        if (newPassword.length() < 8) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码长度不能小于8位");
         }
 
@@ -467,7 +511,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 加密新密码
-        String encryptedPassword = passwordEncoder.encode(resetRequest.getNewPassword());
+        String encryptedPassword = passwordEncoder.encode(newPassword);
         user.setUserPassword(encryptedPassword);
 
         // 更新成功后删除验证码

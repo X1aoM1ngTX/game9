@@ -19,6 +19,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Autowired
     private WebSocketHandshakeInterceptor handshakeInterceptor;
     
+    @Autowired
+    private CustomHandshakeHandler customHandshakeHandler;
+    
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         // 启用简单的消息代理，前缀为 /topic 和 /queue
@@ -29,16 +32,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // 注册WebSocket端点，允许跨域，并添加握手拦截器
+        // 注册WebSocket端点，允许跨域，并添加握手拦截器和自定义握手处理器
         // 提供两种连接方式：SockJS和原生WebSocket
-        registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:3000", "http://localhost:3001")
-                .addInterceptors(handshakeInterceptor)
-                .withSockJS();
         
-        // 同时提供原生WebSocket端点
-        registry.addEndpoint("/ws-native")
-                .setAllowedOrigins("http://localhost:3000", "http://localhost:3001")
-                .addInterceptors(handshakeInterceptor);
+        // SockJS端点
+        registry.addEndpoint("/ws")
+                .setAllowedOrigins("http://localhost:3000")
+                .addInterceptors(handshakeInterceptor)
+                .setHandshakeHandler(customHandshakeHandler)
+                .withSockJS();
     }
 }

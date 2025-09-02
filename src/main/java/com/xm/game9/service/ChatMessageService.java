@@ -48,11 +48,11 @@ public interface ChatMessageService extends IService<ChatMessage> {
     /**
      * 标记消息为已读
      *
-     * @param userId   当前用户ID
-     * @param friendId 好友ID
+     * @param readerId 读取消息的用户ID (即接收者)
+     * @param senderId 发送消息的用户ID
      * @return 是否成功
      */
-    boolean markMessagesAsRead(Long userId, Long friendId);
+    boolean markMessagesAsRead(Long readerId, Long senderId);
     
     /**
      * 获取离线消息

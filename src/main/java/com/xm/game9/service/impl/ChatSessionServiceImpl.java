@@ -1,6 +1,5 @@
 package com.xm.game9.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xm.game9.mapper.ChatSessionMapper;
 import com.xm.game9.model.domain.ChatSession;
@@ -33,6 +32,12 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
     @Autowired
     private RedisUtil redisUtil;
     
+    /**
+     * 获取用户会话列表
+     *
+     * @param userId 用户ID
+     * @return 会话列表
+     */
     @Override
     public List<ChatSessionVO> getUserSessions(Long userId) {
         List<ChatSession> sessions = chatSessionMapper.getUserSessions(userId);
@@ -72,14 +77,26 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         return result;
     }
     
+    /**
+     * 获取或创建会话
+     *
+     * @param user1Id 用户1 ID
+     * @param user2Id 用户2 ID
+     * @return 会话ID
+     */
     @Override
     public Long getOrCreateSession(Long user1Id, Long user2Id) {
-        ChatSession session = chatSessionMapper.getSessionByUsers(user1Id, user2Id);
+        Long minUserId = Math.min(user1Id, user2Id);
+        Long maxUserId = Math.max(user1Id, user2Id);
+
+        // 尝试获取现有会话
+        ChatSession session = chatSessionMapper.getSessionByUsers(minUserId, maxUserId);
         
+        // 如果不存在则创建新会话
         if (session == null) {
             session = new ChatSession();
-            session.setUser1Id(Math.min(user1Id, user2Id));
-            session.setUser2Id(Math.max(user1Id, user2Id));
+            session.setUser1Id(minUserId);
+            session.setUser2Id(maxUserId);
             session.setUnreadCountUser1(0);
             session.setUnreadCountUser2(0);
             session.setCreateTime(new Date());
@@ -87,10 +104,18 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
             
             save(session);
         }
-        
+        // 返回会话ID
         return session.getSessionId();
     }
     
+    /**
+     * 更新会话的最后一条消息和未读消息数
+     *
+     * @param sessionId   会话ID
+     * @param lastMessage 最后一条消息内容
+     * @param senderId    发送者ID
+     * @return 更新是否成功
+     */
     @Override
     public boolean updateSession(Long sessionId, String lastMessage, Long senderId) {
         ChatSession session = getById(sessionId);
@@ -104,6 +129,13 @@ public class ChatSessionServiceImpl extends ServiceImpl<ChatSessionMapper, ChatS
         return result > 0;
     }
     
+    /**
+     * 清除会话的未读消息数
+     *
+     * @param sessionId 会话ID
+     * @param userId    用户ID
+     * @return 清除是否成功
+     */
     @Override
     public boolean clearUnreadCount(Long sessionId, Long userId) {
         ChatSession session = getById(sessionId);

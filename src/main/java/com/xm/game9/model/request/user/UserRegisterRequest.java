@@ -40,4 +40,9 @@ public class UserRegisterRequest implements Serializable {
      * 验证码
      */
     private String verifyCode;
+
+    /**
+     * 标识密码是否已加密
+     */
+    private Boolean encrypted = false;
 }

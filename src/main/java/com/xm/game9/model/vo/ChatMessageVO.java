@@ -48,7 +48,7 @@ public class ChatMessageVO {
     private Integer messageType;
     
     /**
-     * 消息状态：0-已发送 1-已送达 2-已读
+     * 消息状态：0-已发送 1-已推送 2-已读
      */
     private Integer status;
     
