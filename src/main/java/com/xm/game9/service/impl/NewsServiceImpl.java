@@ -8,6 +8,8 @@ import com.xm.game9.common.ErrorCode;
 import com.xm.game9.exception.BusinessException;
 import com.xm.game9.mapper.NewsMapper;
 import com.xm.game9.model.domain.News;
+import com.xm.game9.model.domain.Game;
+import com.xm.game9.mapper.GameMapper;
 import com.xm.game9.service.NewsService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,10 @@ import org.springframework.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author X1aoM1ngTX
@@ -22,11 +28,73 @@ import java.util.List;
  * @createDate 2025-04-30
  */
 @Service
+@Slf4j
 public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
         implements NewsService {
 
     @Resource
+    private ObjectMapper objectMapper;
+
+    // 标签正则表达式：匹配 #开头的标签，支持中文、英文、数字、下划线
+    private static final Pattern TAG_PATTERN = Pattern.compile("#([a-zA-Z0-9_\u4e00-\u9fa5]+)");
+
+    @Resource
     private NewsMapper newsMapper;
+
+    @Resource
+    private GameMapper gameMapper;
+
+    /**
+     * 解析和验证自定义标签
+     *
+     * @param tagsText 标签文本
+     * @return JSON格式的标签数组
+     */
+    private String parseCustomTags(String tagsText) {
+        if (!StringUtils.hasText(tagsText)) {
+            return null;
+        }
+
+        List<String> tags = new java.util.ArrayList<>();
+        Matcher matcher = TAG_PATTERN.matcher(tagsText);
+        
+        while (matcher.find()) {
+            String tag = matcher.group(1);
+            if (tag.length() <= 20) { // 限制标签长度
+                tags.add("#" + tag);
+            }
+        }
+
+        if (tags.isEmpty()) {
+            return null;
+        }
+
+        try {
+            return objectMapper.writeValueAsString(tags);
+        } catch (Exception e) {
+            log.error("解析自定义标签失败", e);
+            return null;
+        }
+    }
+
+    /**
+     * 从JSON格式的标签字符串中提取标签列表
+     *
+     * @param tagsJson JSON格式的标签字符串
+     * @return 标签列表
+     */
+    private List<String> extractTagsFromJson(String tagsJson) {
+        if (!StringUtils.hasText(tagsJson)) {
+            return new java.util.ArrayList<>();
+        }
+
+        try {
+            return objectMapper.readValue(tagsJson, List.class);
+        } catch (Exception e) {
+            log.error("解析标签JSON失败", e);
+            return new java.util.ArrayList<>();
+        }
+    }
 
     /**
      * 创建资讯
@@ -62,6 +130,20 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
         news.setNewsCreateTime(new Date());
         news.setNewsUpdateTime(new Date());
         news.setNewsViews(0);
+
+        // 如果设置了游戏标签，自动填充游戏标签名称
+        if (news.getNewsGameTag() != null && news.getNewsGameTag() > 0) {
+            Game game = gameMapper.selectById(news.getNewsGameTag());
+            if (game != null) {
+                news.setNewsGameTagName(game.getGameName());
+            }
+        }
+
+        // 处理自定义标签
+        if (StringUtils.hasText(news.getNewsCustomTags())) {
+            String parsedTags = parseCustomTags(news.getNewsCustomTags());
+            news.setNewsCustomTags(parsedTags);
+        }
 
         boolean saveResult = this.save(news);
         if (!saveResult) {
@@ -110,6 +192,25 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
         if (StringUtils.hasText(news.getNewsCoverImage())) {
             // 可添加URL格式校验
             updateNews.setNewsCoverImage(news.getNewsCoverImage());
+        }
+        // 更新游戏标签
+        updateNews.setNewsGameTag(news.getNewsGameTag());
+        // 如果设置了游戏标签，自动填充游戏标签名称
+        if (news.getNewsGameTag() != null && news.getNewsGameTag() > 0) {
+            Game game = gameMapper.selectById(news.getNewsGameTag());
+            if (game != null) {
+                updateNews.setNewsGameTagName(game.getGameName());
+            }
+        } else {
+            updateNews.setNewsGameTagName(null);
+        }
+
+        // 更新自定义标签
+        if (StringUtils.hasText(news.getNewsCustomTags())) {
+            String parsedTags = parseCustomTags(news.getNewsCustomTags());
+            updateNews.setNewsCustomTags(parsedTags);
+        } else {
+            updateNews.setNewsCustomTags(null);
         }
 
         updateNews.setNewsUpdateTime(new Date());
@@ -316,5 +417,133 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
             // 可能资讯不存在或已被删除，记录日志
             log.warn("Failed to increment views for news ID: " + id + ". News might not exist or be deleted.");
         }
+    }
+
+    /**
+     * 根据游戏标签获取资讯列表
+     *
+     * @param gameTagId 游戏标签ID
+     * @param pageNum   页码
+     * @param pageSize  每页大小
+     * @return 分页结果
+     */
+    @Override
+    public Page<News> getNewsByGameTag(Long gameTagId, Integer pageNum, Integer pageSize) {
+        if (gameTagId == null || gameTagId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "游戏标签ID非法");
+        }
+        if (pageNum == null || pageNum <= 0) {
+            pageNum = 1;
+        }
+        if (pageSize == null || pageSize <= 0) {
+            pageSize = 10;
+        }
+
+        LambdaQueryWrapper<News> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(News::getNewsGameTag, gameTagId)
+                .eq(News::getNewsStatus, 1) // 只查询已发布的资讯
+                .eq(News::getNewsIsDelete, 0) // 未删除的资讯
+                .orderByDesc(News::getNewsPublishTime); // 按发布时间降序
+
+        return this.page(new Page<>(pageNum, pageSize), queryWrapper);
+    }
+
+    /**
+     * 根据游戏标签名称获取资讯列表
+     *
+     * @param gameTagName 游戏标签名称
+     * @param pageNum     页码
+     * @param pageSize    每页大小
+     * @return 分页结果
+     */
+    @Override
+    public Page<News> getNewsByGameTagName(String gameTagName, Integer pageNum, Integer pageSize) {
+        if (!StringUtils.hasText(gameTagName)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "游戏标签名称不能为空");
+        }
+        if (pageNum == null || pageNum <= 0) {
+            pageNum = 1;
+        }
+        if (pageSize == null || pageSize <= 0) {
+            pageSize = 10;
+        }
+
+        LambdaQueryWrapper<News> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(News::getNewsGameTagName, gameTagName)
+                .eq(News::getNewsStatus, 1) // 只查询已发布的资讯
+                .eq(News::getNewsIsDelete, 0) // 未删除的资讯
+                .orderByDesc(News::getNewsPublishTime); // 按发布时间降序
+
+        return this.page(new Page<>(pageNum, pageSize), queryWrapper);
+    }
+
+    /**
+     * 根据自定义标签获取资讯列表
+     *
+     * @param customTag 自定义标签
+     * @param pageNum   页码
+     * @param pageSize  每页大小
+     * @return 分页结果
+     */
+    @Override
+    public Page<News> getNewsByCustomTag(String customTag, Integer pageNum, Integer pageSize) {
+        if (!StringUtils.hasText(customTag)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "自定义标签不能为空");
+        }
+        if (pageNum == null || pageNum <= 0) {
+            pageNum = 1;
+        }
+        if (pageSize == null || pageSize <= 0) {
+            pageSize = 10;
+        }
+
+        // 确保标签格式正确（以#开头）
+        String tagQuery = customTag.startsWith("#") ? customTag : "#" + customTag;
+
+        LambdaQueryWrapper<News> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.like(News::getNewsCustomTags, tagQuery)
+                .eq(News::getNewsStatus, 1) // 只查询已发布的资讯
+                .eq(News::getNewsIsDelete, 0) // 未删除的资讯
+                .orderByDesc(News::getNewsPublishTime); // 按发布时间降序
+
+        return this.page(new Page<>(pageNum, pageSize), queryWrapper);
+    }
+
+    /**
+     * 获取热门自定义标签
+     *
+     * @param limit 限制返回的标签数量
+     * @return 热门标签列表
+     */
+    @Override
+    public List<String> getHotCustomTags(Integer limit) {
+        if (limit == null || limit <= 0) {
+            limit = 20;
+        }
+
+        // 查询所有已发布资讯的自定义标签
+        LambdaQueryWrapper<News> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.select(News::getNewsCustomTags)
+                .isNotNull(News::getNewsCustomTags)
+                .eq(News::getNewsStatus, 1)
+                .eq(News::getNewsIsDelete, 0);
+
+        List<News> newsList = this.list(queryWrapper);
+        
+        // 统计标签频率
+        java.util.Map<String, Integer> tagCountMap = new java.util.HashMap<>();
+        for (News news : newsList) {
+            List<String> tags = extractTagsFromJson(news.getNewsCustomTags());
+            for (String tag : tags) {
+                tagCountMap.put(tag, tagCountMap.getOrDefault(tag, 0) + 1);
+            }
+        }
+
+        // 按使用频率排序并返回前N个标签
+        return tagCountMap.entrySet().stream()
+                .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
+                .limit(limit)
+                .map(java.util.Map.Entry::getKey)
+                .collect(java.util.stream.Collectors.toList());
     }
 }

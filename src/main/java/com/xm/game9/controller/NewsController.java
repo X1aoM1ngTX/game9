@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 import static com.xm.game9.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
@@ -406,5 +408,85 @@ public class NewsController {
             throw new BusinessException(ErrorCode.NO_AUTH, "无权查看他人草稿");
         }
         return ResultUtils.success(news);
+    }
+
+    /**
+     * 根据游戏标签ID获取资讯列表
+     *
+     * @param gameTagId 游戏标签ID
+     * @param pageNum   页码
+     * @param pageSize  每页大小
+     * @return 资讯列表
+     */
+    @Operation(summary = "根据游戏标签ID获取资讯", description = "根据游戏标签ID获取已发布的资讯列表")
+    @GetMapping("/list/byGameTag")
+    public BaseResponse<Page<News>> getNewsByGameTag(
+            @Parameter(description = "游戏标签ID", required = true) @RequestParam Long gameTagId,
+            @Parameter(description = "页码", required = false) @RequestParam(defaultValue = "1") Integer pageNum,
+            @Parameter(description = "每页大小", required = false) @RequestParam(defaultValue = "10") Integer pageSize) {
+        if (gameTagId == null || gameTagId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "游戏标签ID无效");
+        }
+        Page<News> page = newsService.getNewsByGameTag(gameTagId, pageNum, pageSize);
+        return ResultUtils.success(page);
+    }
+
+    /**
+     * 根据游戏标签名称获取资讯列表
+     *
+     * @param gameTagName 游戏标签名称
+     * @param pageNum     页码
+     * @param pageSize    每页大小
+     * @return 资讯列表
+     */
+    @Operation(summary = "根据游戏标签名称获取资讯", description = "根据游戏标签名称获取已发布的资讯列表")
+    @GetMapping("/list/byGameTagName")
+    public BaseResponse<Page<News>> getNewsByGameTagName(
+            @Parameter(description = "游戏标签名称", required = true) @RequestParam String gameTagName,
+            @Parameter(description = "页码", required = false) @RequestParam(defaultValue = "1") Integer pageNum,
+            @Parameter(description = "每页大小", required = false) @RequestParam(defaultValue = "10") Integer pageSize) {
+        if (!org.springframework.util.StringUtils.hasText(gameTagName)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "游戏标签名称不能为空");
+        }
+        Page<News> page = newsService.getNewsByGameTagName(gameTagName, pageNum, pageSize);
+        return ResultUtils.success(page);
+    }
+
+    /**
+     * 根据自定义标签获取资讯列表
+     *
+     * @param customTag 自定义标签
+     * @param pageNum   页码
+     * @param pageSize  每页大小
+     * @return 资讯列表
+     */
+    @Operation(summary = "根据自定义标签获取资讯", description = "根据自定义标签获取已发布的资讯列表")
+    @GetMapping("/list/byCustomTag")
+    public BaseResponse<Page<News>> getNewsByCustomTag(
+            @Parameter(description = "自定义标签", required = true) @RequestParam String customTag,
+            @Parameter(description = "页码", required = false) @RequestParam(defaultValue = "1") Integer pageNum,
+            @Parameter(description = "每页大小", required = false) @RequestParam(defaultValue = "10") Integer pageSize) {
+        if (!org.springframework.util.StringUtils.hasText(customTag)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "自定义标签不能为空");
+        }
+        Page<News> page = newsService.getNewsByCustomTag(customTag, pageNum, pageSize);
+        return ResultUtils.success(page);
+    }
+
+    /**
+     * 获取热门自定义标签
+     *
+     * @param limit 限制返回的标签数量
+     * @return 热门标签列表
+     */
+    @Operation(summary = "获取热门自定义标签", description = "获取使用频率最高的自定义标签")
+    @GetMapping("/tags/hot")
+    public BaseResponse<List<String>> getHotCustomTags(
+            @Parameter(description = "限制返回的标签数量", required = false) @RequestParam(defaultValue = "20") Integer limit) {
+        if (limit == null || limit <= 0) {
+            limit = 20;
+        }
+        List<String> hotTags = newsService.getHotCustomTags(limit);
+        return ResultUtils.success(hotTags);
     }
 }

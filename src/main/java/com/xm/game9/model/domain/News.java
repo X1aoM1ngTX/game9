@@ -83,4 +83,19 @@ public class News implements Serializable {
      * 浏览次数
      */
     private Integer newsViews;
+
+    /**
+     * 游戏标签ID (关联游戏表)
+     */
+    private Long newsGameTag;
+
+    /**
+     * 游戏标签名称
+     */
+    private String newsGameTagName;
+
+    /**
+     * 自定义标签（JSON格式存储多个标签）
+     */
+    private String newsCustomTags;
 }

@@ -97,4 +97,42 @@ public interface NewsService extends IService<News> {
      */
     void incrementNewsViews(Long id);
 
+    /**
+     * 根据游戏标签获取资讯列表
+     *
+     * @param gameTagId 游戏标签ID
+     * @param pageNum   页码
+     * @param pageSize  每页大小
+     * @return 分页结果
+     */
+    Page<News> getNewsByGameTag(Long gameTagId, Integer pageNum, Integer pageSize);
+
+    /**
+     * 根据游戏标签名称获取资讯列表
+     *
+     * @param gameTagName 游戏标签名称
+     * @param pageNum     页码
+     * @param pageSize    每页大小
+     * @return 分页结果
+     */
+    Page<News> getNewsByGameTagName(String gameTagName, Integer pageNum, Integer pageSize);
+
+    /**
+     * 根据自定义标签获取资讯列表
+     *
+     * @param customTag 自定义标签
+     * @param pageNum   页码
+     * @param pageSize  每页大小
+     * @return 分页结果
+     */
+    Page<News> getNewsByCustomTag(String customTag, Integer pageNum, Integer pageSize);
+
+    /**
+     * 获取热门自定义标签
+     *
+     * @param limit 限制返回的标签数量
+     * @return 热门标签列表
+     */
+    List<String> getHotCustomTags(Integer limit);
+
 }

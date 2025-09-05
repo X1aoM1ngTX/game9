@@ -37,4 +37,14 @@ public class NewsUpdateRequest implements Serializable {
      */
     private String newsCoverImage;
 
+  /**
+     * 游戏标签ID (关联游戏表)
+     */
+    private Long newsGameTag;
+
+    /**
+     * 自定义标签（JSON格式存储多个标签）
+     */
+    private String newsCustomTags;
+
 }

@@ -17,13 +17,14 @@
         <result property="newsCoverImage" column="newsCoverImage" jdbcType="VARCHAR"/>
         <result property="newsSummary" column="newsSummary" jdbcType="VARCHAR"/>
         <result property="newsViews" column="newsViews" jdbcType="INTEGER"/>
+        <result property="newsGameTag" column="newsGameTag" jdbcType="BIGINT"/>
+        <result property="newsGameTagName" column="newsGameTagName" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        newsId
-        ,newsTitle,newsContent,
+        newsId,newsTitle,newsContent,
         newsAuthorId,newsStatus,newsCreateTime,
         newsUpdateTime,newsPublishTime,newsIsDelete,
-        newsCoverImage,newsSummary,newsViews
+        newsCoverImage,newsSummary,newsViews,newsGameTag,newsGameTagName
     </sql>
 </mapper>
