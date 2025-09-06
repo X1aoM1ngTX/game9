@@ -546,4 +546,36 @@ public class NewsServiceImpl extends ServiceImpl<NewsMapper, News>
                 .map(java.util.Map.Entry::getKey)
                 .collect(java.util.stream.Collectors.toList());
     }
+
+    /**
+     * 搜索资讯
+     *
+     * @param keyword  搜索关键词
+     * @param pageNum  页码
+     * @param pageSize 每页大小
+     * @return 搜索结果
+     */
+    @Override
+    public Page<News> searchNews(String keyword, Integer pageNum, Integer pageSize) {
+        if (!StringUtils.hasText(keyword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "搜索关键词不能为空");
+        }
+        
+        // 构建查询条件
+        LambdaQueryWrapper<News> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(News::getNewsStatus, 1)  // 只搜索已发布的资讯
+                   .eq(News::getNewsIsDelete, 0)  // 排除已删除的资讯
+                   .and(wrapper -> wrapper
+                       .like(News::getNewsTitle, keyword)  // 标题包含关键词
+                       .or()
+                       .like(News::getNewsSummary, keyword)  // 摘要包含关键词
+                       .or()
+                       .like(News::getNewsContent, keyword)  // 内容包含关键词
+                   )
+                   .orderByDesc(News::getNewsPublishTime);  // 按发布时间降序排序
+        
+        // 执行分页查询
+        Page<News> page = new Page<>(pageNum, pageSize);
+        return this.page(page, queryWrapper);
+    }
 }

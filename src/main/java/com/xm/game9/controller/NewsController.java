@@ -489,4 +489,31 @@ public class NewsController {
         List<String> hotTags = newsService.getHotCustomTags(limit);
         return ResultUtils.success(hotTags);
     }
+
+    /**
+     * 搜索资讯
+     *
+     * @param keyword  搜索关键词
+     * @param pageNum  页码
+     * @param pageSize 每页大小
+     * @return 搜索结果
+     */
+    @Operation(summary = "搜索资讯", description = "根据关键词搜索已发布的资讯")
+    @GetMapping("/search")
+    public BaseResponse<Page<News>> searchNews(
+            @Parameter(description = "搜索关键词", required = true) @RequestParam String keyword,
+            @Parameter(description = "页码", required = false) @RequestParam(defaultValue = "1") Integer pageNum,
+            @Parameter(description = "每页大小", required = false) @RequestParam(defaultValue = "10") Integer pageSize) {
+        if (!org.springframework.util.StringUtils.hasText(keyword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "搜索关键词不能为空");
+        }
+        if (pageNum < 1) {
+            pageNum = 1;
+        }
+        if (pageSize < 1) {
+            pageSize = 10;
+        }
+        Page<News> page = newsService.searchNews(keyword, pageNum, pageSize);
+        return ResultUtils.success(page);
+    }
 }

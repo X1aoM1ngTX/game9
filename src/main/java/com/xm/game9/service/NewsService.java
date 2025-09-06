@@ -135,4 +135,14 @@ public interface NewsService extends IService<News> {
      */
     List<String> getHotCustomTags(Integer limit);
 
+    /**
+     * 搜索资讯
+     *
+     * @param keyword  搜索关键词
+     * @param pageNum  页码
+     * @param pageSize 每页大小
+     * @return 搜索结果
+     */
+    Page<News> searchNews(String keyword, Integer pageNum, Integer pageSize);
+
 }
