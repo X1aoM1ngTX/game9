@@ -5,7 +5,10 @@ spring:
     username: ${MYSQL_USERNAME:test_user}
     password: ${MYSQL_PASSWORD:test_password}
   session:
+    store-type: redis # 指定使用Redis存储Session
     timeout: 1478400 # 默认14天
+    redis:
+      namespace: game9:sessions:test # Session的Redis命名空间
   mail:
     host: smtp.qq.com
     username: ${MAIL_USERNAME}

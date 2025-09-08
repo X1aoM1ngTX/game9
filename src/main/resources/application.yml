@@ -11,7 +11,10 @@ spring:
     username: root
     password: 123456
   session:
+    store-type: redis # 指定使用Redis存储Session
     timeout: 1478400 # 默认14天
+    redis:
+      namespace: game9:sessions # Session的Redis命名空间
   servlet:
     multipart:
       max-file-size: 10MB

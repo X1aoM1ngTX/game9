@@ -13,6 +13,7 @@ import com.xm.game9.service.UserService;
 import com.xm.game9.utils.EmailUtil;
 import com.xm.game9.utils.EncryptionUtil;
 import com.xm.game9.utils.RedisUtil;
+import com.xm.game9.utils.SessionManager;
 import com.xm.game9.utils.UploadUtil;
 import com.xm.game9.utils.UserUtils;
 import jakarta.annotation.PostConstruct;
@@ -60,6 +61,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private String emailFrom;
     @Resource
     private RedisUtil redisUtil;
+    
+    @Resource
+    private SessionManager sessionManager;
 
     // 初始化邮箱地址
     @PostConstruct
@@ -228,8 +232,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("user login failed, userName cannot match userPassword");
             throw new BusinessException(ErrorCode.USER_PASSWORD_ERROR, "密码错误");
         }
-        // 5. 记录用户的登录态
-        request.getSession().setAttribute(USER_LOGIN_STATE, user);
+        // 5. 使用SessionManager处理登录（实现单设备登录）
+        sessionManager.handleUserLogin(user.getUserId(), request, user);
         log.info("[Service-登录] 用户名:{}, IP:{}, 时间:{}", userName, request.getRemoteAddr(), java.time.LocalDateTime.now());
         return UserUtils.getSafetyUser(user);
     }
@@ -249,6 +253,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (currentUser == null || currentUser.getUserId() == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
+        
+        // 验证Session是否有效（防止在其他设备登录后，当前设备的Session仍然可用）
+        if (!sessionManager.validateSession(currentUser.getUserId(), request)) {
+            // 清除当前Session的登录状态
+            request.getSession().removeAttribute(USER_LOGIN_STATE);
+            throw new BusinessException(ErrorCode.NOT_LOGIN, "账号已在其他设备登录，请重新登录");
+        }
+        
         // 从数据库查询（追求性能的话可以注释，直接走缓存）
         long userId = currentUser.getUserId();
         currentUser = getById(userId);
@@ -267,11 +279,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public boolean userLogout(HttpServletRequest logoutRequest) {
-        if (logoutRequest.getSession().getAttribute(USER_LOGIN_STATE) == null) {
+        // 获取当前登录用户
+        User currentUser = (User) logoutRequest.getSession().getAttribute(USER_LOGIN_STATE);
+        if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
-        // 移除登录态
-        logoutRequest.getSession().removeAttribute(USER_LOGIN_STATE);
+        
+        // 使用SessionManager处理登出
+        sessionManager.handleUserLogout(currentUser.getUserId(), logoutRequest);
         return true;
     }
 
