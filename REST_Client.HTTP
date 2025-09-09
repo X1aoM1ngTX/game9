@@ -461,3 +461,84 @@ Content-Type: application/json
 
 ### 获取当前用户的愿望单
 GET http://localhost:8080/api/wishlist/my
+
+
+### ==================== 钱包接口 (WalletController) ====================
+
+### 获取钱包信息
+GET http://localhost:8080/api/wallet/info
+
+### 钱包充值
+POST http://localhost:8080/api/wallet/recharge
+Content-Type: application/json
+
+{
+  "amount": 100.00,
+  "paymentMethod": "alipay",
+  "description": "钱包充值"
+}
+
+### 钱包消费
+POST http://localhost:8080/api/wallet/consume
+Content-Type: application/json
+
+{
+  "amount": 50.00,
+  "description": "购买游戏"
+}
+
+### 获取钱包余额
+GET http://localhost:8080/api/wallet/balance
+
+### 获取交易记录
+GET http://localhost:8080/api/wallet/transactions?pageNum=1&pageSize=10
+
+### 获取所有交易记录
+GET http://localhost:8080/api/wallet/transactions/all
+
+### 转账
+POST http://localhost:8080/api/wallet/transfer?toUserId=2&amount=30.00&description=测试转账
+
+### 冻结钱包
+POST http://localhost:8080/api/wallet/freeze
+
+### 解冻钱包
+POST http://localhost:8080/api/wallet/unfreeze
+
+### 检查钱包状态
+GET http://localhost:8080/api/wallet/status
+
+
+### ==================== 订单接口 (OrderController) ====================
+
+### 创建订单
+POST http://localhost:8080/api/order/create
+Content-Type: application/json
+
+{
+  "gameId": 1,
+  "orderAmount": 99.99,
+  "paymentMethod": "wallet",
+  "description": "购买游戏"
+}
+
+### 根据订单ID获取订单信息
+GET http://localhost:8080/api/order/10
+
+### 根据订单编号获取订单信息
+GET http://localhost:8080/api/order/by-order-no/ORDER20250909131226AED4553A
+
+### 获取用户的订单列表
+GET http://localhost:8080/api/order/list
+
+### 支付订单
+POST http://localhost:8080/api/order/10/pay?paymentMethod=wallet
+
+### 取消订单
+POST http://localhost:8080/api/order/10/cancel
+
+### 退款订单
+POST http://localhost:8080/api/order/10/refund?reason=不想要了
+
+### 检查订单状态
+GET http://localhost:8080/api/order/10/status
