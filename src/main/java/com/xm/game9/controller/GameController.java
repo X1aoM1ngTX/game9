@@ -9,6 +9,7 @@ import com.xm.game9.model.domain.Game;
 import com.xm.game9.model.domain.User;
 import com.xm.game9.model.request.game.*;
 import com.xm.game9.model.vo.GameDetailVO;
+import com.xm.game9.model.vo.order.OrderVO;
 import com.xm.game9.service.GameService;
 import com.xm.game9.service.SteamApiService;
 import com.xm.game9.service.UserService;
@@ -233,15 +234,15 @@ public class GameController {
     }
 
     /**
-     * 购买游戏
+     * 购买游戏 - 创建订单
      *
      * @param purchaseRequest 购买请求
      * @param request         HTTP请求
-     * @return 是否购买成功
+     * @return 订单信息
      */
-    @Operation(summary = "购买游戏", description = "用户购买游戏")
+    @Operation(summary = "购买游戏", description = "用户购买游戏，创建订单")
     @PostMapping("/purchase")
-    public BaseResponse<Boolean> purchaseGame(@RequestBody GamePurchaseRequest purchaseRequest,
+    public BaseResponse<OrderVO> purchaseGame(@RequestBody GamePurchaseRequest purchaseRequest,
                                               HttpServletRequest request) {
         // 1. 参数校验
         if (purchaseRequest == null || purchaseRequest.getGameId() == null) {
@@ -254,9 +255,9 @@ public class GameController {
             throw new BusinessException(ErrorCode.NOT_LOGIN, "用户未登录");
         }
 
-        // 3. 执行购买
-        boolean result = gameService.purchaseGame(loginUser.getUserId(), purchaseRequest.getGameId());
-        return ResultUtils.success(result);
+        // 3. 创建订单
+        OrderVO orderVO = gameService.createPurchaseOrder(loginUser.getUserId(), purchaseRequest.getGameId());
+        return ResultUtils.success(orderVO);
     }
 
     /**

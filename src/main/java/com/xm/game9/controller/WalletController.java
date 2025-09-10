@@ -1,6 +1,5 @@
 package com.xm.game9.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xm.game9.common.BaseResponse;
 import com.xm.game9.common.ErrorCode;
 import com.xm.game9.common.ResultUtils;

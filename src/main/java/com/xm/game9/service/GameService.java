@@ -10,6 +10,7 @@ import com.xm.game9.model.request.game.GameStatusRequest;
 import com.xm.game9.model.request.game.GameSteamUrlUpdateRequest;
 import com.xm.game9.model.request.game.GameUpdateRequest;
 import com.xm.game9.model.vo.GameDetailVO;
+import com.xm.game9.model.vo.order.OrderVO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,12 +81,22 @@ public interface GameService extends IService<Game> {
     boolean deleteGame(Long gameId);
 
     /**
-     * 购买游戏
+     * 购买游戏 - 创建订单
+     *
+     * @param userId 用户ID
+     * @param gameId 游戏ID
+     * @return 订单信息
+     */
+    OrderVO createPurchaseOrder(Long userId, Long gameId);
+
+    /**
+     * 购买游戏（旧方法，保留兼容性）
      *
      * @param userId 用户ID
      * @param gameId 游戏ID
      * @return 是否购买成功
      */
+    @Deprecated
     boolean purchaseGame(Long userId, Long gameId);
 
     /**

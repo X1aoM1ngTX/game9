@@ -146,8 +146,8 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
 
         // 创建交易记录
         createTransactionRecord(userId, amount, newBalance, 1, 
-                "钱包充值 - " + request.getPaymentMethod(), 
-                null, request.getThirdPartyTransactionId());
+                "钱包充值", 
+                null, request.getThirdPartyTransactionId(), request.getPaymentMethod());
 
         log.info("钱包充值成功 - userId: {}, amount: {}, newBalance: {}", userId, amount, newBalance);
         return convertToWalletVO(wallet);
@@ -199,7 +199,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
 
         // 创建交易记录
         createTransactionRecord(userId, amount, newBalance, 2, 
-                request.getDescription(), request.getOrderId(), null);
+                request.getDescription(), request.getOrderId(), null, null);
 
         log.info("钱包消费成功 - userId: {}, amount: {}, newBalance: {}", userId, amount, newBalance);
         return convertToWalletVO(wallet);
@@ -242,7 +242,7 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         }
 
         // 创建交易记录
-        createTransactionRecord(userId, amount, newBalance, 2, description, orderId, null);
+        createTransactionRecord(userId, amount, newBalance, 2, description, orderId, null, null);
 
         log.info("内部消费成功 - userId: {}, amount: {}, newBalance: {}", userId, amount, newBalance);
         return true;
@@ -446,10 +446,10 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
 
         // 创建交易记录
         String transferDesc = "转账给" + toUser.getUserName() + " - " + description;
-        createTransactionRecord(fromUserId, amount, fromNewBalance, 4, transferDesc, null, null);
+        createTransactionRecord(fromUserId, amount, fromNewBalance, 4, transferDesc, null, null, null);
 
         String receiveDesc = "收到" + userService.getById(fromUserId).getUserName() + "的转账 - " + description;
-        createTransactionRecord(toUserId, amount, toNewBalance, 3, receiveDesc, null, null);
+        createTransactionRecord(toUserId, amount, toNewBalance, 3, receiveDesc, null, null, null);
 
         log.info("转账成功 - fromUserId: {}, toUserId: {}, amount: {}", fromUserId, toUserId, amount);
         return true;
@@ -465,10 +465,11 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
      * @param description 交易描述
      * @param orderId 关联订单ID
      * @param thirdPartyTransactionId 第三方交易号
+     * @param paymentMethod 支付方式
      */
     private void createTransactionRecord(Long userId, BigDecimal amount, BigDecimal balanceAfter, 
                                         Integer transactionType, String description, Long orderId, 
-                                        String thirdPartyTransactionId) {
+                                        String thirdPartyTransactionId, String paymentMethod) {
         WalletTransaction transaction = new WalletTransaction();
         transaction.setUserId(userId);
         transaction.setTransactionType(transactionType);
@@ -477,6 +478,8 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
         transaction.setTransactionDescription(description);
         transaction.setOrderId(orderId);
         transaction.setThirdPartyTransactionId(thirdPartyTransactionId);
+        transaction.setPaymentMethod(paymentMethod);
+        transaction.setTransactionStatus(1);
         transaction.setCreatedTime(LocalDateTime.now());
 
         boolean saved = walletTransactionMapper.insert(transaction) > 0;
@@ -535,6 +538,17 @@ public class WalletServiceImpl extends ServiceImpl<WalletMapper, Wallet> impleme
                 default -> "未知";
             };
             vo.setTransactionTypeDesc(typeDesc);
+        }
+        
+        // 设置交易状态描述
+        if (transaction.getTransactionStatus() != null) {
+            String statusDesc = switch (transaction.getTransactionStatus()) {
+                case 0 -> "处理中";
+                case 1 -> "成功";
+                case 2 -> "失败";
+                default -> "未知";
+            };
+            vo.setStatusName(statusDesc);
         }
         
         return vo;

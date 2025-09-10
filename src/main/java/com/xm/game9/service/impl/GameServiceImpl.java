@@ -13,8 +13,11 @@ import com.xm.game9.model.request.game.GameQueryRequest;
 import com.xm.game9.model.request.game.GameStatusRequest;
 import com.xm.game9.model.request.game.GameSteamUrlUpdateRequest;
 import com.xm.game9.model.request.game.GameUpdateRequest;
+import com.xm.game9.model.request.order.CreateOrderRequest;
 import com.xm.game9.model.vo.GameDetailVO;
+import com.xm.game9.model.vo.order.OrderVO;
 import com.xm.game9.service.GameService;
+import com.xm.game9.service.OrderService;
 import com.xm.game9.service.UserLibraryService;
 import com.xm.game9.utils.SteamUrlParser;
 import jakarta.annotation.Resource;
@@ -25,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +45,12 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     private GameMapper gameMapper;
 
     @Resource
+    private OrderService orderService;
+
+    @Resource
     private UserLibraryService userLibraryService;
+
+    private static final BigDecimal ZERO = new BigDecimal("0.00");
 
     /**
      * 创建游戏
@@ -273,13 +282,88 @@ public class GameServiceImpl extends ServiceImpl<GameMapper, Game> implements Ga
     }
 
     /**
-     * 购买游戏
+     * 购买游戏 - 创建订单
+     *
+     * @param userId 用户id
+     * @param gameId 游戏id
+     * @return 订单信息
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public OrderVO createPurchaseOrder(Long userId, Long gameId) {
+        // 1. 参数校验
+        if (userId == null || userId <= 0 || gameId == null || gameId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数错误");
+        }
+
+        // 2. 检查游戏是否存在且未下架
+        Game game = getById(gameId);
+        if (game == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "游戏不存在");
+        }
+        if (game.getGameIsRemoved()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "游戏已下架");
+        }
+
+        // 3. 检查库存
+        if (game.getGameStock() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "游戏库存不足");
+        }
+
+        // 4. 检查用户是否已拥有该游戏
+        if (userLibraryService.hasGame(userId, gameId)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "已拥有该游戏");
+        }
+
+        // 5. 预占库存（原子操作，防止超卖）
+        int stockUpdateCount = gameMapper.decreaseStockForUpdate(gameId);
+        if (stockUpdateCount == 0) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "库存不足，购买失败");
+        }
+
+        // 6. 判断游戏是否在打折，使用正确的价格
+        BigDecimal orderAmount = game.getGameOnSale() != null && game.getGameOnSale() == 1 
+                ? game.getGameDiscountedPrices() 
+                : game.getGamePrice();
+        
+        // 7. 免费游戏也创建订单，等待用户确认
+        if (orderAmount.compareTo(ZERO) == 0) {
+            // 创建订单请求
+            CreateOrderRequest createOrderRequest = new CreateOrderRequest();
+            createOrderRequest.setUserId(userId);
+            createOrderRequest.setGameId(gameId);
+            createOrderRequest.setOrderAmount(orderAmount);
+            createOrderRequest.setPaymentMethod("FREE"); // 免费游戏使用FREE支付方式
+            createOrderRequest.setDescription("免费领取游戏：" + game.getGameName());
+
+            // 调用订单服务创建订单
+            OrderVO orderVO = orderService.createOrder(createOrderRequest);
+            return orderVO;
+        }
+        
+        // 8. 创建订单请求
+        CreateOrderRequest createOrderRequest = new CreateOrderRequest();
+        createOrderRequest.setUserId(userId);
+        createOrderRequest.setGameId(gameId);
+        createOrderRequest.setOrderAmount(orderAmount);
+        createOrderRequest.setPaymentMethod("WALLET"); // 默认使用钱包支付
+        createOrderRequest.setDescription("购买游戏：" + game.getGameName());
+
+        // 9. 调用订单服务创建订单
+        OrderVO orderVO = orderService.createOrder(createOrderRequest);
+
+        return orderVO;
+    }
+
+    /**
+     * 购买游戏（旧方法，保留兼容性）
      *
      * @param userId 用户id
      * @param gameId 游戏id
      * @return 是否购买成功
      */
     @Override
+    @Deprecated
     @Transactional(rollbackFor = Exception.class)
     public boolean purchaseGame(Long userId, Long gameId) {
         // 1. 参数校验

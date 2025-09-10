@@ -5,7 +5,6 @@ import com.xm.game9.common.ErrorCode;
 import com.xm.game9.common.ResultUtils;
 import com.xm.game9.constant.UserConstant;
 import com.xm.game9.exception.BusinessException;
-import com.xm.game9.model.domain.Orders;
 import com.xm.game9.model.domain.User;
 import com.xm.game9.model.request.order.CreateOrderRequest;
 import com.xm.game9.model.vo.order.OrderVO;
@@ -115,6 +114,8 @@ public class OrderController {
     public BaseResponse<Boolean> payOrder(@PathVariable Long orderId,
                                         @RequestParam String paymentMethod,
                                         HttpServletRequest request) {
+        log.info("支付订单请求 - orderId: {}, paymentMethod: {}", orderId, paymentMethod);
+        
         // 验证订单是否属于当前用户
         OrderVO orderVO = orderService.getOrderById(orderId);
         if (!orderVO.getUserId().equals(getCurrentUserId(request))) {
@@ -122,6 +123,7 @@ public class OrderController {
         }
         
         boolean result = orderService.payOrder(orderId, paymentMethod);
+        log.info("支付订单结果 - orderId: {}, result: {}", orderId, result);
         return ResultUtils.success(result);
     }
 
@@ -155,8 +157,7 @@ public class OrderController {
      */
     @Operation(summary = "退款订单", description = "申请退款")
     @PostMapping("/{orderId}/refund")
-    public BaseResponse<Boolean> refundOrder(@PathVariable Long orderId,
-                                           @RequestParam String reason,
+    public BaseResponse<Boolean> refundOrder(@PathVariable Long orderId, String reason,
                                            HttpServletRequest request) {
         // 验证订单是否属于当前用户
         OrderVO orderVO = orderService.getOrderById(orderId);

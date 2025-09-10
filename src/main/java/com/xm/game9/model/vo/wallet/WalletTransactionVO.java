@@ -39,5 +39,11 @@ public class WalletTransactionVO implements Serializable {
 
     private String thirdPartyTransactionId;
 
+    private String paymentMethod;
+
+    private Integer transactionStatus;
+
+    private String statusName;
+
     private LocalDateTime createdTime;
 }
