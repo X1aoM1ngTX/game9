@@ -1,0 +1,20 @@
+CREATE TABLE `game`  (
+  `gameId` bigint NOT NULL AUTO_INCREMENT COMMENT '游戏ID',
+  `gameName` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '游戏名',
+  `gameDescription` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '游戏描述',
+  `gamePrice` decimal(10, 2) NOT NULL COMMENT '游戏原始价格',
+  `gameStock` int NOT NULL COMMENT '游戏库存',
+  `gameCreatedTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '游戏创建时间',
+  `gameReleaseDate` date NULL DEFAULT NULL COMMENT '游戏发行时间',
+  `gameDev` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '游戏开发商',
+  `gamePub` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '游戏发行商',
+  `gameIsRemoved` tinyint(1) NOT NULL DEFAULT 0 COMMENT '游戏是否下架',
+  `gameDiscountedPrices` decimal(10, 2) NULL COMMENT '游戏打折价格',
+  `gameOnSale` tinyint(1) NOT NULL DEFAULT 0 COMMENT '游戏是否正在打折',
+  `gameSaleStartTime` datetime NULL DEFAULT NULL COMMENT '游戏折扣开始时间',
+  `gameSaleEndTime` datetime NULL DEFAULT NULL COMMENT '游戏折扣结束时间',
+  `gameDiscount` decimal(5, 2) NULL DEFAULT NULL COMMENT '游戏折扣',
+  `gameCover` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '游戏封面',
+  `gameAppId` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`gameId`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 59 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '游戏表' ROW_FORMAT = Dynamic;

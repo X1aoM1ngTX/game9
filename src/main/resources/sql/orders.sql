@@ -1,0 +1,21 @@
+CREATE TABLE `orders`  (
+  `orderId` bigint NOT NULL AUTO_INCREMENT COMMENT '订单ID',
+  `orderNo` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '订单号',
+  `userId` bigint NOT NULL COMMENT '用户ID',
+  `gameId` bigint NOT NULL COMMENT '游戏ID',
+  `gameName` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '游戏名称',
+  `originalPrice` decimal(12, 2) NOT NULL COMMENT '原价',
+  `finalPrice` decimal(12, 2) NOT NULL COMMENT '最终价格',
+  `discountAmount` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '优惠金额',
+  `orderStatus` tinyint NULL DEFAULT 1 COMMENT '订单状态：1-待支付 2-已支付 3-已取消 4-已退款 5-已发货',
+  `paymentMethod` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '支付方式',
+  `paymentTime` timestamp NULL DEFAULT NULL COMMENT '支付时间',
+  `cancelReason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '取消原因',
+  `refundReason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '退款原因',
+  `refundTime` timestamp NULL DEFAULT NULL COMMENT '退款时间',
+  `remark` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '备注',
+  `createdTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updateTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`orderId`) USING BTREE,
+  UNIQUE INDEX `order_orderNo_unique`(`orderNo`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 52 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '订单表' ROW_FORMAT = Dynamic;

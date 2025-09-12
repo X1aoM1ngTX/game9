@@ -1,0 +1,21 @@
+CREATE TABLE `chat_message`  (
+  `messageId` bigint NOT NULL AUTO_INCREMENT,
+  `senderId` bigint NOT NULL COMMENT '发送者ID',
+  `receiverId` bigint NOT NULL COMMENT '接收者ID',
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '消息内容',
+  `title` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '消息标题（非聊天消息使用）',
+  `isSystem` tinyint NULL DEFAULT 0 COMMENT '是否系统消息：0-否 1-是',
+  `messageType` tinyint NULL DEFAULT 1 COMMENT '消息类型：1-文本 2-图片 3-文件',
+  `messageCategory` tinyint NULL DEFAULT 1 COMMENT '消息分类：1-聊天 2-系统通知 3-交易通知 4-营销消息',
+  `messageStatus` tinyint NULL DEFAULT 0 COMMENT '消息状态：0-已发送 1-已送达 2-已读',
+  `createTime` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updateTime` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `isDeleted` tinyint NULL DEFAULT 0 COMMENT '是否删除：0-未删除 1-已删除',
+  PRIMARY KEY (`messageId`) USING BTREE,
+  INDEX `idx_sender_receiver`(`senderId`, `receiverId`) USING BTREE,
+  INDEX `idx_create_time`(`createTime`) USING BTREE,
+  INDEX `idx_status`(`messageStatus`) USING BTREE,
+  INDEX `idx_message_category`(`messageCategory`) USING BTREE,
+  INDEX `idx_is_system`(`isSystem`) USING BTREE,
+  INDEX `idx_category_system`(`messageCategory`, `isSystem`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 74 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '聊天消息表' ROW_FORMAT = Dynamic;

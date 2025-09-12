@@ -60,8 +60,6 @@ cloudflare:
   r2:
     # 开发环境URL
     domain: https://pub-7ffa66837b134ab0a7a00e6bdda1375b.r2.dev/
-    # 生产环境URL
-    # domain: https://files.game9hq.xyz/ 
     endpoint: https://1a63a68acfe38be8d33d84b44835fe80.r2.cloudflarestorage.com
     bucketName: gamehub-bucket
 
